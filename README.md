@@ -94,6 +94,27 @@ Once installed, the following commands are available in Claude Code sessions.
 | `/fbim reopen NNNN` | Reopen a closed issue |
 | `/fbim help` | Show help |
 
+## Shell completion
+
+Completion scripts for bash and zsh are in `completions/`.
+
+**zsh**
+
+```zsh
+# Add to ~/.zshrc
+fpath=(/path/to/fbim/completions $fpath)
+autoload -Uz compinit && compinit
+```
+
+**bash**
+
+```bash
+# Add to ~/.bashrc
+source /path/to/fbim/completions/fbim.bash
+```
+
+Subcommands, options, and issue numbers (read from `issues/` in the current directory) are all completed.
+
 ## Customization
 
 Place `.fbim.yml` in the project root to customize how areas are displayed in the issue list.

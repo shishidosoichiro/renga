@@ -1,0 +1,76 @@
+#compdef fbim
+
+_fbim() {
+    local state
+
+    _arguments \
+        '1: :->command' \
+        '*: :->args'
+
+    case $state in
+        command)
+            local commands=(
+                'create:Create an issue'
+                'done:Close an issue'
+                'pending:Put an issue on hold'
+                'reopen:Reopen a closed issue'
+                'list:List issues'
+                'show:Show issue details'
+                'help:Show help'
+            )
+            _describe 'command' commands
+            ;;
+        args)
+            case $words[2] in
+                create)
+                    _arguments \
+                        '--slug[kebab-case slug]:slug' \
+                        '--priority[priority level]:priority:(high medium low)' \
+                        '--area[area name]:area' \
+                        '--body[body text]:body'
+                    ;;
+                done|pending|show)
+                    _fbim_open_issues
+                    ;;
+                reopen)
+                    _fbim_done_issues
+                    ;;
+                list)
+                    _arguments \
+                        '--json[output as JSON]' \
+                        '--status[filter by status]:status:(open pending done)' \
+                        '--area[filter by area]:area' \
+                        '--label[filter by label]:label'
+                    ;;
+                help)
+                    local commands=(create done pending reopen list show help)
+                    _describe 'command' commands
+                    ;;
+            esac
+            ;;
+    esac
+}
+
+_fbim_open_issues() {
+    local issues=()
+    if [[ -d "$PWD/issues" ]]; then
+        for f in "$PWD/issues"/[0-9][0-9][0-9][0-9]-*.md(N); do
+            local stem="${f:t:r}"
+            issues+=("${stem:0:4}:$stem")
+        done
+    fi
+    _describe 'issue' issues
+}
+
+_fbim_done_issues() {
+    local issues=()
+    if [[ -d "$PWD/issues/done" ]]; then
+        for f in "$PWD/issues/done"/[0-9][0-9][0-9][0-9]-*.md(N); do
+            local stem="${f:t:r}"
+            issues+=("${stem:0:4}:$stem")
+        done
+    fi
+    _describe 'issue' issues
+}
+
+_fbim "$@"

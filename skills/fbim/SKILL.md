@@ -1,3 +1,7 @@
+---
+argument-hint: "[create] <title> | done <NNNN> | pending <NNNN> | reopen <NNNN> | help [command]"
+---
+
 # /fbim skill
 
 A Claude Code skill for File-Based Issue Management (FBIM).
