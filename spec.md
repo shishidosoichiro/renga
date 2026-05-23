@@ -118,3 +118,21 @@ labels: []
 ## `bin/gen-issues-readme` の仕様
 
 `issues/` と `issues/done/` の全ファイルを走査し、frontmatter の `status` / `priority` / `area` を読み取って `issues/README.md` を再生成する。open と pending を先に、done を後に列挙する。
+
+area の表示順・表示名はプロジェクトルートの `.fbim.yml` で設定できる。`.fbim.yml` がない場合は area 名をそのまま使い、アルファベット順で表示する。
+
+## `.fbim.yml` の仕様
+
+プロジェクトルートに置く設定ファイル。省略可能。PyYAML が必要（`pip install pyyaml`）。
+
+```yaml
+area_order:       # issue 一覧での area の表示順（省略時はアルファベット順）
+  - backend
+  - frontend
+  - misc
+
+area_labels:      # area の表示名（省略時は area 名をそのまま使う）
+  backend: "バックエンド"
+  frontend: "フロントエンド"
+  misc: "その他"
+```

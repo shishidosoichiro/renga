@@ -13,27 +13,32 @@
 
 import sys
 import argparse
+try:
+    import yaml
+    HAS_YAML = True
+except ImportError:
+    HAS_YAML = False
 from pathlib import Path
 
 ISSUES_DIR = Path.cwd() / "issues"
-
-AREA_ORDER = ["authz", "arch", "logging", "projection", "runtime-view", "test", "misc"]
-
-AREA_LABELS = {
-    "authz": "認可（authz）",
-    "arch": "アーキテクチャ全体（arch）",
-    "logging": "ロギング（logging）",
-    "projection": "投影（projection）",
-    "runtime-view": "Runtime View",
-    "test": "テスト・契約",
-    "misc": "その他・低優先度",
-}
 
 PRIORITY_LABELS = {
     "high": "高",
     "medium": "中",
     "low": "低",
 }
+
+
+def load_config() -> dict:
+    config_path = Path.cwd() / ".fbim.yml"
+    if config_path.exists() and HAS_YAML:
+        with open(config_path, encoding="utf-8") as f:
+            return yaml.safe_load(f) or {}
+    return {}
+
+CONFIG = load_config()
+AREA_ORDER: list[str] = CONFIG.get("area_order", [])
+AREA_LABELS: dict[str, str] = CONFIG.get("area_labels", {})
 
 
 def parse_frontmatter(content: str) -> dict:
@@ -116,8 +121,11 @@ def generate(filter_area=None, filter_label=None, filter_status=None) -> str:
     for issue in issues:
         by_area.setdefault(issue["area"], []).append(issue)
 
-    unknown_areas = sorted(a for a in by_area if a not in AREA_ORDER)
-    ordered_areas = AREA_ORDER + unknown_areas
+    if AREA_ORDER:
+        unknown_areas = sorted(a for a in by_area if a not in AREA_ORDER)
+        ordered_areas = [a for a in AREA_ORDER if a in by_area] + unknown_areas
+    else:
+        ordered_areas = sorted(by_area.keys())
 
     lines = [
         "# Issues",
@@ -137,7 +145,7 @@ def generate(filter_area=None, filter_label=None, filter_status=None) -> str:
         if not area_issues:
             continue
 
-        lines.append(f"## {AREA_LABELS.get(area, area.capitalize())}")
+        lines.append(f"## {AREA_LABELS.get(area, area)}")
         lines.append("")
         lines.append("| # | ステータス | 優先度 | タイトル |")
         lines.append("|---|---|---|---|")

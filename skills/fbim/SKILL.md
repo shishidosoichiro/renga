@@ -20,7 +20,7 @@ File-Based Issue Management (FBIM) の操作スキル。
 ## ルール（全コマンド共通）
 
 - `$ARGUMENTS` が空の場合は `${CLAUDE_SKILL_DIR}/scripts/fbim help` を実行して表示する
-- スクリプトのエラー出力はそのまま宍戸さんに伝える
+- スクリプトのエラー出力はそのままユーザーに伝える
 
 ---
 
@@ -35,7 +35,7 @@ ${CLAUDE_SKILL_DIR}/scripts/fbim create "<タイトル>" --slug <slug> --area <a
 - `--slug`: タイトルを英語に変換してケバブケースにしたもの（30文字以内）
 - `--area`: 文脈から判断する。不明なら `misc`
 - `--body`: 補足説明があれば付ける
-- 作成したファイルパスを宍戸さんに伝える
+- 作成したファイルパスをユーザーに伝える
 
 ---
 
@@ -45,7 +45,7 @@ ${CLAUDE_SKILL_DIR}/scripts/fbim create "<タイトル>" --slug <slug> --area <a
 ${CLAUDE_SKILL_DIR}/scripts/fbim done <NNNN>
 ```
 
-移動先ファイルパスを宍戸さんに伝える。
+移動先ファイルパスをユーザーに伝える。
 
 ---
 
@@ -55,7 +55,7 @@ ${CLAUDE_SKILL_DIR}/scripts/fbim done <NNNN>
 ${CLAUDE_SKILL_DIR}/scripts/fbim pending <NNNN>
 ```
 
-変更したファイルパスを宍戸さんに伝える。
+変更したファイルパスをユーザーに伝える。
 
 ---
 
@@ -65,7 +65,7 @@ ${CLAUDE_SKILL_DIR}/scripts/fbim pending <NNNN>
 ${CLAUDE_SKILL_DIR}/scripts/fbim reopen <NNNN>
 ```
 
-移動先ファイルパスを宍戸さんに伝える。
+移動先ファイルパスをユーザーに伝える。
 
 ---
 
