@@ -1,0 +1,291 @@
+#!/usr/bin/env python3
+"""FBIM — File-Based Issue Management CLI
+
+使い方:
+  fbim create <title> [--slug <slug>] [--priority high|medium|low] [--area <area>]
+  fbim done <NNNN>
+  fbim pending <NNNN>
+  fbim reopen <NNNN>
+  fbim list [--status open|pending|done] [--area <area>] [--label <label>] [--json]
+  fbim show <NNNN>
+"""
+
+import sys
+import json
+import re
+import subprocess
+import argparse
+from pathlib import Path
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+ISSUES_DIR = Path.cwd() / "issues"
+DONE_DIR = ISSUES_DIR / "done"
+
+
+# ── frontmatter ──────────────────────────────────────────────────────────────
+
+def parse_frontmatter(content: str) -> dict:
+    fm = {}
+    lines = content.split("\n")
+    if not lines or lines[0].strip() != "---":
+        return fm
+    in_fm = False
+    for line in lines:
+        stripped = line.strip()
+        if stripped == "---":
+            if not in_fm:
+                in_fm = True
+                continue
+            else:
+                break
+        if in_fm and ":" in line:
+            key, _, val = line.partition(":")
+            key = key.strip()
+            val = val.strip()
+            if val.startswith("[") and val.endswith("]"):
+                inner = val[1:-1].strip()
+                val = [v.strip() for v in inner.split(",") if v.strip()] if inner else []
+            fm[key] = val
+    return fm
+
+
+def set_frontmatter_field(content: str, field: str, value: str) -> str:
+    lines = content.split("\n")
+    if not lines or lines[0].strip() != "---":
+        return content
+    in_fm = False
+    for i, line in enumerate(lines):
+        if line.strip() == "---":
+            if not in_fm:
+                in_fm = True
+                continue
+            else:
+                break
+        if in_fm and line.startswith(field + ":"):
+            lines[i] = f"{field}: {value}"
+            return "\n".join(lines)
+    return content
+
+
+def get_title(content: str) -> str:
+    for line in content.split("\n"):
+        if line.startswith("# "):
+            return re.sub(r"^\d+:\s*", "", line[2:].strip())
+    return ""
+
+
+# ── ファイル検索 ──────────────────────────────────────────────────────────────
+
+def find_issue(nnnn: str, include_done: bool = False) -> Path | None:
+    padded = nnnn.zfill(4)
+    for path in ISSUES_DIR.glob(f"{padded}-*.md"):
+        return path
+    if include_done:
+        for path in DONE_DIR.glob(f"{padded}-*.md"):
+            return path
+    return None
+
+
+def all_issues(status_filter=None, area_filter=None, label_filter=None) -> list[dict]:
+    results = []
+    dirs = [ISSUES_DIR]
+    if status_filter and "done" in status_filter:
+        dirs.append(DONE_DIR)
+    elif status_filter is None:
+        dirs.append(DONE_DIR)
+
+    for d in dirs:
+        if not d.exists():
+            continue
+        for path in sorted(d.glob("[0-9][0-9][0-9][0-9]-*.md")):
+            content = path.read_text(encoding="utf-8")
+            fm = parse_frontmatter(content)
+            if not fm:
+                continue
+            status = fm.get("status", "open")
+            area = fm.get("area", "misc")
+            labels = fm.get("labels", [])
+            if isinstance(labels, str):
+                labels = [labels] if labels else []
+            if status_filter and status not in status_filter:
+                continue
+            if area_filter and area != area_filter:
+                continue
+            if label_filter and label_filter not in labels:
+                continue
+            results.append({
+                "id": path.stem[:4],
+                "file": str(path.relative_to(ISSUES_DIR.parent)),
+                "status": status,
+                "priority": fm.get("priority", "medium"),
+                "area": area,
+                "labels": labels,
+                "title": get_title(content),
+            })
+    return results
+
+
+# ── ユーティリティ ─────────────────────────────────────────────────────────────
+
+def make_slug(title: str) -> str:
+    slug = re.sub(r"[^a-zA-Z0-9]+", "-", title.lower()).strip("-")
+    return slug[:30] if slug else "issue"
+
+
+def next_id() -> str:
+    result = subprocess.run(
+        [SCRIPT_DIR / "next-id", "issues/"],
+        capture_output=True, text=True, check=True
+    )
+    return result.stdout.strip()
+
+
+def reindex():
+    try:
+        subprocess.run([SCRIPT_DIR / "gen-issues-readme"], check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"warning: gen-issues-readme failed: {e}", file=sys.stderr)
+
+
+def check_issues_dir():
+    if not ISSUES_DIR.exists():
+        print(f"error: issues/ not found in {Path.cwd()}", file=sys.stderr)
+        sys.exit(1)
+
+
+# ── コマンド ──────────────────────────────────────────────────────────────────
+
+def cmd_create(argv):
+    p = argparse.ArgumentParser(prog="fbim create")
+    p.add_argument("title", nargs="+")
+    p.add_argument("--slug")
+    p.add_argument("--priority", default="medium", choices=["high", "medium", "low"])
+    p.add_argument("--area", default="misc")
+    args = p.parse_args(argv)
+
+    check_issues_dir()
+    title = " ".join(args.title)
+    slug = args.slug or make_slug(title)
+    nnnn = next_id()
+    path = ISSUES_DIR / f"{nnnn}-{slug}.md"
+
+    content = f"""---
+status: open
+priority: {args.priority}
+area: {args.area}
+labels: []
+---
+
+# {title}
+"""
+    path.write_text(content, encoding="utf-8")
+    reindex()
+    print(path)
+
+
+def cmd_done(argv):
+    p = argparse.ArgumentParser(prog="fbim done")
+    p.add_argument("nnnn")
+    args = p.parse_args(argv)
+
+    check_issues_dir()
+    path = find_issue(args.nnnn)
+    if not path:
+        print(f"error: issue {args.nnnn} not found", file=sys.stderr)
+        sys.exit(1)
+
+    DONE_DIR.mkdir(exist_ok=True)
+    dest = DONE_DIR / path.name
+    content = set_frontmatter_field(path.read_text(encoding="utf-8"), "status", "done")
+    dest.write_text(content, encoding="utf-8")
+    path.unlink()
+    reindex()
+    print(dest)
+
+
+def cmd_pending(argv):
+    p = argparse.ArgumentParser(prog="fbim pending")
+    p.add_argument("nnnn")
+    args = p.parse_args(argv)
+
+    check_issues_dir()
+    path = find_issue(args.nnnn)
+    if not path:
+        print(f"error: issue {args.nnnn} not found", file=sys.stderr)
+        sys.exit(1)
+
+    content = set_frontmatter_field(path.read_text(encoding="utf-8"), "status", "pending")
+    path.write_text(content, encoding="utf-8")
+    reindex()
+    print(path)
+
+
+def cmd_reopen(argv):
+    p = argparse.ArgumentParser(prog="fbim reopen")
+    p.add_argument("nnnn")
+    args = p.parse_args(argv)
+
+    check_issues_dir()
+    path = find_issue(args.nnnn, include_done=True)
+    if not path:
+        print(f"error: issue {args.nnnn} not found", file=sys.stderr)
+        sys.exit(1)
+
+    dest = ISSUES_DIR / path.name
+    content = set_frontmatter_field(path.read_text(encoding="utf-8"), "status", "open")
+    dest.write_text(content, encoding="utf-8")
+    if path.parent == DONE_DIR:
+        path.unlink()
+    reindex()
+    print(dest)
+
+
+def cmd_list(argv):
+    p = argparse.ArgumentParser(prog="fbim list")
+    p.add_argument("--status", help="カンマ区切り (例: open,pending)")
+    p.add_argument("--area")
+    p.add_argument("--label")
+    p.add_argument("--json", action="store_true", dest="as_json")
+    args = p.parse_args(argv)
+
+    check_issues_dir()
+    status_filter = [s.strip() for s in args.status.split(",")] if args.status else ["open", "pending"]
+    issues = all_issues(status_filter, args.area, args.label)
+
+    if args.as_json:
+        print(json.dumps(issues, ensure_ascii=False, indent=2))
+    else:
+        for i in issues:
+            print(f"[{i['id']}] {i['status']:8s} {i['priority']:6s} {i['area']:16s} {i['title']}")
+
+
+def cmd_show(argv):
+    p = argparse.ArgumentParser(prog="fbim show")
+    p.add_argument("nnnn")
+    args = p.parse_args(argv)
+
+    check_issues_dir()
+    path = find_issue(args.nnnn, include_done=True)
+    if not path:
+        print(f"error: issue {args.nnnn} not found", file=sys.stderr)
+        sys.exit(1)
+
+    print(path.read_text(encoding="utf-8"))
+
+
+# ── エントリポイント ───────────────────────────────────────────────────────────
+
+COMMANDS = {
+    "create": cmd_create,
+    "done": cmd_done,
+    "pending": cmd_pending,
+    "reopen": cmd_reopen,
+    "list": cmd_list,
+    "show": cmd_show,
+}
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2 or sys.argv[1] not in COMMANDS:
+        print(__doc__)
+        sys.exit(0 if len(sys.argv) < 2 else 1)
+    COMMANDS[sys.argv[1]](sys.argv[2:])
