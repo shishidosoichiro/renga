@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""issues/ の frontmatter を読んで README.md を生成する
+"""Regenerate issues/README.md from frontmatter in issues/*.md.
 
-カレントディレクトリの issues/ を対象にする。
+Operates on issues/ in the current working directory.
 
-使い方:
-  bin/gen-issues-readme                  # issues/README.md を再生成
-  bin/gen-issues-readme --stdout         # 標準出力に出力
-  bin/gen-issues-readme --area authz     # area でフィルタリング
-  bin/gen-issues-readme --label security # label でフィルタリング
-  bin/gen-issues-readme --status open    # status でフィルタリング（カンマ区切り可）
+Usage:
+  bin/gen-issues-readme                  # regenerate issues/README.md
+  bin/gen-issues-readme --stdout         # print to stdout instead
+  bin/gen-issues-readme --area auth      # filter by area
+  bin/gen-issues-readme --label security # filter by label
+  bin/gen-issues-readme --status open    # filter by status (comma-separated)
 """
 
 import sys
@@ -130,11 +130,11 @@ def generate(filter_area=None, filter_label=None, filter_status=None) -> str:
     lines = [
         "# Issues",
         "",
-        "対応が必要な問題・未決定事項の一覧。",
+        "Open issues and decisions.",
         "",
-        "ステータス: `open` = 対応待ち / `pending` = 後回し・将来構想（原則読まない）",
+        "Status: `open` = needs action / `pending` = blocked or deferred",
         "",
-        "完了したものは `done/` に移動する。",
+        "Closed issues are moved to `done/`.",
         "",
         "---",
         "",
@@ -147,13 +147,12 @@ def generate(filter_area=None, filter_label=None, filter_status=None) -> str:
 
         lines.append(f"## {AREA_LABELS.get(area, area)}")
         lines.append("")
-        lines.append("| # | ステータス | 優先度 | タイトル |")
+        lines.append("| # | status | priority | title |")
         lines.append("|---|---|---|---|")
 
         for issue in area_issues:
-            priority_jp = PRIORITY_LABELS.get(issue["priority"], issue["priority"])
             lines.append(
-                f"| [{issue['id']}]({issue['file']}) | {issue['status']} | {priority_jp} | {issue['title']} |"
+                f"| [{issue['id']}]({issue['file']}) | {issue['status']} | {issue['priority']} | {issue['title']} |"
             )
 
         lines.append("")
@@ -164,7 +163,7 @@ def generate(filter_area=None, filter_label=None, filter_status=None) -> str:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="issues/README.md を再生成する")
+    parser = argparse.ArgumentParser(description="Regenerate issues/README.md")
     parser.add_argument("--area", help="area でフィルタリング")
     parser.add_argument("--label", help="label でフィルタリング")
     parser.add_argument("--status", help="status でフィルタリング（カンマ区切り）", default="open,pending")

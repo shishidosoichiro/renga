@@ -1,100 +1,102 @@
 # FBIM — File-Based Issue Management
 
-ファイルで issue を管理するシステム。GitHub Issues や Redmine のような外部ツールを使わず、Git リポジトリ内のファイルだけで issue を追跡する。
+A system for managing issues as plain files. Track issues entirely within your Git repository, without relying on external services like GitHub Issues or Redmine.
 
-## なぜファイルベースか
+> Japanese version: [README.ja.md](README.ja.md)
 
-- **Git で完結する**: issue の履歴・変更者・コメントがすべて git log に残る。外部サービスへの依存がない
-- **コードと並走できる**: issue ファイルをコード変更と同じ PR に含められる。「この修正はこの issue を解決する」という対応関係が一目でわかる
-- **オフラインで動く**: ネットワーク接続なしに issue を作成・更新・参照できる
-- **移行が容易**: Redmine や GitHub Issues に移行するときも、ファイルを読めば全データが手元にある。ロックインがない
-- **ツールを選ばない**: エディタでも、スクリプトでも、AI ツールでも操作できる。インターフェースがファイルなので何とでも組み合わせられる
+## Why file-based?
 
-## 動作要件
+- **Git-native**: Full history, authorship, and comments live in `git log`. No external service dependency.
+- **Co-located with code**: Include issue files in the same PR as the code change they relate to. The connection between fix and issue is explicit.
+- **Works offline**: Create, update, and browse issues without a network connection.
+- **Easy to migrate**: All data is plain files. Moving to Redmine or GitHub Issues later means reading those files — no lock-in.
+- **Tool-agnostic**: Use an editor, a shell script, or an AI tool. The interface is just files.
 
-- Python 3.8 以上（`bin/fbim`・`bin/gen-issues-readme` に必要）
-- bash（`bin/next-id` に必要）
-- PyYAML（`.fbim.yml` による設定をカスタマイズする場合のみ。`pip install pyyaml`）
+## Requirements
 
-## アクション
+- Python 3.8+ (`bin/fbim`, `bin/gen-issues-readme`)
+- bash (`bin/next-id`)
+- PyYAML — only if using `.fbim.yml` for customization (`pip install pyyaml`)
 
-### issue を作成する
+## Actions
 
-`issues/NNNN-short-name.md` を作成する。`NNNN` は連番。frontmatter に `status`・`priority`・`area` を付ける。
+### Create an issue
+
+Create `issues/NNNN-short-name.md`. `NNNN` is a zero-padded sequential number. Include `status`, `priority`, and `area` in the frontmatter.
 
 ```
 issues/0042-api-auth-missing-scope.md
 ```
 
-テンプレートや命名規則の詳細は [spec.md](spec.md) を参照。
+See [spec.md](spec.md) for naming conventions and the file template.
 
-### issue を更新する
+### Update an issue
 
-対象ファイルを直接編集する。本文・frontmatter のどちらも自由に変更できる。
+Edit the file directly. Both the body and frontmatter can be changed freely.
 
-### issue を完了にする
+### Close an issue
 
-`issues/NNNN-*.md` を `issues/done/NNNN-*.md` に移動し、frontmatter の `status` を `done` に変更する。
+Move `issues/NNNN-*.md` to `issues/done/NNNN-*.md` and set `status` to `done`.
 
-### issue を保留にする
+### Put an issue on hold
 
-frontmatter の `status` を `pending` に変更する。決定待ち・後回しにしたい issue に使う。
+Set `status` to `pending`. Use this for issues that are blocked or deferred.
 
-### issue を再開する
+### Reopen an issue
 
-`issues/done/NNNN-*.md` を `issues/NNNN-*.md` に移動し、frontmatter の `status` を `open` に変更する。
+Move `issues/done/NNNN-*.md` back to `issues/NNNN-*.md` and set `status` to `open`.
 
-### 一覧を確認する
+### Browse the issue list
 
-`issues/README.md` に open/pending の issue 一覧が生成される。手動編集は禁止。`bin/gen-issues-readme` を実行して再生成する。
+`issues/README.md` contains a generated list of open and pending issues. Do not edit it by hand — run `bin/gen-issues-readme` to regenerate it.
 
-## ツール
+## Tools
 
 ### bin/ CLI
 
-`bin/fbim` をプロジェクトの PATH に追加するか、フルパスで呼び出す。
+Add `bin/` to your PATH or call scripts by full path.
 
 ```sh
 export PATH="$PATH:/path/to/fbim/bin"
 ```
 
-| コマンド | 動作 |
+| Command | Description |
 |---|---|
-| `fbim create <title>` | issue を作成する |
-| `fbim done <NNNN>` | issue を完了にする |
-| `fbim pending <NNNN>` | issue を保留にする |
-| `fbim reopen <NNNN>` | issue を再開する |
-| `fbim list [--json]` | issue 一覧を表示する（`--json` で JSON 出力） |
-| `fbim show <NNNN>` | issue の詳細を表示する |
-| `fbim help [コマンド]` | ヘルプを表示する |
+| `fbim create <title>` | Create an issue |
+| `fbim done <NNNN>` | Close an issue |
+| `fbim pending <NNNN>` | Put an issue on hold |
+| `fbim reopen <NNNN>` | Reopen a closed issue |
+| `fbim list [--json]` | List issues (use `--json` for structured output) |
+| `fbim show <NNNN>` | Show issue details |
+| `fbim help [command]` | Show help |
 
-`fbim list --json` の出力は `yq` や `jq` にパイプできる。
+`fbim list --json` outputs JSON that can be piped to `jq` or `yq`.
 
 ```sh
-fbim list --json | jq '.[] | select(.area == "authz")'
+fbim list --json | jq '.[] | select(.area == "auth")'
 ```
 
-### Claude Code スキル
+### Claude Code skill
 
-`skills/fbim/` に Claude Code 用のスキルを同梱している。シンボリックリンクでインストールする。
+A Claude Code skill is included in `skills/fbim/`. Install it with a symlink.
 
 ```sh
 ln -s /path/to/fbim/skills/fbim ~/.claude/skills/fbim
 ```
 
-インストール後は以下のコマンドが使えるようになる。
+Once installed, the following commands are available in Claude Code sessions.
 
-| コマンド | 動作 |
+| Command | Description |
 |---|---|
-| `/fbim タイトル` | issue を作成する |
-| `/fbim done NNNN` | issue を完了にする |
-| `/fbim pending NNNN` | issue を保留にする |
-| `/fbim reopen NNNN` | 完了した issue を再開する |
-| `/fbim help` | ヘルプを表示する |
+| `/fbim <title>` | Create an issue |
+| `/fbim done NNNN` | Close an issue |
+| `/fbim pending NNNN` | Put an issue on hold |
+| `/fbim reopen NNNN` | Reopen a closed issue |
+| `/fbim help` | Show help |
 
-## カスタマイズ
+## Customization
 
-プロジェクトルートに `.fbim.yml` を置くと、issue 一覧の area 表示をカスタマイズできる。
+Place `.fbim.yml` in the project root to customize how areas are displayed in the issue list.
 
 ```yaml
 area_order:
@@ -104,10 +106,10 @@ area_order:
   - misc
 
 area_labels:
-  backend: "バックエンド"
-  frontend: "フロントエンド"
-  infra: "インフラ"
-  misc: "その他"
+  backend: "Backend"
+  frontend: "Frontend"
+  infra: "Infrastructure"
+  misc: "Other"
 ```
 
-`.fbim.yml` がない場合は area 名をそのまま使い、アルファベット順で表示する。
+Without `.fbim.yml`, areas are displayed as-is and sorted alphabetically.

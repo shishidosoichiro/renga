@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
-# 指定ディレクトリ（およびその直下の done/）の最大番号 + 1 を出力する
-# 使い方: next-id <dir>
-# 例: next-id issues/
-#     next-id docs/authz/adr/
+# Print the next sequential NNNN number for files in <dir> (and its done/ subdirectory).
+# Usage: next-id <dir>
+# Example: next-id issues/
 set -euo pipefail
 
 if [[ $# -ne 1 ]]; then
@@ -16,6 +15,7 @@ if [[ ! -d "$TARGET" ]]; then
   echo "error: directory not found: $TARGET" >&2
   exit 1
 fi
+
 
 max=$(find "$TARGET" -maxdepth 2 -name '[0-9][0-9][0-9][0-9]-*.md' \
   | grep -oE '/[0-9]{4}-' | grep -oE '[0-9]{4}' | sort -n | tail -1)

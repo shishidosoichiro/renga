@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """FBIM — File-Based Issue Management CLI
 
-使い方:
-  fbim create <title> [--slug <slug>] [--priority high|medium|low] [--area <area>]
+Usage:
+  fbim create <title> [--slug <slug>] [--priority high|medium|low] [--area <area>] [--body <text>]
   fbim done <NNNN>
   fbim pending <NNNN>
   fbim reopen <NNNN>
   fbim list [--status open|pending|done] [--area <area>] [--label <label>] [--json]
   fbim show <NNNN>
+  fbim help [command]
 """
 
 import sys

@@ -1,138 +1,138 @@
-# FBIM 仕様
+# FBIM Specification
 
-File-Based Issue Management の仕様。
+> Japanese version: [spec.ja.md](spec.ja.md)
 
 ---
 
-## ディレクトリ構造
+## Directory structure
 
 ```
 issues/
-  README.md          一覧（自動生成。手動編集不可）
-  NNNN-name.md       open または pending な issue
+  README.md          Issue list (auto-generated — do not edit manually)
+  NNNN-name.md       Open or pending issues
   done/
-    NNNN-name.md     完了した issue
+    NNNN-name.md     Closed issues
 ```
 
-## ファイル命名規則
+## File naming
 
 ```
 NNNN-short-name.md
 ```
 
-- `NNNN`: ゼロ埋め4桁の連番。次番号は `bin/next-id issues/` で取得する
-- `short-name`: ケバブケースの短い説明（英数字・ハイフンのみ）
-- 作成前に既存 issues を確認し、同等の内容が存在する場合は新規作成しない
+- `NNNN`: Zero-padded 4-digit sequential number. Get the next number with `bin/next-id issues/`.
+- `short-name`: Kebab-case short description (ASCII alphanumeric and hyphens only).
+- Before creating, check for duplicates. Do not create a new issue if an equivalent one already exists.
 
-## frontmatter
-
-```markdown
----
-status: open
-priority: high/medium/low
-area: エリア名（例: authz, authn, test, docs）
-labels: []
----
-```
-
-**status の値**
-
-| 値 | 意味 |
-|---|---|
-| `open` | 対応が必要。作業対象 |
-| `pending` | 決定待ち・確認待ち。作業保留 |
-| `done` | 完了（`done/` に移動済み） |
-
-**priority の意味**
-
-| 値 | 意味 |
-|---|---|
-| `high` | すぐに修正が必要。正確性・整合性に問題がある |
-| `medium` | 要確認。設計判断や方針の議論が必要 |
-| `low` | 提案。改善の余地があるが緊急ではない |
-
-## issue ファイルのテンプレート
+## Frontmatter
 
 ```markdown
 ---
 status: open
-priority: high/medium/low
-area: エリア名（例: authz, authn, test, docs）
+priority: high|medium|low
+area: area-name (e.g. auth, api, docs)
+labels: []
+---
+```
+
+**status values**
+
+| Value | Meaning |
+|---|---|
+| `open` | Needs action. Work target. |
+| `pending` | Blocked or deferred. Do not work on it. |
+| `done` | Closed (moved to `done/`). |
+
+**priority values**
+
+| Value | Meaning |
+|---|---|
+| `high` | Fix immediately. Correctness or consistency is broken. |
+| `medium` | Needs discussion. Design decisions required. |
+| `low` | Suggestion. Improvement opportunity, not urgent. |
+
+## Issue file template
+
+```markdown
+---
+status: open
+priority: medium
+area: area-name
 labels: []
 ---
 
-# タイトル
+# Title
 
-何をするかの説明。
+Brief description of what needs to be done.
 
-## 背景（任意）
+## Background (optional)
 
-詳細な文脈や関連情報。
+Additional context and related information.
 
-## 関連（任意）
+## Related (optional)
 
-- 関連する issues や ADR への参照
+- Links to related issues, ADRs, or documentation
 ```
 
-## `issues/README.md` の管理
+## Managing `issues/README.md`
 
-- 手動編集禁止。`bin/gen-issues-readme` を実行して再生成する
-- issue を新規作成・`done/` に移動・status 変更のたびに実行する
+- Do not edit manually. Run `bin/gen-issues-readme` to regenerate.
+- Run after every create, close, or status change.
 
-## アクション
+## Actions
 
-### issue を作成する
+### Create an issue
 
-1. `bin/next-id issues/` で次番号を取得する
-2. タイトルからケバブケースの short-name を作る
-3. `issues/NNNN-short-name.md` をテンプレートに従って作成する
-4. `bin/gen-issues-readme` を実行する
+1. Get the next number: `bin/next-id issues/`
+2. Generate a kebab-case `short-name` from the title.
+3. Create `issues/NNNN-short-name.md` using the template above.
+4. Run `bin/gen-issues-readme`.
 
-### issue を完了にする
+### Close an issue
 
-1. `issues/NNNN-*.md` を `issues/done/NNNN-*.md` に移動する
-2. frontmatter の `status` を `done` に変更する
-3. `bin/gen-issues-readme` を実行する
+1. Move `issues/NNNN-*.md` to `issues/done/NNNN-*.md`.
+2. Set frontmatter `status` to `done`.
+3. Run `bin/gen-issues-readme`.
 
-### issue を保留にする
+### Put an issue on hold
 
-1. `issues/NNNN-*.md` の frontmatter `status` を `pending` に変更する
-2. `bin/gen-issues-readme` を実行する
+1. Set frontmatter `status` to `pending`.
+2. Run `bin/gen-issues-readme`.
 
-### issue を再開する
+### Reopen an issue
 
-1. `issues/done/NNNN-*.md` を `issues/NNNN-*.md` に移動する
-2. frontmatter の `status` を `open` に変更する
-3. `bin/gen-issues-readme` を実行する
+1. Move `issues/done/NNNN-*.md` to `issues/NNNN-*.md`.
+2. Set frontmatter `status` to `open`.
+3. Run `bin/gen-issues-readme`.
 
-### issue の内容を更新する
+### Update an issue
 
-対象ファイルを直接編集する。
+Edit the file directly.
 
 ---
 
-## `bin/next-id` の仕様
+## `bin/next-id`
 
-`bin/next-id <dir>` は指定ディレクトリ（および `done/` サブディレクトリ）の `NNNN-` ファイルを走査し、最大番号 + 1 をゼロ埋め4桁で出力する。ファイルが存在しない場合は `0001` を返す。
+`bin/next-id <dir>` scans the given directory (and its `done/` subdirectory) for `NNNN-*.md` files, and prints the next number as a zero-padded 4-digit string. Returns `0001` if no files exist.
 
-## `bin/gen-issues-readme` の仕様
+## `bin/gen-issues-readme`
 
-`issues/` と `issues/done/` の全ファイルを走査し、frontmatter の `status` / `priority` / `area` を読み取って `issues/README.md` を再生成する。open と pending を先に、done を後に列挙する。
+Scans `issues/` and `issues/done/`, reads `status`, `priority`, and `area` from each file's frontmatter, and regenerates `issues/README.md`. Open and pending issues appear first; done issues appear after.
 
-area の表示順・表示名はプロジェクトルートの `.fbim.yml` で設定できる。`.fbim.yml` がない場合は area 名をそのまま使い、アルファベット順で表示する。
+Area display order and labels are read from `.fbim.yml` in the project root. If not present, areas are sorted alphabetically and displayed as-is.
 
-## `.fbim.yml` の仕様
+## `.fbim.yml`
 
-プロジェクトルートに置く設定ファイル。省略可能。PyYAML が必要（`pip install pyyaml`）。
+Optional configuration file placed in the project root. Requires PyYAML (`pip install pyyaml`).
 
 ```yaml
-area_order:       # issue 一覧での area の表示順（省略時はアルファベット順）
+area_order:       # Display order of areas in the issue list (alphabetical if omitted)
   - backend
   - frontend
   - misc
 
-area_labels:      # area の表示名（省略時は area 名をそのまま使う）
-  backend: "バックエンド"
-  frontend: "フロントエンド"
-  misc: "その他"
+area_labels:      # Display names for areas (area name used as-is if omitted)
+  backend: "Backend"
+  frontend: "Frontend"
+  misc: "Other"
 ```
