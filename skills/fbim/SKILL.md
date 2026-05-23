@@ -1,98 +1,78 @@
 # /fbim スキル
 
 File-Based Issue Management (FBIM) の操作スキル。
+すべての操作は `${CLAUDE_SKILL_DIR}/scripts/fbim` を呼び出して行う。
 
 ## 呼び出し形式
 
 ```
-/fbim [create] <タイトル>   issue を作成する
-/fbim done <NNNN>           issue を done に移動する
-/fbim pending <NNNN>        issue を pending にする
-/fbim reopen <NNNN>         done の issue を open に戻す
+/fbim [create] <タイトル>          issue を作成する
+/fbim done <NNNN>                  issue を完了にする
+/fbim pending <NNNN>               issue を保留にする
+/fbim reopen <NNNN>                issue を再開する
+/fbim help [コマンド名]            ヘルプを表示する
 ```
 
-引数なし・または `create` のみの場合は使い方を表示する。
+`create` は省略可能。`/fbim タイトル` でそのまま issue を作成する。
 
 ---
 
 ## ルール（全コマンド共通）
 
-- `issues/` ディレクトリが存在しない場合は「`issues/` が見つかりません」と伝えて止まる
-- コマンド完了後、必ず `${CLAUDE_SKILL_DIR}/scripts/gen-issues-readme` を実行して `issues/README.md` を再生成する
-- 再生成に失敗しても issue 操作は成功扱いとするが、エラーをユーザーに伝える
+- `$ARGUMENTS` が空の場合は `${CLAUDE_SKILL_DIR}/scripts/fbim help` を実行して表示する
+- スクリプトのエラー出力はそのまま宍戸さんに伝える
 
 ---
 
 ## create
 
-**引数**: `$ARGUMENTS` からコマンド名（`create`）を除いたテキストをタイトルとして使う。コマンド名を省略した場合（`/fbim タイトル`）は `$ARGUMENTS` 全体がタイトル。
-
-### 手順
-
-1. `$ARGUMENTS` が空、または `create` だけの場合は使い方を表示して終了する
-2. 既存 issue を確認し、同内容が存在する場合は「すでに NNNN-name.md が存在します」と伝えて止まる
-3. 次番号を取得する: `${CLAUDE_SKILL_DIR}/scripts/next-id issues/` を実行して出力を使う
-4. ファイル名の `short-name` を生成する:
-   - タイトルを英語に変換し、ケバブケースで30文字以内に短縮する
-5. `issues/NNNN-short-name.md` を以下の内容で作成する:
+`$ARGUMENTS` の先頭が `create` なら除いた残りをタイトルとして使う。そうでなければ `$ARGUMENTS` 全体がタイトル。
 
 ```
----
-status: open
-priority: medium
-area: docs
-labels: []
----
-
-# <タイトル>
-
-<タイトルを1文で説明した内容。ユーザーが追記できるように簡潔に。>
+${CLAUDE_SKILL_DIR}/scripts/fbim create "<タイトル>" --slug <slug> --area <area>
 ```
 
-6. `${CLAUDE_SKILL_DIR}/scripts/gen-issues-readme` を実行する
-7. 作成したファイルパスを伝える
+- `--slug`: タイトルを英語に変換してケバブケースにしたもの（30文字以内）
+- `--area`: 文脈から判断する。不明なら `misc`
+- `--body`: 補足説明があれば付ける
+- 作成したファイルパスを宍戸さんに伝える
 
 ---
 
 ## done
 
-**引数**: `$ARGUMENTS` から `done` を除いた番号（例: `0042`）
+```
+${CLAUDE_SKILL_DIR}/scripts/fbim done <NNNN>
+```
 
-### 手順
-
-1. `issues/NNNN-*.md` にマッチするファイルを探す（`NNNN` は4桁にゼロ埋めして検索）
-2. 見つからない場合は「NNNN の issue が見つかりません」と伝えて止まる
-3. `issues/done/` ディレクトリが存在しない場合は作成する
-4. ファイルを `issues/done/NNNN-name.md` に移動する（`mv` コマンド）
-5. frontmatter の `status:` を `done` に変更する
-6. `${CLAUDE_SKILL_DIR}/scripts/gen-issues-readme` を実行する
-7. 移動先ファイルパスを伝える
+移動先ファイルパスを宍戸さんに伝える。
 
 ---
 
 ## pending
 
-**引数**: `$ARGUMENTS` から `pending` を除いた番号
+```
+${CLAUDE_SKILL_DIR}/scripts/fbim pending <NNNN>
+```
 
-### 手順
-
-1. `issues/NNNN-*.md` にマッチするファイルを探す
-2. 見つからない場合は「NNNN の issue が見つかりません」と伝えて止まる
-3. frontmatter の `status:` を `pending` に変更する
-4. `${CLAUDE_SKILL_DIR}/scripts/gen-issues-readme` を実行する
-5. 変更したファイルパスを伝える
+変更したファイルパスを宍戸さんに伝える。
 
 ---
 
 ## reopen
 
-**引数**: `$ARGUMENTS` から `reopen` を除いた番号
+```
+${CLAUDE_SKILL_DIR}/scripts/fbim reopen <NNNN>
+```
 
-### 手順
+移動先ファイルパスを宍戸さんに伝える。
 
-1. `issues/done/NNNN-*.md` にマッチするファイルを探す
-2. 見つからない場合は「NNNN の done issue が見つかりません」と伝えて止まる
-3. ファイルを `issues/NNNN-name.md` に移動する（`mv` コマンド）
-4. frontmatter の `status:` を `open` に変更する
-5. `${CLAUDE_SKILL_DIR}/scripts/gen-issues-readme` を実行する
-6. 移動先ファイルパスを伝える
+---
+
+## help
+
+```
+${CLAUDE_SKILL_DIR}/scripts/fbim help [コマンド名]
+```
+
+出力をそのまま表示する。
