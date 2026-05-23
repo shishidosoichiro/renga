@@ -161,6 +161,7 @@ def cmd_create(argv):
     p.add_argument("--slug")
     p.add_argument("--priority", default="medium", choices=["high", "medium", "low"])
     p.add_argument("--area", default="misc")
+    p.add_argument("--body", default="")
     args = p.parse_args(argv)
 
     check_issues_dir()
@@ -169,15 +170,8 @@ def cmd_create(argv):
     nnnn = next_id()
     path = ISSUES_DIR / f"{nnnn}-{slug}.md"
 
-    content = f"""---
-status: open
-priority: {args.priority}
-area: {args.area}
-labels: []
----
-
-# {title}
-"""
+    body_section = f"\n{args.body}\n" if args.body else "\n"
+    content = f"---\nstatus: open\npriority: {args.priority}\narea: {args.area}\nlabels: []\n---\n\n# {title}\n{body_section}"
     path.write_text(content, encoding="utf-8")
     reindex()
     print(path)
@@ -275,6 +269,17 @@ def cmd_show(argv):
 
 # ── エントリポイント ───────────────────────────────────────────────────────────
 
+def cmd_help(argv):
+    p = argparse.ArgumentParser(prog="fbim help")
+    p.add_argument("command", nargs="?")
+    args = p.parse_args(argv)
+
+    if args.command and args.command in COMMANDS and args.command != "help":
+        COMMANDS[args.command](["--help"])
+    else:
+        print(__doc__)
+
+
 COMMANDS = {
     "create": cmd_create,
     "done": cmd_done,
@@ -282,6 +287,7 @@ COMMANDS = {
     "reopen": cmd_reopen,
     "list": cmd_list,
     "show": cmd_show,
+    "help": cmd_help,
 }
 
 if __name__ == "__main__":
