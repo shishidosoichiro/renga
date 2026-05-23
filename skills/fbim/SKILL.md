@@ -18,7 +18,7 @@ File-Based Issue Management (FBIM) の操作スキル。
 ## ルール（全コマンド共通）
 
 - `issues/` ディレクトリが存在しない場合は「`issues/` が見つかりません」と伝えて止まる
-- コマンド完了後、必ず `bin/gen-issues-readme` を実行して `issues/README.md` を再生成する
+- コマンド完了後、必ず `${CLAUDE_SKILL_DIR}/scripts/gen-issues-readme` を実行して `issues/README.md` を再生成する
 - 再生成に失敗しても issue 操作は成功扱いとするが、エラーをユーザーに伝える
 
 ---
@@ -31,9 +31,7 @@ File-Based Issue Management (FBIM) の操作スキル。
 
 1. `$ARGUMENTS` が空、または `create` だけの場合は使い方を表示して終了する
 2. 既存 issue を確認し、同内容が存在する場合は「すでに NNNN-name.md が存在します」と伝えて止まる
-3. 次番号を取得する:
-   - `issues/` と `issues/done/` の `NNNN-` ファイルを走査し、最大番号 + 1 をゼロ埋め4桁で算出する
-   - ファイルが存在しない場合は `0001`
+3. 次番号を取得する: `${CLAUDE_SKILL_DIR}/scripts/next-id issues/` を実行して出力を使う
 4. ファイル名の `short-name` を生成する:
    - タイトルを英語に変換し、ケバブケースで30文字以内に短縮する
 5. `issues/NNNN-short-name.md` を以下の内容で作成する:
@@ -51,7 +49,7 @@ labels: []
 <タイトルを1文で説明した内容。ユーザーが追記できるように簡潔に。>
 ```
 
-6. `bin/gen-issues-readme` を実行する
+6. `${CLAUDE_SKILL_DIR}/scripts/gen-issues-readme` を実行する
 7. 作成したファイルパスを伝える
 
 ---
@@ -67,7 +65,7 @@ labels: []
 3. `issues/done/` ディレクトリが存在しない場合は作成する
 4. ファイルを `issues/done/NNNN-name.md` に移動する（`mv` コマンド）
 5. frontmatter の `status:` を `done` に変更する
-6. `bin/gen-issues-readme` を実行する
+6. `${CLAUDE_SKILL_DIR}/scripts/gen-issues-readme` を実行する
 7. 移動先ファイルパスを伝える
 
 ---
@@ -81,7 +79,7 @@ labels: []
 1. `issues/NNNN-*.md` にマッチするファイルを探す
 2. 見つからない場合は「NNNN の issue が見つかりません」と伝えて止まる
 3. frontmatter の `status:` を `pending` に変更する
-4. `bin/gen-issues-readme` を実行する
+4. `${CLAUDE_SKILL_DIR}/scripts/gen-issues-readme` を実行する
 5. 変更したファイルパスを伝える
 
 ---
@@ -96,5 +94,5 @@ labels: []
 2. 見つからない場合は「NNNN の done issue が見つかりません」と伝えて止まる
 3. ファイルを `issues/NNNN-name.md` に移動する（`mv` コマンド）
 4. frontmatter の `status:` を `open` に変更する
-5. `bin/gen-issues-readme` を実行する
+5. `${CLAUDE_SKILL_DIR}/scripts/gen-issues-readme` を実行する
 6. 移動先ファイルパスを伝える
