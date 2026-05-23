@@ -1,6 +1,6 @@
 # FBIM 仕様
 
-File-Based Issue Management の詳細仕様。
+File-Based Issue Management の仕様。
 
 ---
 
@@ -22,7 +22,7 @@ NNNN-short-name.md
 
 - `NNNN`: ゼロ埋め4桁の連番。次番号は `bin/next-id issues/` で取得する
 - `short-name`: ケバブケースの短い説明（英数字・ハイフンのみ）
-- 同じ内容の issue が既に存在する場合は新規作成しない
+- 作成前に既存 issues を確認し、同等の内容が存在する場合は新規作成しない
 
 ## frontmatter
 
@@ -57,7 +57,7 @@ labels: []
 ---
 status: open
 priority: high/medium/low
-area: エリア名
+area: エリア名（例: authz, authn, test, docs）
 labels: []
 ---
 
@@ -77,49 +77,37 @@ labels: []
 ## `issues/README.md` の管理
 
 - 手動編集禁止。`bin/gen-issues-readme` を実行して再生成する
-- issue を新規作成・`done/` 移動・status 変更のたびに実行する
+- issue を新規作成・`done/` に移動・status 変更のたびに実行する
 
 ## アクション
 
-### create
-
-```
-/issue タイトル
-/issue create タイトル
-```
+### issue を作成する
 
 1. `bin/next-id issues/` で次番号を取得する
-2. `issues/NNNN-short-name.md` を frontmatter テンプレートで作成する（short-name はタイトルから生成）
-3. `bin/gen-issues-readme` を実行する
+2. タイトルからケバブケースの short-name を作る
+3. `issues/NNNN-short-name.md` をテンプレートに従って作成する
+4. `bin/gen-issues-readme` を実行する
 
-### done
-
-```
-/issue done NNNN
-```
+### issue を完了にする
 
 1. `issues/NNNN-*.md` を `issues/done/NNNN-*.md` に移動する
 2. frontmatter の `status` を `done` に変更する
 3. `bin/gen-issues-readme` を実行する
 
-### pending
-
-```
-/issue pending NNNN
-```
+### issue を保留にする
 
 1. `issues/NNNN-*.md` の frontmatter `status` を `pending` に変更する
 2. `bin/gen-issues-readme` を実行する
 
-### reopen
-
-```
-/issue reopen NNNN
-```
+### issue を再開する
 
 1. `issues/done/NNNN-*.md` を `issues/NNNN-*.md` に移動する
 2. frontmatter の `status` を `open` に変更する
 3. `bin/gen-issues-readme` を実行する
+
+### issue の内容を更新する
+
+対象ファイルを直接編集する。
 
 ---
 

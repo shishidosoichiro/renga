@@ -1,14 +1,14 @@
-# /issue スキル
+# /fbim スキル
 
 File-Based Issue Management (FBIM) の操作スキル。
 
 ## 呼び出し形式
 
 ```
-/issue [create] <タイトル>   issue を作成する
-/issue done <NNNN>           issue を done に移動する
-/issue pending <NNNN>        issue を pending にする
-/issue reopen <NNNN>         done の issue を open に戻す
+/fbim [create] <タイトル>   issue を作成する
+/fbim done <NNNN>           issue を done に移動する
+/fbim pending <NNNN>        issue を pending にする
+/fbim reopen <NNNN>         done の issue を open に戻す
 ```
 
 引数なし・または `create` のみの場合は使い方を表示する。
@@ -25,7 +25,7 @@ File-Based Issue Management (FBIM) の操作スキル。
 
 ## create
 
-**引数**: `$ARGUMENTS` からコマンド名（`create`）を除いたテキストをタイトルとして使う。コマンド名を省略した場合（`/issue タイトル`）は `$ARGUMENTS` 全体がタイトル。
+**引数**: `$ARGUMENTS` からコマンド名（`create`）を除いたテキストをタイトルとして使う。コマンド名を省略した場合（`/fbim タイトル`）は `$ARGUMENTS` 全体がタイトル。
 
 ### 手順
 

@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# 指定ディレクトリ（およびその直下の done/）の最大番号 + 1 を出力する
+# 使い方: next-id <dir>
+# 例: next-id issues/
+#     next-id docs/authz/adr/
+set -euo pipefail
+
+if [[ $# -ne 1 ]]; then
+  echo "usage: $(basename "$0") <dir>" >&2
+  exit 1
+fi
+
+TARGET="$1"
+
+if [[ ! -d "$TARGET" ]]; then
+  echo "error: directory not found: $TARGET" >&2
+  exit 1
+fi
+
+max=$(find "$TARGET" -maxdepth 2 -name '[0-9][0-9][0-9][0-9]-*.md' \
+  | grep -oE '/[0-9]{4}-' | grep -oE '[0-9]{4}' | sort -n | tail -1)
+
+printf '%04d\n' "$(( 10#${max:-0} + 1 ))"
