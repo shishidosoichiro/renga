@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Regenerate issues/README.md from frontmatter in issues/*.md.
 
-Operates on issues/ in the current working directory.
+Walks up from the current directory to find the project root (directory
+containing .fbim.yml or issues/). Uses issues_dir from .fbim.yml if set.
 
 Usage:
   bin/gen-issues-readme                  # regenerate issues/README.md
@@ -20,7 +21,31 @@ except ImportError:
     HAS_YAML = False
 from pathlib import Path
 
-ISSUES_DIR = Path.cwd() / "issues"
+
+def find_project_root() -> tuple[Path, Path]:
+    """Walk up from CWD to find project root and issues directory."""
+    for directory in [Path.cwd().resolve(), *Path.cwd().resolve().parents]:
+        fbim_yml = directory / ".fbim.yml"
+        if fbim_yml.exists():
+            config = _load_yml(fbim_yml)
+            rel = config.get("issues_dir", "issues")
+            issues_path = Path(rel)
+            if not issues_path.is_absolute():
+                issues_path = directory / issues_path
+            return directory, issues_path
+        if (directory / "issues").is_dir():
+            return directory, directory / "issues"
+    return Path.cwd(), Path.cwd() / "issues"
+
+
+def _load_yml(path: Path) -> dict:
+    if HAS_YAML:
+        with open(path, encoding="utf-8") as f:
+            return yaml.safe_load(f) or {}
+    return {}
+
+
+_PROJECT_ROOT, ISSUES_DIR = find_project_root()
 
 PRIORITY_LABELS = {
     "high": "高",
@@ -30,10 +55,9 @@ PRIORITY_LABELS = {
 
 
 def load_config() -> dict:
-    config_path = Path.cwd() / ".fbim.yml"
-    if config_path.exists() and HAS_YAML:
-        with open(config_path, encoding="utf-8") as f:
-            return yaml.safe_load(f) or {}
+    config_path = _PROJECT_ROOT / ".fbim.yml"
+    if config_path.exists():
+        return _load_yml(config_path)
     return {}
 
 CONFIG = load_config()

@@ -107,18 +107,32 @@ Scans `issues/` and `issues/done/`, reads `status`, `priority`, and `area` from 
 
 Area display order and labels are read from `.fbim.yml` in the project root. If not present, areas are sorted alphabetically and displayed as-is.
 
+## Project root discovery
+
+When any FBIM tool runs, it walks up from the current directory to find the project root:
+
+1. If a directory contains `.fbim.yml` → that directory is the project root.
+2. Else if a directory contains `issues/` → that directory is the project root.
+3. If neither is found up to the filesystem root → error.
+
+This means tools can be run from any subdirectory of the project.
+
 ## `.fbim.yml`
 
-Optional configuration file placed in the project root. Requires PyYAML (`pip install pyyaml`).
+Optional configuration file placed in the project root. Requires PyYAML (`pip install pyyaml`) except for `issues_dir`, which is read without it.
 
 ```yaml
-area_order:       # Display order of areas in the issue list (alphabetical if omitted)
+issues_dir: issues    # Path to issues directory, relative to .fbim.yml (default: issues)
+
+area_order:           # Display order of areas in the issue list (alphabetical if omitted)
   - backend
   - frontend
   - misc
 
-area_labels:      # Display names for areas (area name used as-is if omitted)
+area_labels:          # Display names for areas (area name used as-is if omitted)
   backend: "Backend"
   frontend: "Frontend"
   misc: "Other"
 ```
+
+`issues_dir` lets you store issues in a non-default location, such as `docs/issues`.

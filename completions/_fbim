@@ -51,25 +51,52 @@ _fbim() {
     esac
 }
 
+# Walk up from PWD to find issues directory (mirrors bin/fbim logic).
+_fbim_find_issues_dir() {
+    local dir="$PWD"
+    while [[ "$dir" != "/" ]]; do
+        if [[ -f "$dir/.fbim.yml" ]]; then
+            local rel
+            rel=$(grep -m1 '^issues_dir' "$dir/.fbim.yml" 2>/dev/null \
+                | sed 's/^issues_dir[[:space:]]*:[[:space:]]*//' \
+                | tr -d '"'"'")
+            echo "${dir}/${rel:-issues}"
+            return 0
+        fi
+        if [[ -d "$dir/issues" ]]; then
+            echo "$dir/issues"
+            return 0
+        fi
+        dir="${dir:h}"
+    done
+    return 1
+}
+
 _fbim_open_issues() {
+    local issues_dir
+    issues_dir=$(_fbim_find_issues_dir) || return
     local issues=()
-    if [[ -d "$PWD/issues" ]]; then
-        for f in "$PWD/issues"/[0-9][0-9][0-9][0-9]-*.md(N) "$PWD/issues"/[0-9][0-9][0-9][0-9][0-9]-*.md(N); do
-            local stem="${f:t:r}"
-            issues+=("${stem:0:4}:$stem")
-        done
-    fi
+    for f in "$issues_dir"/[0-9][0-9][0-9][0-9]-*.md(N) "$issues_dir"/[0-9][0-9][0-9][0-9][0-9]-*.md(N); do
+        local stem="${f:t:r}"
+        local num="${stem%%[-]*}"
+        local title
+        title=$(grep -m1 '^# ' "$f" 2>/dev/null | sed 's/^# //')
+        issues+=("${num}:${title:-$stem}")
+    done
     _describe 'issue' issues
 }
 
 _fbim_done_issues() {
+    local issues_dir
+    issues_dir=$(_fbim_find_issues_dir) || return
     local issues=()
-    if [[ -d "$PWD/issues/done" ]]; then
-        for f in "$PWD/issues/done"/[0-9][0-9][0-9][0-9]-*.md(N) "$PWD/issues/done"/[0-9][0-9][0-9][0-9][0-9]-*.md(N); do
-            local stem="${f:t:r}"
-            issues+=("${stem:0:4}:$stem")
-        done
-    fi
+    for f in "$issues_dir/done"/[0-9][0-9][0-9][0-9]-*.md(N) "$issues_dir/done"/[0-9][0-9][0-9][0-9][0-9]-*.md(N); do
+        local stem="${f:t:r}"
+        local num="${stem%%[-]*}"
+        local title
+        title=$(grep -m1 '^# ' "$f" 2>/dev/null | sed 's/^# //')
+        issues+=("${num}:${title:-$stem}")
+    done
     _describe 'issue' issues
 }
 

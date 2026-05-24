@@ -160,20 +160,22 @@ python3 -m pytest tests/ -v
 
 ## Customization
 
-Place `.fbim.yml` in the project root to customize how areas are displayed in the issue list.
+Place `.fbim.yml` in the project root to configure FBIM behavior.
 
 ```yaml
-area_order:
+issues_dir: issues    # Where to store issues, relative to this file (default: issues)
+
+area_order:           # Display order in the issue list (alphabetical if omitted)
   - backend
   - frontend
   - infra
   - misc
 
-area_labels:
+area_labels:          # Display names for areas (area name used as-is if omitted)
   backend: "Backend"
   frontend: "Frontend"
   infra: "Infrastructure"
   misc: "Other"
 ```
 
-Without `.fbim.yml`, areas are displayed as-is and sorted alphabetically.
+`issues_dir` lets you store issues in a non-default location (e.g. `docs/issues`). FBIM tools walk up from the current directory to find `.fbim.yml`, so they work from any subdirectory of the project.
