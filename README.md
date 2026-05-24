@@ -22,10 +22,10 @@ A system for managing issues as plain files. Track issues entirely within your G
 
 ### Create an issue
 
-Create `issues/NNNN-short-name.md`. `NNNN` is a zero-padded sequential number. Include `status`, `priority`, and `area` in the frontmatter.
+Create `issues/NNNNN-short-name.md`. `NNNNN` is a zero-padded 5-digit sequential number. Include `status`, `priority`, and `area` in the frontmatter.
 
 ```
-issues/0042-api-auth-missing-scope.md
+issues/00042-api-auth-missing-scope.md
 ```
 
 See [spec.md](spec.md) for naming conventions and the file template.

@@ -8,21 +8,23 @@ File-Based Issue Management の仕様。
 
 ```
 issues/
-  README.md          一覧（自動生成。手動編集不可）
-  NNNN-name.md       open または pending な issue
+  README.md           一覧（自動生成。手動編集不可）
+  NNNNN-name.md       open または pending な issue
   done/
-    NNNN-name.md     完了した issue
+    NNNNN-name.md     完了した issue
 ```
 
 ## ファイル命名規則
 
 ```
-NNNN-short-name.md
+NNNNN-short-name.md
 ```
 
-- `NNNN`: ゼロ埋め4桁の連番。次番号は `bin/next-id issues/` で取得する
+- `NNNNN`: ゼロ埋め5桁の連番。次番号は `bin/next-id issues/` で取得する
 - `short-name`: ケバブケースの短い説明（英数字・ハイフンのみ）
 - 作成前に既存 issues を確認し、同等の内容が存在する場合は新規作成しない
+
+**後方互換**: 旧来の4桁 ID（`NNNN-*.md`）は引き続きサポートする。すべてのツールは両形式を読み込む。新規 issue は常に5桁で作成する。
 
 ## frontmatter
 
@@ -85,23 +87,23 @@ labels: []
 
 1. `bin/next-id issues/` で次番号を取得する
 2. タイトルからケバブケースの short-name を作る
-3. `issues/NNNN-short-name.md` をテンプレートに従って作成する
+3. `issues/NNNNN-short-name.md` をテンプレートに従って作成する
 4. `bin/gen-issues-readme` を実行する
 
 ### issue を完了にする
 
-1. `issues/NNNN-*.md` を `issues/done/NNNN-*.md` に移動する
+1. `issues/NNNNN-*.md` を `issues/done/NNNNN-*.md` に移動する
 2. frontmatter の `status` を `done` に変更する
 3. `bin/gen-issues-readme` を実行する
 
 ### issue を保留にする
 
-1. `issues/NNNN-*.md` の frontmatter `status` を `pending` に変更する
+1. `issues/NNNNN-*.md` の frontmatter `status` を `pending` に変更する
 2. `bin/gen-issues-readme` を実行する
 
 ### issue を再開する
 
-1. `issues/done/NNNN-*.md` を `issues/NNNN-*.md` に移動する
+1. `issues/done/NNNNN-*.md` を `issues/NNNNN-*.md` に移動する
 2. frontmatter の `status` を `open` に変更する
 3. `bin/gen-issues-readme` を実行する
 
@@ -113,7 +115,7 @@ labels: []
 
 ## `bin/next-id` の仕様
 
-`bin/next-id <dir>` は指定ディレクトリ（および `done/` サブディレクトリ）の `NNNN-` ファイルを走査し、最大番号 + 1 をゼロ埋め4桁で出力する。ファイルが存在しない場合は `0001` を返す。
+`bin/next-id <dir>` は指定ディレクトリ（および `done/` サブディレクトリ）の issue ファイルを走査し、最大番号 + 1 をゼロ埋め5桁で出力する。ファイルが存在しない場合は `00001` を返す。旧来の4桁ファイルも検出する。
 
 ## `bin/gen-issues-readme` の仕様
 

@@ -8,10 +8,10 @@
 
 ```
 issues/
-  README.md          Issue list (auto-generated — do not edit manually)
-  NNNN-name.md       Open or pending issues
+  README.md           Issue list (auto-generated — do not edit manually)
+  NNNNN-name.md       Open or pending issues
   done/
-    NNNN-name.md     Closed issues
+    NNNNN-name.md     Closed issues
 ```
 
 ## File naming
@@ -87,12 +87,12 @@ Additional context and related information.
 
 1. Get the next number: `bin/next-id issues/`
 2. Generate a kebab-case `short-name` from the title.
-3. Create `issues/NNNN-short-name.md` using the template above.
+3. Create `issues/NNNNN-short-name.md` using the template above.
 4. Run `bin/gen-issues-readme`.
 
 ### Close an issue
 
-1. Move `issues/NNNN-*.md` to `issues/done/NNNN-*.md`.
+1. Move `issues/NNNNN-*.md` to `issues/done/NNNNN-*.md`.
 2. Set frontmatter `status` to `done`.
 3. Run `bin/gen-issues-readme`.
 
@@ -103,7 +103,7 @@ Additional context and related information.
 
 ### Reopen an issue
 
-1. Move `issues/done/NNNN-*.md` to `issues/NNNN-*.md`.
+1. Move `issues/done/NNNNN-*.md` to `issues/NNNNN-*.md`.
 2. Set frontmatter `status` to `open`.
 3. Run `bin/gen-issues-readme`.
 
@@ -115,7 +115,7 @@ Edit the file directly.
 
 ## `bin/next-id`
 
-`bin/next-id <dir>` scans the given directory (and its `done/` subdirectory) for `NNNN-*.md` files, and prints the next number as a zero-padded 4-digit string. Returns `0001` if no files exist.
+`bin/next-id <dir>` scans the given directory (and its `done/` subdirectory) for issue files, and prints the next number as a zero-padded 5-digit string. Returns `00001` if no files exist. 4-digit files from earlier versions are also detected.
 
 ## `bin/gen-issues-readme`
 

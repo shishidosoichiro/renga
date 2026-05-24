@@ -20,10 +20,10 @@
 
 ### issue を作成する
 
-`issues/NNNN-short-name.md` を作成する。`NNNN` は連番。frontmatter に `status`・`priority`・`area` を付ける。
+`issues/NNNNN-short-name.md` を作成する。`NNNNN` はゼロ埋め5桁の連番。frontmatter に `status`・`priority`・`area` を付ける。
 
 ```
-issues/0042-api-auth-missing-scope.md
+issues/00042-api-auth-missing-scope.md
 ```
 
 テンプレートや命名規則の詳細は [spec.md](spec.md) を参照。
