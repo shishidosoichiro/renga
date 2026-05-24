@@ -18,6 +18,34 @@ A system for managing issues as plain files. Track issues entirely within your G
 - bash (`bin/next-id`)
 - PyYAML — only if using `.fbim.yml` for customization (`pip install pyyaml`)
 
+## Getting started
+
+1. Clone or download this repository.
+
+   ```sh
+   git clone https://gitlab.home/kiwi/ifbm.git /path/to/fbim
+   ```
+
+2. Add `bin/` to your PATH.
+
+   ```sh
+   export PATH="$PATH:/path/to/fbim/bin"
+   ```
+
+3. In your project root, create the issues directory.
+
+   ```sh
+   mkdir -p issues/done
+   ```
+
+4. Create your first issue.
+
+   ```sh
+   fbim create "My first issue" --area docs
+   ```
+
+That's it. Issue files live alongside your code in Git.
+
 ## Actions
 
 ### Create an issue
@@ -36,7 +64,7 @@ Edit the file directly. Both the body and frontmatter can be changed freely.
 
 ### Close an issue
 
-Move `issues/NNNN-*.md` to `issues/done/NNNN-*.md` and set `status` to `done`.
+Move `issues/NNNNN-*.md` to `issues/done/NNNNN-*.md` and set `status` to `done`.
 
 ### Put an issue on hold
 
@@ -44,7 +72,7 @@ Set `status` to `pending`. Use this for issues that are blocked or deferred.
 
 ### Reopen an issue
 
-Move `issues/done/NNNN-*.md` back to `issues/NNNN-*.md` and set `status` to `open`.
+Move `issues/done/NNNNN-*.md` back to `issues/NNNNN-*.md` and set `status` to `open`.
 
 ### Browse the issue list
 
@@ -62,12 +90,12 @@ export PATH="$PATH:/path/to/fbim/bin"
 
 | Command | Description |
 |---|---|
-| `fbim create <title>` | Create an issue |
-| `fbim done <NNNN>` | Close an issue |
-| `fbim pending <NNNN>` | Put an issue on hold |
-| `fbim reopen <NNNN>` | Reopen a closed issue |
+| `fbim create <title>` | Create an issue (`--slug` is auto-generated from title if omitted) |
+| `fbim done <NNNNN>` | Close an issue |
+| `fbim pending <NNNNN>` | Put an issue on hold |
+| `fbim reopen <NNNNN>` | Reopen a closed issue |
 | `fbim list [--json]` | List issues (use `--json` for structured output) |
-| `fbim show <NNNN>` | Show issue details |
+| `fbim show <NNNNN>` | Show issue details |
 | `fbim help [command]` | Show help |
 
 `fbim list --json` outputs JSON that can be piped to `jq` or `yq`.
@@ -95,13 +123,16 @@ ln -s /path/to/fbim/skills/fbim-show    ~/.claude/skills/fbim-show
 
 | Command | Description |
 |---|---|
-| `/fbim <title>` | Create an issue |
+| `/fbim [create] <title>` | Create an issue |
 | `/fbim-create <title>` | Create an issue |
-| `/fbim-done NNNNN` | Close an issue |
-| `/fbim-pending NNNNN` | Put an issue on hold |
-| `/fbim-reopen NNNNN` | Reopen a closed issue |
+| `/fbim done <NNNNN>` | Close an issue |
+| `/fbim-done <NNNNN>` | Close an issue |
+| `/fbim pending <NNNNN>` | Put an issue on hold |
+| `/fbim-pending <NNNNN>` | Put an issue on hold |
+| `/fbim reopen <NNNNN>` | Reopen a closed issue |
+| `/fbim-reopen <NNNNN>` | Reopen a closed issue |
 | `/fbim-list` | List issues |
-| `/fbim-show NNNNN` | Show issue details |
+| `/fbim-show <NNNNN>` | Show issue details |
 
 ## Shell completion
 
@@ -123,6 +154,15 @@ source /path/to/fbim/completions/fbim.bash
 ```
 
 Subcommands, options, and issue numbers (read from `issues/` in the current directory) are all completed.
+
+## Development
+
+```sh
+pip install -r requirements-dev.txt
+python3 -m pytest tests/ -v
+```
+
+[spec.md](spec.md) is the authoritative specification for file format, naming rules, and tool behavior. README covers usage; spec.md covers the rules behind it.
 
 ## Customization
 

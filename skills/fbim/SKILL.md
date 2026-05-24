@@ -1,5 +1,5 @@
 ---
-argument-hint: "[create] <title> | done <NNNN> | pending <NNNN> | reopen <NNNN> | help [command]"
+argument-hint: "[create] <title> | done <NNNNN> | pending <NNNNN> | reopen <NNNNN> | list | show <NNNNN> | help"
 ---
 
 # /fbim skill
@@ -11,9 +11,11 @@ All operations are performed by calling `${CLAUDE_SKILL_DIR}/scripts/fbim`.
 
 ```
 /fbim [create] <title>     Create an issue
-/fbim done <NNNN>          Close an issue
-/fbim pending <NNNN>       Put an issue on hold
-/fbim reopen <NNNN>        Reopen a closed issue
+/fbim done <NNNNN>         Close an issue
+/fbim pending <NNNNN>      Put an issue on hold
+/fbim reopen <NNNNN>       Reopen a closed issue
+/fbim list                 List open and pending issues
+/fbim show <NNNNN>         Show issue details
 /fbim help [command]       Show help
 ```
 
@@ -36,7 +38,7 @@ If `$ARGUMENTS` starts with `create`, strip it and use the rest as the title. Ot
 ${CLAUDE_SKILL_DIR}/scripts/fbim create "<title>" --slug <slug> --area <area>
 ```
 
-- `--slug`: Kebab-case English slug derived from the title (max 30 chars).
+- `--slug`: Kebab-case English slug derived from the title (max 30 chars). Auto-generated from title if omitted.
 - `--area`: Infer from context. Use `misc` if unclear.
 - `--body`: Include if there is additional context to add.
 - Report the created file path to the user.
@@ -46,7 +48,7 @@ ${CLAUDE_SKILL_DIR}/scripts/fbim create "<title>" --slug <slug> --area <area>
 ## done
 
 ```
-${CLAUDE_SKILL_DIR}/scripts/fbim done <NNNN>
+${CLAUDE_SKILL_DIR}/scripts/fbim done <NNNNN>
 ```
 
 Report the destination file path to the user.
@@ -56,7 +58,7 @@ Report the destination file path to the user.
 ## pending
 
 ```
-${CLAUDE_SKILL_DIR}/scripts/fbim pending <NNNN>
+${CLAUDE_SKILL_DIR}/scripts/fbim pending <NNNNN>
 ```
 
 Report the updated file path to the user.
@@ -66,10 +68,36 @@ Report the updated file path to the user.
 ## reopen
 
 ```
-${CLAUDE_SKILL_DIR}/scripts/fbim reopen <NNNN>
+${CLAUDE_SKILL_DIR}/scripts/fbim reopen <NNNNN>
 ```
 
 Report the destination file path to the user.
+
+---
+
+## list
+
+```
+${CLAUDE_SKILL_DIR}/scripts/fbim list
+```
+
+With filters:
+
+```
+${CLAUDE_SKILL_DIR}/scripts/fbim list --area <area>
+```
+
+Display the output to the user.
+
+---
+
+## show
+
+```
+${CLAUDE_SKILL_DIR}/scripts/fbim show <NNNNN>
+```
+
+Display the output to the user.
 
 ---
 
