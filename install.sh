@@ -14,6 +14,11 @@ GITLAB_URL="${GITLAB_URL:-https://gitlab.home}"
 PROJECT_PATH="${PROJECT_PATH:-kiwi/ifbm}"
 VERSION="${VERSION:-main}"
 INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
+GITLAB_TOKEN="${GITLAB_TOKEN:-$(glab config get token --host "${GITLAB_URL#https://}" 2>/dev/null || true)}"
+if [[ -z "${GITLAB_TOKEN:-}" ]]; then
+  echo "error: GITLAB_TOKEN is not set and glab is not authenticated to ${GITLAB_URL}" >&2
+  exit 1
+fi
 
 OS=$(uname -s)
 ARCH=$(uname -m)
@@ -31,10 +36,7 @@ ENCODED_PROJECT=$(python3 -c "import urllib.parse; print(urllib.parse.quote('${P
 ENCODED_VERSION=$(python3 -c "import urllib.parse; print(urllib.parse.quote('${VERSION}', safe=''))")
 DOWNLOAD_URL="${GITLAB_URL}/api/v4/projects/${ENCODED_PROJECT}/packages/generic/fbim/${ENCODED_VERSION}/${FILE}"
 
-CURL_ARGS=(-fsSL)
-if [[ -n "${GITLAB_TOKEN:-}" ]]; then
-  CURL_ARGS+=(-H "PRIVATE-TOKEN: ${GITLAB_TOKEN}")
-fi
+CURL_ARGS=(-fsSL -H "PRIVATE-TOKEN: ${GITLAB_TOKEN}")
 
 TMP=$(mktemp)
 trap 'rm -f "$TMP"' EXIT
