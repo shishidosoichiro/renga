@@ -4,7 +4,12 @@ use clap::{Args, Parser, Subcommand};
 
 /// FBIM — File-Based Issue Management.
 #[derive(Parser)]
-#[command(name = "fbim", about = "File-Based Issue Management", version, disable_help_subcommand = true)]
+#[command(
+    name = "fbim",
+    about = "File-Based Issue Management",
+    version,
+    disable_help_subcommand = true
+)]
 pub struct Cli {
     /// Subcommand to run.
     #[command(subcommand)]
