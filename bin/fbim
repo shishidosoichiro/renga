@@ -3,11 +3,11 @@
 
 Usage:
   fbim create <title> [--slug <slug>] [--priority high|medium|low] [--area <area>] [--body <text>]
-  fbim done <NNNN>
-  fbim pending <NNNN>
-  fbim reopen <NNNN>
+  fbim done <NNNNN>
+  fbim pending <NNNNN>
+  fbim reopen <NNNNN>
   fbim list [--status open|pending|done] [--area <area>] [--label <label>] [--json]
-  fbim show <NNNN>
+  fbim show <NNNNN>
   fbim help [command]
 """
 
@@ -246,7 +246,7 @@ def cmd_reopen(argv):
 
 def cmd_list(argv):
     p = argparse.ArgumentParser(prog="fbim list")
-    p.add_argument("--status", help="カンマ区切り (例: open,pending)")
+    p.add_argument("--status", help="Comma-separated values (e.g. open,pending)")
     p.add_argument("--area")
     p.add_argument("--label")
     p.add_argument("--json", action="store_true", dest="as_json")

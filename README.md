@@ -82,12 +82,6 @@ Move `issues/done/NNNNN-*.md` back to `issues/NNNNN-*.md` and set `status` to `o
 
 ### bin/ CLI
 
-Add `bin/` to your PATH or call scripts by full path.
-
-```sh
-export PATH="$PATH:/path/to/fbim/bin"
-```
-
 | Command | Description |
 |---|---|
 | `fbim create <title>` | Create an issue (`--slug` is auto-generated from title if omitted) |

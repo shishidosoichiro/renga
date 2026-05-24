@@ -83,33 +83,17 @@ Additional context and related information.
 
 ## Actions
 
-### Create an issue
+Each action defines the required end state. Tools (CLI or manual edits) must satisfy it.
 
-1. Get the next number: `bin/next-id issues/`
-2. Generate a kebab-case `short-name` from the title.
-3. Create `issues/NNNNN-short-name.md` using the template above.
-4. Run `bin/gen-issues-readme`.
+| Action | File location | `status` |
+|--------|--------------|---------|
+| Create | `issues/NNNNN-name.md` | `open` |
+| Close  | `issues/done/NNNNN-name.md` | `done` |
+| Hold   | `issues/NNNNN-name.md` (unchanged) | `pending` |
+| Reopen | `issues/NNNNN-name.md` | `open` |
+| Update | `issues/NNNNN-name.md` (edited in place) | unchanged |
 
-### Close an issue
-
-1. Move `issues/NNNNN-*.md` to `issues/done/NNNNN-*.md`.
-2. Set frontmatter `status` to `done`.
-3. Run `bin/gen-issues-readme`.
-
-### Put an issue on hold
-
-1. Set frontmatter `status` to `pending`.
-2. Run `bin/gen-issues-readme`.
-
-### Reopen an issue
-
-1. Move `issues/done/NNNNN-*.md` to `issues/NNNNN-*.md`.
-2. Set frontmatter `status` to `open`.
-3. Run `bin/gen-issues-readme`.
-
-### Update an issue
-
-Edit the file directly.
+After any action, `issues/README.md` must be regenerated with `bin/gen-issues-readme`.
 
 ---
 
