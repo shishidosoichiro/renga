@@ -168,3 +168,49 @@ def test_show(project):
 def test_show_not_found(project):
     result = run("show", "9999", cwd=project)
     assert result.returncode != 0
+
+
+# ── 親ディレクトリ探索 ─────────────────────────────────────────────────────────
+
+def test_create_from_subdirectory(project):
+    subdir = project / "src"
+    subdir.mkdir()
+    result = run("create", "Sub Issue", "--slug", "sub-issue", cwd=subdir)
+    assert result.returncode == 0
+    assert len(list((project / "issues").glob("*-sub-issue.md"))) == 1
+
+
+def test_done_from_subdirectory(project):
+    make_issue(project, "00001-test.md")
+    subdir = project / "src"
+    subdir.mkdir()
+    result = run("done", "1", cwd=subdir)
+    assert result.returncode == 0
+    assert (project / "issues" / "done" / "00001-test.md").exists()
+
+
+def test_no_issues_dir_error(tmp_path):
+    result = run("create", "No Dir", "--slug", "no-dir", cwd=tmp_path)
+    assert result.returncode != 0
+    assert "error" in result.stderr
+
+
+# ── issues_dir 設定 ────────────────────────────────────────────────────────────
+
+def test_issues_dir_from_config(tmp_path):
+    (tmp_path / ".fbim.yml").write_text("issues_dir: tracking\n")
+    (tmp_path / "tracking" / "done").mkdir(parents=True)
+    result = run("create", "Config Issue", "--slug", "config-issue", cwd=tmp_path)
+    assert result.returncode == 0
+    assert len(list((tmp_path / "tracking").glob("*-config-issue.md"))) == 1
+    assert not (tmp_path / "issues").exists()
+
+
+def test_issues_dir_from_config_subdirectory(tmp_path):
+    (tmp_path / ".fbim.yml").write_text("issues_dir: tracking\n")
+    (tmp_path / "tracking" / "done").mkdir(parents=True)
+    subdir = tmp_path / "src"
+    subdir.mkdir()
+    result = run("create", "Deep Issue", "--slug", "deep-issue", cwd=subdir)
+    assert result.returncode == 0
+    assert len(list((tmp_path / "tracking").glob("*-deep-issue.md"))) == 1

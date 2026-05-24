@@ -83,3 +83,27 @@ def test_4digit_backward_compat(project):
     result = run(project, "--stdout")
     assert "Legacy Issue" in result.stdout
     assert "0042" in result.stdout
+
+
+# ── 親ディレクトリ探索 ─────────────────────────────────────────────────────────
+
+def test_generates_from_subdirectory(project):
+    make_issue(project, "00001-test.md", title="Sub Test")
+    subdir = project / "sub"
+    subdir.mkdir()
+    result = run(subdir, "--stdout")
+    assert result.returncode == 0
+    assert "Sub Test" in result.stdout
+
+
+# ── issues_dir 設定 ────────────────────────────────────────────────────────────
+
+def test_issues_dir_from_config(tmp_path):
+    (tmp_path / ".fbim.yml").write_text("issues_dir: tracking\n")
+    (tmp_path / "tracking" / "done").mkdir(parents=True)
+    (tmp_path / "tracking" / "00001-test.md").write_text(
+        "---\nstatus: open\npriority: medium\narea: misc\nlabels: []\n---\n\n# Config Test\n"
+    )
+    result = run(tmp_path, "--stdout")
+    assert result.returncode == 0
+    assert "Config Test" in result.stdout
