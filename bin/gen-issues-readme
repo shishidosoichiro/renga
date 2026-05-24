@@ -77,8 +77,13 @@ def get_title(content: str) -> str:
 
 
 def collect_issues(filter_area=None, filter_label=None, filter_status=None):
+    import re as _re
     issues = []
-    for path in sorted(ISSUES_DIR.glob("[0-9][0-9][0-9][0-9]-*.md")):
+    files = sorted(
+        list(ISSUES_DIR.glob("[0-9][0-9][0-9][0-9]-*.md")) +
+        list(ISSUES_DIR.glob("[0-9][0-9][0-9][0-9][0-9]-*.md"))
+    )
+    for path in files:
         content = path.read_text(encoding="utf-8")
         fm = parse_frontmatter(content)
         if not fm:
@@ -98,8 +103,9 @@ def collect_issues(filter_area=None, filter_label=None, filter_status=None):
         if filter_label and filter_label not in labels:
             continue
 
+        m = _re.match(r'^(\d+)-', path.stem)
         issues.append({
-            "id": path.stem[:4],
+            "id": m.group(1) if m else path.stem[:5],
             "file": path.name,
             "status": status,
             "area": area,

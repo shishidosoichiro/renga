@@ -54,7 +54,7 @@ _fbim() {
 _fbim_open_issues() {
     local issues=()
     if [[ -d "$PWD/issues" ]]; then
-        for f in "$PWD/issues"/[0-9][0-9][0-9][0-9]-*.md(N); do
+        for f in "$PWD/issues"/[0-9][0-9][0-9][0-9]-*.md(N) "$PWD/issues"/[0-9][0-9][0-9][0-9][0-9]-*.md(N); do
             local stem="${f:t:r}"
             issues+=("${stem:0:4}:$stem")
         done
@@ -65,7 +65,7 @@ _fbim_open_issues() {
 _fbim_done_issues() {
     local issues=()
     if [[ -d "$PWD/issues/done" ]]; then
-        for f in "$PWD/issues/done"/[0-9][0-9][0-9][0-9]-*.md(N); do
+        for f in "$PWD/issues/done"/[0-9][0-9][0-9][0-9]-*.md(N) "$PWD/issues/done"/[0-9][0-9][0-9][0-9][0-9]-*.md(N); do
             local stem="${f:t:r}"
             issues+=("${stem:0:4}:$stem")
         done

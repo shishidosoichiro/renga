@@ -17,12 +17,14 @@ issues/
 ## File naming
 
 ```
-NNNN-short-name.md
+NNNNN-short-name.md
 ```
 
-- `NNNN`: Zero-padded 4-digit sequential number. Get the next number with `bin/next-id issues/`.
+- `NNNNN`: Zero-padded 5-digit sequential number. Get the next number with `bin/next-id issues/`.
 - `short-name`: Kebab-case short description (ASCII alphanumeric and hyphens only).
 - Before creating, check for duplicates. Do not create a new issue if an equivalent one already exists.
+
+**Backward compatibility**: 4-digit IDs (`NNNN-*.md`) from earlier versions are supported. All tools read both formats; new issues are always created with 5-digit IDs.
 
 ## Frontmatter
 

@@ -30,18 +30,20 @@ _fbim_completion() {
                 done|pending|show)
                     if [[ -d "$PWD/issues" ]]; then
                         local nums
-                        nums=$(ls "$PWD/issues"/[0-9][0-9][0-9][0-9]-*.md 2>/dev/null \
+                        nums=$(ls "$PWD/issues"/[0-9][0-9][0-9][0-9]-*.md \
+                                  "$PWD/issues"/[0-9][0-9][0-9][0-9][0-9]-*.md 2>/dev/null \
                             | xargs -I{} basename {} .md \
-                            | cut -c1-4)
+                            | grep -oE '^[0-9]+')
                         COMPREPLY=($(compgen -W "$nums" -- "$cur"))
                     fi
                     ;;
                 reopen)
                     if [[ -d "$PWD/issues/done" ]]; then
                         local nums
-                        nums=$(ls "$PWD/issues/done"/[0-9][0-9][0-9][0-9]-*.md 2>/dev/null \
+                        nums=$(ls "$PWD/issues/done"/[0-9][0-9][0-9][0-9]-*.md \
+                                  "$PWD/issues/done"/[0-9][0-9][0-9][0-9][0-9]-*.md 2>/dev/null \
                             | xargs -I{} basename {} .md \
-                            | cut -c1-4)
+                            | grep -oE '^[0-9]+')
                         COMPREPLY=($(compgen -W "$nums" -- "$cur"))
                     fi
                     ;;

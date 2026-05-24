@@ -78,12 +78,16 @@ def get_title(content: str) -> str:
 # ── ファイル検索 ──────────────────────────────────────────────────────────────
 
 def find_issue(nnnn: str, include_done: bool = False) -> Path | None:
-    padded = nnnn.zfill(4)
-    for path in ISSUES_DIR.glob(f"{padded}-*.md"):
-        return path
-    if include_done:
-        for path in DONE_DIR.glob(f"{padded}-*.md"):
+    num = int(nnnn)
+    for width in (5, 4):
+        padded = str(num).zfill(width)
+        for path in ISSUES_DIR.glob(f"{padded}-*.md"):
             return path
+    if include_done:
+        for width in (5, 4):
+            padded = str(num).zfill(width)
+            for path in DONE_DIR.glob(f"{padded}-*.md"):
+                return path
     return None
 
 
@@ -98,7 +102,11 @@ def all_issues(status_filter=None, area_filter=None, label_filter=None) -> list[
     for d in dirs:
         if not d.exists():
             continue
-        for path in sorted(d.glob("[0-9][0-9][0-9][0-9]-*.md")):
+        files = sorted(
+            list(d.glob("[0-9][0-9][0-9][0-9]-*.md")) +
+            list(d.glob("[0-9][0-9][0-9][0-9][0-9]-*.md"))
+        )
+        for path in files:
             content = path.read_text(encoding="utf-8")
             fm = parse_frontmatter(content)
             if not fm:
@@ -114,8 +122,9 @@ def all_issues(status_filter=None, area_filter=None, label_filter=None) -> list[
                 continue
             if label_filter and label_filter not in labels:
                 continue
+            m = re.match(r'^(\d+)-', path.stem)
             results.append({
-                "id": path.stem[:4],
+                "id": m.group(1) if m else path.stem[:5],
                 "file": str(path.relative_to(ISSUES_DIR.parent)),
                 "status": status,
                 "priority": fm.get("priority", "medium"),
