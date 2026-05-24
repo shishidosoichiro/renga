@@ -1,113 +1,125 @@
 # FBIM — File-Based Issue Management
 
-ファイルで issue を管理するシステム。GitHub Issues や Redmine のような外部ツールを使わず、Git リポジトリ内のファイルだけで issue を追跡する。
+[![pipeline status](https://gitlab.home/kiwi/ifbm/badges/main/pipeline.svg)](https://gitlab.home/kiwi/ifbm/-/pipelines)
+[![coverage](https://gitlab.home/kiwi/ifbm/badges/main/coverage.svg)](https://gitlab.home/kiwi/ifbm/-/pipelines)
+
+リポジトリの中で生きる issue 管理。アカウントも設定も外部サービスも不要で、数秒で始められる。
+
+> English version: [README.md](README.md)
+
+## クイックスタート
+
+```sh
+# 1. インストール
+bash <(curl -fsSL https://gitlab.home/kiwi/ifbm/-/raw/main/install.sh)
+
+# 2. 初期化（git リポジトリがなくても動く）
+fbim init
+
+# 3. 最初の issue を作る
+fbim create "最初のタスク"
+```
+
+以上。`issues/` ディレクトリにファイルが作られ、そのままコードと一緒に git で管理できる。
+
+## こんな人に向いている
+
+**ソロ開発者・小規模チーム**で、外部サービスのセットアップなしにすぐ作業を始めたい人向け。
+
+- 新しいプロジェクトを始めたばかりで、まだ GitHub Issues を設定したくない
+- ネットワークのない環境やプライベートなマシンで開発している
+- Claude Code などの AI ツールを使っていて、ターミナルを離れずに issue 管理をしたい
+- issue の変更履歴をコードと同じ git に残したい
+
+コメント・担当者・通知・Web UI が必要なら、GitHub Issues や Linear を使うほうがいい。FBIM は意図的にシンプルに絞っている。
 
 ## なぜファイルベースか
 
-- **Git で完結する**: issue の履歴・変更者・コメントがすべて git log に残る。外部サービスへの依存がない
-- **コードと並走できる**: issue ファイルをコード変更と同じ PR に含められる。「この修正はこの issue を解決する」という対応関係が一目でわかる
+- **即スタート**: `fbim init` だけで始まる。アカウントもトークンも設定ファイルも不要
+- **Git で完結**: 履歴・変更者・差分がすべて `git log` に残る。修正した issue を同じコミットで close できる
 - **オフラインで動く**: ネットワーク接続なしに issue を作成・更新・参照できる
-- **移行が容易**: Redmine や GitHub Issues に移行するときも、ファイルを読めば全データが手元にある。ロックインがない
-- **ツールを選ばない**: エディタでも、スクリプトでも、AI ツールでも操作できる。インターフェースがファイルなので何とでも組み合わせられる
+- **AI と相性がいい**: Markdown ファイルは LLM が読み書きしやすい。Claude Code と組み合わせると、コーディング中に issue 管理も同時にできる
+- **ロックインがない**: データはすべてプレーンファイル。他のツールへの移行もファイルを読むだけ
 
-## 動作要件
+## インストール
 
-- Python 3.8 以上（`bin/fbim`・`bin/gen-issues-readme` に必要）
-- bash（`bin/next-id` に必要）
-- PyYAML（`.fbim.yml` による設定をカスタマイズする場合のみ。`pip install pyyaml`）
-
-## アクション
-
-### issue を作成する
-
-`issues/NNNNN-short-name.md` を作成する。`NNNNN` はゼロ埋め5桁の連番。frontmatter に `status`・`priority`・`area` を付ける。
-
-```
-issues/00042-api-auth-missing-scope.md
-```
-
-テンプレートや命名規則の詳細は [spec.md](spec.md) を参照。
-
-### issue を更新する
-
-対象ファイルを直接編集する。本文・frontmatter のどちらも自由に変更できる。
-
-### issue を完了にする
-
-`issues/NNNN-*.md` を `issues/done/NNNN-*.md` に移動し、frontmatter の `status` を `done` に変更する。
-
-### issue を保留にする
-
-frontmatter の `status` を `pending` に変更する。決定待ち・後回しにしたい issue に使う。
-
-### issue を再開する
-
-`issues/done/NNNN-*.md` を `issues/NNNN-*.md` に移動し、frontmatter の `status` を `open` に変更する。
-
-### 一覧を確認する
-
-`issues/README.md` に open/pending の issue 一覧が生成される。手動編集は禁止。`bin/gen-issues-readme` を実行して再生成する。
-
-## ツール
-
-### bin/ CLI
-
-`bin/fbim` をプロジェクトの PATH に追加するか、フルパスで呼び出す。
+インストールスクリプトがプラットフォームに合ったバイナリをパッケージレジストリから取得してインストールする。
 
 ```sh
-export PATH="$PATH:/path/to/fbim/bin"
+bash <(curl -fsSL https://gitlab.home/kiwi/ifbm/-/raw/main/install.sh)
 ```
+
+ソースからビルドする場合:
+
+```sh
+cargo install --path /path/to/fbim
+```
+
+## コマンド
 
 | コマンド | 動作 |
 |---|---|
-| `fbim create <title>` | issue を作成する |
-| `fbim done <NNNN>` | issue を完了にする |
-| `fbim pending <NNNN>` | issue を保留にする |
-| `fbim reopen <NNNN>` | issue を再開する |
-| `fbim list [--json]` | issue 一覧を表示する（`--json` で JSON 出力） |
-| `fbim show <NNNN>` | issue の詳細を表示する |
+| `fbim init` | issues ディレクトリを初期化する |
+| `fbim create <タイトル>` | issue を作成する |
+| `fbim done <NNNNN>` | issue を完了にする |
+| `fbim pending <NNNNN>` | issue を保留にする |
+| `fbim reopen <NNNNN>` | issue を再開する |
+| `fbim list [--status open\|pending\|done] [--area <area>] [--json]` | issue 一覧を表示する |
+| `fbim show <NNNNN>` | issue の詳細を表示する |
 | `fbim help [コマンド]` | ヘルプを表示する |
 
-`fbim list --json` の出力は `yq` や `jq` にパイプできる。
-
 ```sh
-fbim list --json | jq '.[] | select(.area == "authz")'
+# JSON 出力を jq にパイプする
+fbim list --json | jq '.[] | select(.area == "auth")'
 ```
 
-### Claude Code スキル
+## Claude Code スキル
 
-`skills/fbim/` に Claude Code 用のスキルを同梱している。シンボリックリンクでインストールする。
+Claude Code と組み合わせると特に便利。スキルをインストールすれば、コーディング中に `/fbim` で issue を作成・管理できる。
 
 ```sh
-ln -s /path/to/fbim/skills/fbim ~/.claude/skills/fbim
+ln -sf /path/to/fbim/skills/fbim ~/.claude/skills/fbim
 ```
-
-インストール後は以下のコマンドが使えるようになる。
 
 | コマンド | 動作 |
 |---|---|
-| `/fbim タイトル` | issue を作成する |
-| `/fbim done NNNN` | issue を完了にする |
-| `/fbim pending NNNN` | issue を保留にする |
-| `/fbim reopen NNNN` | 完了した issue を再開する |
-| `/fbim help` | ヘルプを表示する |
+| `/fbim [create] <タイトル>` | issue を作成する |
+| `/fbim done <NNNNN>` | 完了にする |
+| `/fbim pending <NNNNN>` | 保留にする |
+| `/fbim reopen <NNNNN>` | 再開する |
+| `/fbim list` | open/pending の一覧を表示する |
+| `/fbim show <NNNNN>` | 詳細を表示する |
+
+Claude が作業しながら issue を作り、完了したら close する——コーディングのフローを止めずに issue 管理が回る。
 
 ## カスタマイズ
 
-プロジェクトルートに `.fbim.yml` を置くと、issue 一覧の area 表示をカスタマイズできる。
+プロジェクトルートに `.fbim.yml` を置く。
 
 ```yaml
-area_order:
+issues_dir: issues    # デフォルト: issues
+
+area_order:           # 一覧での area の表示順（省略時はアルファベット順）
   - backend
   - frontend
   - infra
   - misc
 
-area_labels:
+area_labels:          # area の表示名
   backend: "バックエンド"
   frontend: "フロントエンド"
   infra: "インフラ"
   misc: "その他"
 ```
 
-`.fbim.yml` がない場合は area 名をそのまま使い、アルファベット順で表示する。
+## 開発
+
+```sh
+cargo test            # テスト実行
+cargo test --doc      # doctest 実行
+cargo clippy -- -D warnings
+cargo fmt --check
+cargo doc --no-deps --open
+```
+
+ファイル形式と命名規則の仕様は [spec.ja.md](spec.ja.md) を参照。

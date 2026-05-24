@@ -8,7 +8,7 @@ argument-hint: "<title> [--slug <slug>] [--priority high|medium|low] [--area <ar
 Create a new issue in `issues/`.
 
 ```
-${CLAUDE_SKILL_DIR}/../../bin/fbim create "<title>" --slug <slug> --area <area>
+fbim create "<title>" --slug <slug> --area <area>
 ```
 
 - `--slug`: Kebab-case English slug derived from the title (max 30 chars).

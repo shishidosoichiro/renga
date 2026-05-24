@@ -1,15 +1,17 @@
 # /fbim スキル
 
 File-Based Issue Management (FBIM) の操作スキル。
-すべての操作は `${CLAUDE_SKILL_DIR}/scripts/fbim` を呼び出して行う。
+すべての操作は `fbim` バイナリを呼び出して行う。
 
 ## 呼び出し形式
 
 ```
 /fbim [create] <タイトル>          issue を作成する
-/fbim done <NNNN>                  issue を完了にする
-/fbim pending <NNNN>               issue を保留にする
-/fbim reopen <NNNN>                issue を再開する
+/fbim done <NNNNN>                 issue を完了にする
+/fbim pending <NNNNN>              issue を保留にする
+/fbim reopen <NNNNN>               issue を再開する
+/fbim list                         open/pending の一覧を表示する
+/fbim show <NNNNN>                 issue の詳細を表示する
 /fbim help [コマンド名]            ヘルプを表示する
 ```
 
@@ -19,7 +21,7 @@ File-Based Issue Management (FBIM) の操作スキル。
 
 ## ルール（全コマンド共通）
 
-- `$ARGUMENTS` が空の場合は `${CLAUDE_SKILL_DIR}/scripts/fbim help` を実行して表示する
+- `$ARGUMENTS` が空の場合は `fbim help` を実行して表示する
 - スクリプトのエラー出力はそのままユーザーに伝える
 
 ---
@@ -29,7 +31,7 @@ File-Based Issue Management (FBIM) の操作スキル。
 `$ARGUMENTS` の先頭が `create` なら除いた残りをタイトルとして使う。そうでなければ `$ARGUMENTS` 全体がタイトル。
 
 ```
-${CLAUDE_SKILL_DIR}/scripts/fbim create "<タイトル>" --slug <slug> --area <area>
+fbim create "<タイトル>" --slug <slug> --area <area>
 ```
 
 - `--slug`: タイトルを英語に変換してケバブケースにしたもの（30文字以内）
@@ -42,7 +44,7 @@ ${CLAUDE_SKILL_DIR}/scripts/fbim create "<タイトル>" --slug <slug> --area <a
 ## done
 
 ```
-${CLAUDE_SKILL_DIR}/scripts/fbim done <NNNN>
+fbim done <NNNNN>
 ```
 
 移動先ファイルパスをユーザーに伝える。
@@ -52,7 +54,7 @@ ${CLAUDE_SKILL_DIR}/scripts/fbim done <NNNN>
 ## pending
 
 ```
-${CLAUDE_SKILL_DIR}/scripts/fbim pending <NNNN>
+fbim pending <NNNNN>
 ```
 
 変更したファイルパスをユーザーに伝える。
@@ -62,17 +64,43 @@ ${CLAUDE_SKILL_DIR}/scripts/fbim pending <NNNN>
 ## reopen
 
 ```
-${CLAUDE_SKILL_DIR}/scripts/fbim reopen <NNNN>
+fbim reopen <NNNNN>
 ```
 
 移動先ファイルパスをユーザーに伝える。
 
 ---
 
+## list
+
+```
+fbim list
+```
+
+フィルターあり:
+
+```
+fbim list --area <area>
+```
+
+出力をユーザーに表示する。
+
+---
+
+## show
+
+```
+fbim show <NNNNN>
+```
+
+出力をユーザーに表示する。
+
+---
+
 ## help
 
 ```
-${CLAUDE_SKILL_DIR}/scripts/fbim help [コマンド名]
+fbim help [コマンド名]
 ```
 
 出力をそのまま表示する。
