@@ -73,6 +73,28 @@ cargo install --path /path/to/fbim
 fbim list --json | jq '.[] | select(.area == "auth")'
 ```
 
+## シェル補完
+
+サブコマンド・フラグ・イシュー番号のタブ補完を有効にする。
+
+**bash** — `~/.bashrc` に追加:
+
+```sh
+source <(fbim completions bash)
+```
+
+**zsh** — `~/.zshrc` に追加:
+
+```sh
+source <(fbim completions zsh)
+```
+
+**fish** — 一度だけ実行:
+
+```sh
+fbim completions fish > ~/.config/fish/completions/fbim.fish
+```
+
 ## Claude Code スキル
 
 Claude Code と組み合わせると特に便利。スキルをインストールすれば、コーディング中に `/fbim` で issue を作成・管理できる。

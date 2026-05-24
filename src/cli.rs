@@ -39,6 +39,21 @@ pub enum Command {
         command: Option<String>,
     },
     /// Generate shell completion scripts.
+    ///
+    /// Prints a completion script to stdout. Source it in your shell to enable
+    /// tab completion for subcommands, flags, and issue IDs.
+    ///
+    /// bash — add to ~/.bashrc:
+    ///
+    ///   source <(fbim completions bash)
+    ///
+    /// zsh — add to ~/.zshrc:
+    ///
+    ///   source <(fbim completions zsh)
+    ///
+    /// fish — install once:
+    ///
+    ///   fbim completions fish > ~/.config/fish/completions/fbim.fish
     Completions {
         /// Shell to generate completions for.
         shell: clap_complete::Shell,

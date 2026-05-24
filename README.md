@@ -73,6 +73,28 @@ cargo install --path /path/to/fbim
 fbim list --json | jq '.[] | select(.area == "auth")'
 ```
 
+## Shell completions
+
+Enable tab completion for subcommands, flags, and issue IDs.
+
+**bash** — add to `~/.bashrc`:
+
+```sh
+source <(fbim completions bash)
+```
+
+**zsh** — add to `~/.zshrc`:
+
+```sh
+source <(fbim completions zsh)
+```
+
+**fish** — install once:
+
+```sh
+fbim completions fish > ~/.config/fish/completions/fbim.fish
+```
+
 ## Claude Code skill
 
 FBIM pairs especially well with Claude Code. Install the skill to create and manage issues with `/fbim` without leaving your coding session.
