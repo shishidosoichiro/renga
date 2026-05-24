@@ -1,5 +1,7 @@
 //! Command handler modules.
 
+/// `fbim completions` and `fbim __complete` handlers.
+pub mod completions;
 /// `fbim create` handler.
 pub mod create;
 /// `fbim done` handler.

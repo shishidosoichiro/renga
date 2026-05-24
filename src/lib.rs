@@ -95,10 +95,7 @@ pub fn run() -> Result<()> {
             println!();
             Ok(())
         }
-        cli::Command::Completions { shell } => {
-            let mut cmd = cli::Cli::command();
-            clap_complete::generate(shell, &mut cmd, "fbim", &mut std::io::stdout());
-            Ok(())
-        }
+        cli::Command::Completions { shell } => commands::completions::run(shell),
+        cli::Command::Complete { args } => commands::completions::complete(&args, &ctx),
     }
 }

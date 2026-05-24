@@ -266,6 +266,7 @@ fn completions_bash() {
         .args(["completions", "bash"])
         .assert()
         .success()
+        .stdout(predicate::str::contains("__complete"))
         .stdout(predicate::str::contains("fbim"));
 }
 
@@ -276,5 +277,59 @@ fn completions_zsh() {
         .args(["completions", "zsh"])
         .assert()
         .success()
+        .stdout(predicate::str::contains("__complete"))
         .stdout(predicate::str::contains("fbim"));
+}
+
+// ── __complete ────────────────────────────────────────────────────────────────
+
+#[test]
+fn complete_lists_subcommands() {
+    let dir = setup();
+    fbim(&dir)
+        .args(["__complete", "fbim", ""])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("create"))
+        .stdout(predicate::str::contains("done"))
+        .stdout(predicate::str::contains("list"));
+}
+
+#[test]
+fn complete_done_shows_open_issues() {
+    let dir = setup();
+    fbim(&dir).args(["create", "My Task"]).assert().success();
+
+    fbim(&dir)
+        .args(["__complete", "fbim", "done", ""])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("00001"))
+        .stdout(predicate::str::contains("My Task"));
+}
+
+#[test]
+fn complete_reopen_shows_done_issues() {
+    let dir = setup();
+    fbim(&dir).args(["create", "Old Task"]).assert().success();
+    fbim(&dir).args(["done", "1"]).assert().success();
+
+    fbim(&dir)
+        .args(["__complete", "fbim", "reopen", ""])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("00001"))
+        .stdout(predicate::str::contains("Old Task"));
+}
+
+#[test]
+fn complete_list_status_values() {
+    let dir = setup();
+    fbim(&dir)
+        .args(["__complete", "fbim", "list", "--status", ""])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("open"))
+        .stdout(predicate::str::contains("pending"))
+        .stdout(predicate::str::contains("done"));
 }

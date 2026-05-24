@@ -41,6 +41,13 @@ pub enum Command {
         /// Shell to generate completions for.
         shell: clap_complete::Shell,
     },
+    /// Internal: output completion candidates for dynamic shell completion.
+    #[command(name = "__complete", hide = true)]
+    Complete {
+        /// Shell words from the completion context (the full command line token list).
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        args: Vec<String>,
+    },
 }
 
 /// Arguments for `fbim create`.
