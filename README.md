@@ -1,5 +1,8 @@
 # FBIM — File-Based Issue Management
 
+[![pipeline status](https://gitlab.home/kiwi/ifbm/badges/main/pipeline.svg)](https://gitlab.home/kiwi/ifbm/-/pipelines)
+[![coverage](https://gitlab.home/kiwi/ifbm/badges/main/coverage.svg)](https://gitlab.home/kiwi/ifbm/-/pipelines)
+
 A system for managing issues as plain files. Track issues entirely within your Git repository, without relying on external services like GitHub Issues or Redmine.
 
 > Japanese version: [README.ja.md](README.ja.md)

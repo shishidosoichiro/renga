@@ -12,3 +12,4 @@ test:
     - python -m pytest tests/ -v
     - coverage combine
     - coverage report
+  coverage: '/^TOTAL\s+\d+\s+\d+\s+(\d+%)$/'
