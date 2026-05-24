@@ -1,5 +1,7 @@
 default:
   image: rust:latest
+  before_script:
+    - rustup component add rustfmt clippy
 
 stages:
   - test
