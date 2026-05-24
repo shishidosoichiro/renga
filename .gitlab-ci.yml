@@ -6,6 +6,10 @@ stages:
 
 test:
   stage: test
+  variables:
+    COVERAGE_PROCESS_START: "$CI_PROJECT_DIR/.coveragerc"
+    COVERAGE_FILE: "$CI_PROJECT_DIR/.coverage"
+    PYTHONPATH: "$CI_PROJECT_DIR"
   before_script:
     - pip install --quiet -r requirements-dev.txt
   script:
