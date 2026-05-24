@@ -12,6 +12,8 @@ use crate::{cli::Cli, Context};
 // Thin wrapper scripts: all logic lives in `fbim __complete`.
 // Tab-separated `CANDIDATE\tDESCRIPTION` output is handled by each shell appropriately.
 
+// #compdef is only honoured when the file is autoloaded via $fpath.
+// compdef _fbim fbim is required when sourcing directly.
 const ZSH_SCRIPT: &str = r#"#compdef fbim
 
 _fbim() {
@@ -22,6 +24,8 @@ _fbim() {
     done < <(fbim __complete "${words[@]}" 2>/dev/null)
     _describe 'candidates' candidates
 }
+
+compdef _fbim fbim
 "#;
 
 const BASH_SCRIPT: &str = r#"# bash completion for fbim
