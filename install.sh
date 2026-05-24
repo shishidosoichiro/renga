@@ -15,7 +15,9 @@ BRANCH="${BRANCH:-main}"
 JOB_NAME="${JOB_NAME:-build}"
 INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
 
-ARTIFACT_URL="${GITLAB_URL}/${PROJECT_PATH}/-/jobs/artifacts/${BRANCH}/raw/target/release/fbim?job=${JOB_NAME}"
+ENCODED_PROJECT=$(python3 -c "import urllib.parse; print(urllib.parse.quote('${PROJECT_PATH}', safe=''))")
+ENCODED_BRANCH=$(python3 -c "import urllib.parse; print(urllib.parse.quote('${BRANCH}', safe=''))")
+ARTIFACT_URL="${GITLAB_URL}/api/v4/projects/${ENCODED_PROJECT}/jobs/artifacts/${ENCODED_BRANCH}/raw/target/release/fbim?job=${JOB_NAME}"
 
 CURL_ARGS=(-fsSL)
 if [[ -n "${GITLAB_TOKEN:-}" ]]; then
@@ -29,4 +31,9 @@ echo "Downloading fbim from ${GITLAB_URL}/${PROJECT_PATH} (${BRANCH})..."
 curl "${CURL_ARGS[@]}" "$ARTIFACT_URL" -o "$TMP"
 
 install -m 0755 "$TMP" "${INSTALL_DIR}/fbim"
-echo "Installed: ${INSTALL_DIR}/fbim ($(${INSTALL_DIR}/fbim --version))"
+if VERSION=$("${INSTALL_DIR}/fbim" --version 2>/dev/null); then
+  echo "Installed: ${INSTALL_DIR}/fbim ($VERSION)"
+else
+  echo "Installed: ${INSTALL_DIR}/fbim"
+  echo "note: binary was built for a different platform (run 'cargo build --release' to build locally)"
+fi
