@@ -5,7 +5,7 @@ argument-hint: "[create] <title> | done <NNNNN> | pending <NNNNN> | reopen <NNNN
 # /fbim skill
 
 A Claude Code skill for File-Based Issue Management (FBIM).
-All operations are performed by calling `${CLAUDE_SKILL_DIR}/scripts/fbim`.
+All operations are performed by calling the `fbim` binary.
 
 ## Usage
 
@@ -25,7 +25,7 @@ All operations are performed by calling `${CLAUDE_SKILL_DIR}/scripts/fbim`.
 
 ## Rules (all commands)
 
-- If `$ARGUMENTS` is empty, run `${CLAUDE_SKILL_DIR}/scripts/fbim help` and display the output.
+- If `$ARGUMENTS` is empty, run `fbim help` and display the output.
 - Pass script error output to the user as-is.
 
 ---
@@ -35,7 +35,7 @@ All operations are performed by calling `${CLAUDE_SKILL_DIR}/scripts/fbim`.
 If `$ARGUMENTS` starts with `create`, strip it and use the rest as the title. Otherwise use `$ARGUMENTS` as-is.
 
 ```
-${CLAUDE_SKILL_DIR}/scripts/fbim create "<title>" --slug <slug> --area <area>
+fbim create "<title>" --slug <slug> --area <area>
 ```
 
 - `--slug`: Kebab-case English slug derived from the title (max 30 chars). Auto-generated from title if omitted.
@@ -48,7 +48,7 @@ ${CLAUDE_SKILL_DIR}/scripts/fbim create "<title>" --slug <slug> --area <area>
 ## done
 
 ```
-${CLAUDE_SKILL_DIR}/scripts/fbim done <NNNNN>
+fbim done <NNNNN>
 ```
 
 Report the destination file path to the user.
@@ -58,7 +58,7 @@ Report the destination file path to the user.
 ## pending
 
 ```
-${CLAUDE_SKILL_DIR}/scripts/fbim pending <NNNNN>
+fbim pending <NNNNN>
 ```
 
 Report the updated file path to the user.
@@ -68,7 +68,7 @@ Report the updated file path to the user.
 ## reopen
 
 ```
-${CLAUDE_SKILL_DIR}/scripts/fbim reopen <NNNNN>
+fbim reopen <NNNNN>
 ```
 
 Report the destination file path to the user.
@@ -78,13 +78,13 @@ Report the destination file path to the user.
 ## list
 
 ```
-${CLAUDE_SKILL_DIR}/scripts/fbim list
+fbim list
 ```
 
 With filters:
 
 ```
-${CLAUDE_SKILL_DIR}/scripts/fbim list --area <area>
+fbim list --area <area>
 ```
 
 Display the output to the user.
@@ -94,7 +94,7 @@ Display the output to the user.
 ## show
 
 ```
-${CLAUDE_SKILL_DIR}/scripts/fbim show <NNNNN>
+fbim show <NNNNN>
 ```
 
 Display the output to the user.
@@ -104,7 +104,7 @@ Display the output to the user.
 ## help
 
 ```
-${CLAUDE_SKILL_DIR}/scripts/fbim help [command]
+fbim help [command]
 ```
 
 Display the output as-is.

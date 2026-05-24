@@ -8,7 +8,7 @@ argument-hint: "<NNNNN>"
 Reopen a closed issue by moving it back from `issues/done/`.
 
 ```
-${CLAUDE_SKILL_DIR}/../../bin/fbim reopen <NNNNN>
+fbim reopen <NNNNN>
 ```
 
 Report the destination file path to the user.

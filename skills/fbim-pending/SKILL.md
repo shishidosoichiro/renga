@@ -8,7 +8,7 @@ argument-hint: "<NNNNN>"
 Set an issue's status to `pending` (blocked or deferred).
 
 ```
-${CLAUDE_SKILL_DIR}/../../bin/fbim pending <NNNNN>
+fbim pending <NNNNN>
 ```
 
 Report the updated file path to the user.

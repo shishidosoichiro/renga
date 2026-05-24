@@ -8,7 +8,7 @@ argument-hint: "<NNNNN>"
 Show the full content of an issue.
 
 ```
-${CLAUDE_SKILL_DIR}/../../bin/fbim show <NNNNN>
+fbim show <NNNNN>
 ```
 
 Display the output to the user.
