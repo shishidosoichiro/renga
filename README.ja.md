@@ -80,7 +80,7 @@ fbim list --json | jq '.[] | select(.area == "auth")'
 **bash** — `~/.bashrc` に追加:
 
 ```sh
-source <(fbim completions bash)
+eval "$(fbim completions bash)"
 ```
 
 **zsh** — `~/.zshrc` に追加:

@@ -80,7 +80,7 @@ Enable tab completion for subcommands, flags, and issue IDs.
 **bash** — add to `~/.bashrc`:
 
 ```sh
-source <(fbim completions bash)
+eval "$(fbim completions bash)"
 ```
 
 **zsh** — add to `~/.zshrc`:

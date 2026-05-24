@@ -45,7 +45,7 @@ pub enum Command {
     ///
     /// bash — add to ~/.bashrc:
     ///
-    ///   source <(fbim completions bash)
+    ///   eval "$(fbim completions bash)"
     ///
     /// zsh — add to ~/.zshrc:
     ///
