@@ -1,6 +1,7 @@
 //! Shell completion script generation and dynamic candidate output.
 
 use std::fs;
+use std::io::{self, Write};
 use std::path::Path;
 
 use anyhow::Result;
@@ -44,18 +45,7 @@ complete -c fbim -f -a '(
 
 /// Run `fbim completions <shell>`: print the shell completion script.
 pub fn run(shell: clap_complete::Shell) -> Result<()> {
-    let script = match shell {
-        clap_complete::Shell::Zsh => ZSH_SCRIPT,
-        clap_complete::Shell::Bash => BASH_SCRIPT,
-        clap_complete::Shell::Fish => FISH_SCRIPT,
-        _ => {
-            let mut cmd = Cli::command();
-            clap_complete::generate(shell, &mut cmd, "fbim", &mut std::io::stdout());
-            return Ok(());
-        }
-    };
-    print!("{script}");
-    Ok(())
+    ignore_broken_pipe(write_script(shell))
 }
 
 /// Run `fbim __complete <shell words>`: print completion candidates.
@@ -66,84 +56,115 @@ pub fn run(shell: clap_complete::Shell) -> Result<()> {
 /// Output: one candidate per line as `CANDIDATE\tDESCRIPTION` (tab-separated).
 /// The shell filters by the current partial word using prefix matching.
 pub fn complete(args: &[String], ctx: &Context) -> Result<()> {
+    ignore_broken_pipe(write_candidates(args, ctx))
+}
+
+/// Treat `BrokenPipe` as success; propagate all other errors.
+fn ignore_broken_pipe(result: io::Result<()>) -> Result<()> {
+    match result {
+        Ok(()) => Ok(()),
+        Err(e) if e.kind() == io::ErrorKind::BrokenPipe => Ok(()),
+        Err(e) => Err(e.into()),
+    }
+}
+
+fn write_script(shell: clap_complete::Shell) -> io::Result<()> {
+    let script = match shell {
+        clap_complete::Shell::Zsh => ZSH_SCRIPT,
+        clap_complete::Shell::Bash => BASH_SCRIPT,
+        clap_complete::Shell::Fish => FISH_SCRIPT,
+        _ => {
+            let mut cmd = Cli::command();
+            clap_complete::generate(shell, &mut cmd, "fbim", &mut io::stdout());
+            return Ok(());
+        }
+    };
+    io::stdout().write_all(script.as_bytes())
+}
+
+fn write_candidates(args: &[String], ctx: &Context) -> io::Result<()> {
+    let out = io::stdout();
+    let mut out = out.lock();
+
     // args[0] = binary name, args[1] = subcommand (possibly partial), args[2+] = further args
     let subcmd = args.get(1).map(|s| s.as_str()).unwrap_or("");
 
     if args.len() <= 2 {
-        print_subcommands();
-        return Ok(());
+        return emit_subcommands(&mut out);
     }
 
     let prev = args.get(args.len() - 2).map(|s| s.as_str()).unwrap_or("");
 
     match subcmd {
-        "done" | "pending" | "show" => print_open_issues(ctx)?,
-        "reopen" => print_done_issues(ctx)?,
+        "done" | "pending" | "show" => emit_open_issues(&mut out, ctx)?,
+        "reopen" => emit_done_issues(&mut out, ctx)?,
         "completions" => {
             for shell in ["bash", "zsh", "fish", "powershell", "elvish"] {
-                println!("{shell}");
+                writeln!(out, "{shell}")?;
             }
         }
         "list" => match prev {
             "--status" => {
-                println!("open");
-                println!("pending");
-                println!("done");
+                writeln!(out, "open")?;
+                writeln!(out, "pending")?;
+                writeln!(out, "done")?;
             }
             _ => {
-                println!("--status\tFilter by status");
-                println!("--area\tFilter by area");
-                println!("--label\tFilter by label");
-                println!("--json\tOutput as JSON");
+                writeln!(out, "--status\tFilter by status")?;
+                writeln!(out, "--area\tFilter by area")?;
+                writeln!(out, "--label\tFilter by label")?;
+                writeln!(out, "--json\tOutput as JSON")?;
             }
         },
         "create" => match prev {
             "--priority" => {
-                println!("high");
-                println!("medium");
-                println!("low");
+                writeln!(out, "high")?;
+                writeln!(out, "medium")?;
+                writeln!(out, "low")?;
             }
             _ => {
-                println!("--slug\tCustom filename slug");
-                println!("--priority\tPriority level");
-                println!("--area\tArea");
-                println!("--body\tBody text");
+                writeln!(out, "--slug\tCustom filename slug")?;
+                writeln!(out, "--priority\tPriority level")?;
+                writeln!(out, "--area\tArea")?;
+                writeln!(out, "--body\tBody text")?;
             }
         },
-        _ => print_subcommands(),
+        _ => emit_subcommands(&mut out)?,
     }
 
     Ok(())
 }
 
-fn print_subcommands() {
-    println!("init\tInitialize the issues directory");
-    println!("create\tCreate a new issue");
-    println!("done\tMark an issue as done");
-    println!("pending\tMark an issue as pending");
-    println!("reopen\tReopen an issue");
-    println!("list\tList issues");
-    println!("show\tShow issue details");
-    println!("completions\tGenerate shell completions");
-    println!("help\tShow help");
+fn emit_subcommands<W: Write>(out: &mut W) -> io::Result<()> {
+    writeln!(out, "init\tInitialize the issues directory")?;
+    writeln!(out, "create\tCreate a new issue")?;
+    writeln!(out, "done\tMark an issue as done")?;
+    writeln!(out, "pending\tMark an issue as pending")?;
+    writeln!(out, "reopen\tReopen an issue")?;
+    writeln!(out, "list\tList issues")?;
+    writeln!(out, "show\tShow issue details")?;
+    writeln!(out, "completions\tGenerate shell completions")?;
+    writeln!(out, "help\tShow help")?;
+    Ok(())
 }
 
-fn print_open_issues(ctx: &Context) -> Result<()> {
+fn emit_open_issues<W: Write>(out: &mut W, ctx: &Context) -> io::Result<()> {
     if ctx.issues_dir.exists() {
-        print_issues_in_dir(&ctx.issues_dir)?;
+        emit_issues_in_dir(out, &ctx.issues_dir)?;
     }
     Ok(())
 }
 
-fn print_done_issues(ctx: &Context) -> Result<()> {
+fn emit_done_issues<W: Write>(out: &mut W, ctx: &Context) -> io::Result<()> {
     if ctx.done_dir.exists() {
-        print_issues_in_dir(&ctx.done_dir)?;
+        emit_issues_in_dir(out, &ctx.done_dir)?;
     }
     Ok(())
 }
 
-fn print_issues_in_dir(dir: &Path) -> Result<()> {
-    let mut entries: Vec<_> = fs::read_dir(dir)?
+fn emit_issues_in_dir<W: Write>(out: &mut W, dir: &Path) -> io::Result<()> {
+    let mut entries: Vec<_> = fs::read_dir(dir)
+        .map_err(io::Error::other)?
         .filter_map(|e| e.ok())
         .filter(|e| {
             let name = e.file_name();
@@ -162,7 +183,7 @@ fn print_issues_in_dir(dir: &Path) -> Result<()> {
         let stem = path.file_stem().unwrap_or_default().to_string_lossy();
         let id = stem.split('-').next().unwrap_or("").to_string();
         let title = read_title(&path).unwrap_or_else(|| stem.to_string());
-        println!("{id}\t{title}");
+        writeln!(out, "{id}\t{title}")?;
     }
     Ok(())
 }
