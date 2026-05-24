@@ -18,6 +18,6 @@ fi
 
 
 max=$(find "$TARGET" -maxdepth 2 -name '*.md' \
-  | grep -oE '/[0-9]{4,5}-' | grep -oE '[0-9]+' | sort -n | tail -1)
+  | grep -oE '/[0-9]{4,5}-' | grep -oE '[0-9]+' | sort -n | tail -1 || true)
 
 printf '%05d\n' "$(( 10#${max:-0} + 1 ))"
