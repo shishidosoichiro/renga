@@ -76,23 +76,32 @@ export PATH="$PATH:/path/to/fbim/bin"
 fbim list --json | jq '.[] | select(.area == "auth")'
 ```
 
-### Claude Code skill
+### Claude Code skills
 
-A Claude Code skill is included in `skills/fbim/`. Install it with a symlink.
+Skills are included in `skills/`. Install with symlinks.
 
 ```sh
+# Single entry point (all subcommands)
 ln -s /path/to/fbim/skills/fbim ~/.claude/skills/fbim
-```
 
-Once installed, the following commands are available in Claude Code sessions.
+# Individual skills (discoverable via /fbim- prefix)
+ln -s /path/to/fbim/skills/fbim-create  ~/.claude/skills/fbim-create
+ln -s /path/to/fbim/skills/fbim-done    ~/.claude/skills/fbim-done
+ln -s /path/to/fbim/skills/fbim-pending ~/.claude/skills/fbim-pending
+ln -s /path/to/fbim/skills/fbim-reopen  ~/.claude/skills/fbim-reopen
+ln -s /path/to/fbim/skills/fbim-list    ~/.claude/skills/fbim-list
+ln -s /path/to/fbim/skills/fbim-show    ~/.claude/skills/fbim-show
+```
 
 | Command | Description |
 |---|---|
 | `/fbim <title>` | Create an issue |
-| `/fbim done NNNN` | Close an issue |
-| `/fbim pending NNNN` | Put an issue on hold |
-| `/fbim reopen NNNN` | Reopen a closed issue |
-| `/fbim help` | Show help |
+| `/fbim-create <title>` | Create an issue |
+| `/fbim-done NNNNN` | Close an issue |
+| `/fbim-pending NNNNN` | Put an issue on hold |
+| `/fbim-reopen NNNNN` | Reopen a closed issue |
+| `/fbim-list` | List issues |
+| `/fbim-show NNNNN` | Show issue details |
 
 ## Shell completion
 
