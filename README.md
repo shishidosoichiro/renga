@@ -15,33 +15,29 @@ A system for managing issues as plain files. Track issues entirely within your G
 - **Easy to migrate**: All data is plain files. Moving to Redmine or GitHub Issues later means reading those files — no lock-in.
 - **Tool-agnostic**: Use an editor, a shell script, or an AI tool. The interface is just files.
 
-## Requirements
+## Installation
 
-- Python 3.8+ (`bin/fbim`, `bin/gen-issues-readme`)
-- bash (`bin/next-id`)
-- PyYAML — only if using `.fbim.yml` for customization (`pip install pyyaml`)
+Download and run the install script. It fetches the pre-built binary for your platform from the package registry.
+
+```sh
+bash <(curl -fsSL https://gitlab.home/kiwi/ifbm/-/raw/main/install.sh)
+```
+
+Or clone the repo and build from source:
+
+```sh
+cargo install --path /path/to/fbim
+```
 
 ## Getting started
 
-1. Clone or download this repository.
-
-   ```sh
-   git clone https://gitlab.home/kiwi/ifbm.git /path/to/fbim
-   ```
-
-2. Add `bin/` to your PATH.
-
-   ```sh
-   export PATH="$PATH:/path/to/fbim/bin"
-   ```
-
-3. In your project root, create the issues directory.
+1. In your project root, create the issues directory.
 
    ```sh
    mkdir -p issues/done
    ```
 
-4. Create your first issue.
+2. Create your first issue.
 
    ```sh
    fbim create "My first issue" --area docs
@@ -49,141 +45,66 @@ A system for managing issues as plain files. Track issues entirely within your G
 
 That's it. Issue files live alongside your code in Git.
 
-## Actions
-
-### Create an issue
-
-Create `issues/NNNNN-short-name.md`. `NNNNN` is a zero-padded 5-digit sequential number. Include `status`, `priority`, and `area` in the frontmatter.
-
-```
-issues/00042-api-auth-missing-scope.md
-```
-
-See [spec.md](spec.md) for naming conventions and the file template.
-
-### Update an issue
-
-Edit the file directly. Both the body and frontmatter can be changed freely.
-
-### Close an issue
-
-Move `issues/NNNNN-*.md` to `issues/done/NNNNN-*.md` and set `status` to `done`.
-
-### Put an issue on hold
-
-Set `status` to `pending`. Use this for issues that are blocked or deferred.
-
-### Reopen an issue
-
-Move `issues/done/NNNNN-*.md` back to `issues/NNNNN-*.md` and set `status` to `open`.
-
-### Browse the issue list
-
-`issues/README.md` contains a generated list of open and pending issues. Do not edit it by hand — run `bin/gen-issues-readme` to regenerate it.
-
-## Tools
-
-### bin/ CLI
+## Commands
 
 | Command | Description |
 |---|---|
-| `fbim create <title>` | Create an issue (`--slug` is auto-generated from title if omitted) |
-| `fbim done <NNNNN>` | Close an issue |
+| `fbim create <title>` | Create an issue |
+| `fbim done <NNNNN>` | Mark an issue as done |
 | `fbim pending <NNNNN>` | Put an issue on hold |
 | `fbim reopen <NNNNN>` | Reopen a closed issue |
-| `fbim list [--json]` | List issues (use `--json` for structured output) |
+| `fbim list [--status open\|pending\|done] [--area <area>] [--json]` | List issues |
 | `fbim show <NNNNN>` | Show issue details |
 | `fbim help [command]` | Show help |
 
-`fbim list --json` outputs JSON that can be piped to `jq` or `yq`.
-
 ```sh
+# JSON output can be piped to jq
 fbim list --json | jq '.[] | select(.area == "auth")'
 ```
 
-### Claude Code skills
-
-Skills are included in `skills/`. Install with symlinks.
+## Claude Code skill
 
 ```sh
-# Single entry point (all subcommands)
-ln -s /path/to/fbim/skills/fbim ~/.claude/skills/fbim
-
-# Individual skills (discoverable via /fbim- prefix)
-ln -s /path/to/fbim/skills/fbim-create  ~/.claude/skills/fbim-create
-ln -s /path/to/fbim/skills/fbim-done    ~/.claude/skills/fbim-done
-ln -s /path/to/fbim/skills/fbim-pending ~/.claude/skills/fbim-pending
-ln -s /path/to/fbim/skills/fbim-reopen  ~/.claude/skills/fbim-reopen
-ln -s /path/to/fbim/skills/fbim-list    ~/.claude/skills/fbim-list
-ln -s /path/to/fbim/skills/fbim-show    ~/.claude/skills/fbim-show
+ln -sf /path/to/fbim/skills/fbim ~/.claude/skills/fbim
 ```
 
 | Command | Description |
 |---|---|
 | `/fbim [create] <title>` | Create an issue |
-| `/fbim-create <title>` | Create an issue |
-| `/fbim done <NNNNN>` | Close an issue |
-| `/fbim-done <NNNNN>` | Close an issue |
-| `/fbim pending <NNNNN>` | Put an issue on hold |
-| `/fbim-pending <NNNNN>` | Put an issue on hold |
-| `/fbim reopen <NNNNN>` | Reopen a closed issue |
-| `/fbim-reopen <NNNNN>` | Reopen a closed issue |
-| `/fbim-list` | List issues |
-| `/fbim-show <NNNNN>` | Show issue details |
-
-## Shell completion
-
-Completion scripts for bash and zsh are in `completions/`.
-
-**zsh**
-
-```zsh
-# Add to ~/.zshrc
-fpath=(/path/to/fbim/completions $fpath)
-autoload -Uz compinit && compinit
-```
-
-**bash**
-
-```bash
-# Add to ~/.bashrc
-source /path/to/fbim/completions/fbim.bash
-```
-
-Subcommands, options, and issue numbers (read from `issues/` in the current directory) are all completed.
-
-## Development
-
-```sh
-pip install -r requirements-dev.txt
-
-# Run tests
-python3 -m pytest tests/ -v
-
-# Run tests with coverage
-python3 -m pytest tests/ -q && coverage combine && coverage report
-```
-
-[spec.md](spec.md) is the authoritative specification for file format, naming rules, and tool behavior. README covers usage; spec.md covers the rules behind it.
+| `/fbim done <NNNNN>` | Mark as done |
+| `/fbim pending <NNNNN>` | Put on hold |
+| `/fbim reopen <NNNNN>` | Reopen |
+| `/fbim list` | List open and pending issues |
+| `/fbim show <NNNNN>` | Show details |
 
 ## Customization
 
-Place `.fbim.yml` in the project root to configure FBIM behavior.
+Place `.fbim.yml` in the project root.
 
 ```yaml
-issues_dir: issues    # Where to store issues, relative to this file (default: issues)
+issues_dir: issues    # default: issues
 
-area_order:           # Display order in the issue list (alphabetical if omitted)
+area_order:           # display order in the list (alphabetical if omitted)
   - backend
   - frontend
   - infra
   - misc
 
-area_labels:          # Display names for areas (area name used as-is if omitted)
+area_labels:          # display names for areas
   backend: "Backend"
   frontend: "Frontend"
   infra: "Infrastructure"
   misc: "Other"
 ```
 
-`issues_dir` lets you store issues in a non-default location (e.g. `docs/issues`). FBIM tools walk up from the current directory to find `.fbim.yml`, so they work from any subdirectory of the project.
+## Development
+
+```sh
+cargo test            # run tests
+cargo test --doc      # run doctests
+cargo clippy -- -D warnings
+cargo fmt --check
+cargo doc --no-deps --open
+```
+
+[spec.md](spec.md) is the authoritative specification for file format and naming rules.

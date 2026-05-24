@@ -21,11 +21,15 @@ cache:
 
 test:
   stage: test
+  before_script:
+    - curl -LsSf https://github.com/taiki-e/cargo-llvm-cov/releases/latest/download/cargo-llvm-cov-x86_64-unknown-linux-musl.tar.gz
+        | tar xzf - -C /usr/local/bin
   script:
     - cargo fmt --check
     - cargo clippy -- -D warnings
-    - cargo test
+    - cargo llvm-cov --summary-only
     - cargo doc --no-deps
+  coverage: '/TOTAL\s+\d+\s+\d+\s+(\d+\.\d+%)/'
 
 build:
   stage: build

@@ -12,6 +12,14 @@ use serde::{Deserialize, Serialize};
 use walkdir::WalkDir;
 
 /// Status of an issue.
+///
+/// # Examples
+///
+/// ```
+/// use fbim::issue::Status;
+/// assert_eq!(Status::Open.to_string(), "open");
+/// assert_eq!("pending".parse::<Status>().unwrap(), Status::Pending);
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Status {
@@ -47,6 +55,14 @@ impl FromStr for Status {
 }
 
 /// Priority of an issue.
+///
+/// # Examples
+///
+/// ```
+/// use fbim::issue::Priority;
+/// assert_eq!(Priority::High.to_string(), "high");
+/// assert_eq!("low".parse::<Priority>().unwrap(), Priority::Low);
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Priority {
@@ -253,6 +269,15 @@ pub fn next_id(issues_dir: &Path) -> Result<String> {
 }
 
 /// Generate a URL-safe kebab-case slug from a title (max 30 ASCII characters).
+///
+/// # Examples
+///
+/// ```
+/// use fbim::issue::make_slug;
+/// assert_eq!(make_slug("Hello World"), "hello-world");
+/// assert_eq!(make_slug("Rust への書き直し"), "rust");
+/// assert_eq!(make_slug(""), "issue");
+/// ```
 pub fn make_slug(title: &str) -> String {
     let re = Regex::new(r"[^a-zA-Z0-9]+").unwrap();
     let lower = title.to_lowercase();
@@ -271,6 +296,16 @@ pub fn make_slug(title: &str) -> String {
 ///
 /// Leaves all other lines unchanged. If the field is not found, returns the
 /// content unmodified.
+///
+/// # Examples
+///
+/// ```
+/// use fbim::issue::set_frontmatter_field;
+/// let content = "---\nstatus: open\npriority: high\n---\n\n# Title\n";
+/// let updated = set_frontmatter_field(content, "status", "done");
+/// assert!(updated.contains("status: done"));
+/// assert!(updated.contains("priority: high"));
+/// ```
 pub fn set_frontmatter_field(content: &str, field: &str, value: &str) -> String {
     let prefix = format!("{field}:");
     let mut in_fm = false;
