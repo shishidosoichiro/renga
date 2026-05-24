@@ -6,6 +6,8 @@ pub mod completions;
 pub mod create;
 /// `fbim done` handler.
 pub mod done;
+/// `fbim init` handler.
+pub mod init;
 /// `fbim list` handler.
 pub mod list;
 /// `fbim pending` handler.

@@ -19,6 +19,8 @@ pub struct Cli {
 /// Available subcommands.
 #[derive(Subcommand)]
 pub enum Command {
+    /// Initialize the issues directory in the current project.
+    Init,
     /// Create a new issue.
     Create(CreateArgs),
     /// Mark an issue as done and move it to `done/`.

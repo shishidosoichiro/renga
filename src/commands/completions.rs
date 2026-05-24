@@ -117,6 +117,7 @@ pub fn complete(args: &[String], ctx: &Context) -> Result<()> {
 }
 
 fn print_subcommands() {
+    println!("init\tInitialize the issues directory");
     println!("create\tCreate a new issue");
     println!("done\tMark an issue as done");
     println!("pending\tMark an issue as pending");
