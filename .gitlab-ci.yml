@@ -46,7 +46,7 @@ publish:
   needs: [build]
   script:
     - |
-      curl --fail -sS --upload-file target/release/fbim \
+      curl --fail --insecure -sS --upload-file target/release/fbim \
         -H "JOB-TOKEN: $CI_JOB_TOKEN" \
         "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/fbim/${CI_COMMIT_REF_SLUG}/fbim-linux-x86_64"
   rules:
