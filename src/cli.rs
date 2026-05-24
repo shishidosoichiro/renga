@@ -36,6 +36,11 @@ pub enum Command {
         /// Command to show help for (omit for overall help).
         command: Option<String>,
     },
+    /// Generate shell completion scripts.
+    Completions {
+        /// Shell to generate completions for.
+        shell: clap_complete::Shell,
+    },
 }
 
 /// Arguments for `fbim create`.
