@@ -10,3 +10,5 @@ test:
     - pip install --quiet -r requirements-dev.txt
   script:
     - python -m pytest tests/ -v
+    - coverage combine
+    - coverage report

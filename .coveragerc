@@ -1,0 +1,8 @@
+[run]
+parallel = true
+include =
+    */fbim/bin/fbim
+    */fbim/bin/gen-issues-readme
+
+[report]
+show_missing = true

@@ -1,8 +1,19 @@
+import os
 import pytest
 from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).parent.parent
+
+# Enable subprocess coverage: subprocesses inherit COVERAGE_PROCESS_START and
+# PYTHONPATH so that sitecustomize.py at the repo root can call coverage.process_startup().
+os.environ.setdefault("COVERAGE_PROCESS_START", str(REPO_ROOT / ".coveragerc"))
+os.environ.setdefault("COVERAGE_FILE", str(REPO_ROOT / ".coverage"))
+_pythonpath = str(REPO_ROOT)
+if "PYTHONPATH" in os.environ:
+    os.environ["PYTHONPATH"] = _pythonpath + os.pathsep + os.environ["PYTHONPATH"]
+else:
+    os.environ["PYTHONPATH"] = _pythonpath
 
 
 def make_issue(issues_dir: Path, name: str, title: str = "Test Issue",

@@ -153,7 +153,12 @@ Subcommands, options, and issue numbers (read from `issues/` in the current dire
 
 ```sh
 pip install -r requirements-dev.txt
+
+# Run tests
 python3 -m pytest tests/ -v
+
+# Run tests with coverage
+python3 -m pytest tests/ -q && coverage combine && coverage report
 ```
 
 [spec.md](spec.md) is the authoritative specification for file format, naming rules, and tool behavior. README covers usage; spec.md covers the rules behind it.
