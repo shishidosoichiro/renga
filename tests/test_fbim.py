@@ -4,13 +4,13 @@ from pathlib import Path
 
 import pytest
 
-from conftest import make_issue, REPO_ROOT
+from conftest import make_issue, REPO_ROOT, _cov_run
 
 FBIM = REPO_ROOT / "bin" / "fbim"
 
 
 def run(*args, cwd):
-    return subprocess.run([FBIM] + list(args), capture_output=True, text=True, cwd=cwd)
+    return _cov_run(FBIM, list(args), cwd)
 
 
 # ── create ────────────────────────────────────────────────────────────────────

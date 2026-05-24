@@ -1,13 +1,13 @@
 import subprocess
 from pathlib import Path
 
-from conftest import make_issue, REPO_ROOT
+from conftest import make_issue, REPO_ROOT, _cov_run
 
 GEN = REPO_ROOT / "bin" / "gen-issues-readme"
 
 
 def run(cwd, *args):
-    return subprocess.run([GEN] + list(args), capture_output=True, text=True, cwd=cwd)
+    return _cov_run(GEN, list(args), cwd)
 
 
 def test_generates_readme(project):
