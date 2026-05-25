@@ -163,7 +163,7 @@ pub fn find_issue(issues_dir: &Path, id: &str, include_done: bool) -> Result<Opt
     let num: u64 = id
         .parse()
         .with_context(|| format!("invalid issue ID: {id}"))?;
-    let re = Regex::new(r"^(\d{4,5})-.*\.md$").unwrap();
+    let re = Regex::new(r"^(\d+)-.*\.md$").unwrap();
 
     let mut dirs = vec![issues_dir.to_path_buf()];
     if include_done {
@@ -207,7 +207,7 @@ pub fn all_issues(
         _ => {}
     }
 
-    let re = Regex::new(r"^\d{4,5}-.*\.md$").unwrap();
+    let re = Regex::new(r"^\d+-.*\.md$").unwrap();
     let mut results = Vec::new();
 
     for dir in &dirs {
@@ -247,9 +247,13 @@ pub fn all_issues(
     Ok(results)
 }
 
-/// Generate the next zero-padded 5-digit issue ID by scanning existing files.
+/// Generate the next issue ID by scanning existing files.
+///
+/// Returns a plain integer string with no zero-padding (e.g. `"1"`, `"42"`).
+/// Existing zero-padded filenames (e.g. `00042-foo.md`) are recognised and
+/// their numeric value is included when computing the next ID.
 pub fn next_id(issues_dir: &Path) -> Result<String> {
-    let re = Regex::new(r"^(\d{4,5})-").unwrap();
+    let re = Regex::new(r"^(\d+)-").unwrap();
     let mut max: u64 = 0;
 
     for entry in WalkDir::new(issues_dir).max_depth(2) {
@@ -265,7 +269,7 @@ pub fn next_id(issues_dir: &Path) -> Result<String> {
         }
     }
 
-    Ok(format!("{:05}", max + 1))
+    Ok(format!("{}", max + 1))
 }
 
 /// Generate a URL-safe kebab-case slug from a title (max 30 ASCII characters).
@@ -348,7 +352,7 @@ fn extract_id(path: &Path) -> String {
     path.file_stem()
         .and_then(|s| s.to_str())
         .and_then(|s| {
-            let re = Regex::new(r"^(\d{4,5})-").ok()?;
+            let re = Regex::new(r"^(\d+)-").ok()?;
             Some(re.captures(s)?[1].to_string())
         })
         .unwrap_or_default()
@@ -427,15 +431,15 @@ mod tests {
     #[test]
     fn next_id_returns_one_when_empty() {
         let dir = TempDir::new().unwrap();
-        assert_eq!(next_id(dir.path()).unwrap(), "00001");
+        assert_eq!(next_id(dir.path()).unwrap(), "1");
     }
 
     #[test]
     fn next_id_increments_from_existing() {
         let dir = TempDir::new().unwrap();
-        std::fs::write(dir.path().join("00003-foo.md"), "").unwrap();
-        std::fs::write(dir.path().join("00001-bar.md"), "").unwrap();
-        assert_eq!(next_id(dir.path()).unwrap(), "00004");
+        std::fs::write(dir.path().join("3-foo.md"), "").unwrap();
+        std::fs::write(dir.path().join("1-bar.md"), "").unwrap();
+        assert_eq!(next_id(dir.path()).unwrap(), "4");
     }
 
     #[test]
@@ -443,8 +447,16 @@ mod tests {
         let dir = TempDir::new().unwrap();
         let done = dir.path().join("done");
         std::fs::create_dir(&done).unwrap();
-        std::fs::write(done.join("00010-old.md"), "").unwrap();
-        assert_eq!(next_id(dir.path()).unwrap(), "00011");
+        std::fs::write(done.join("10-old.md"), "").unwrap();
+        assert_eq!(next_id(dir.path()).unwrap(), "11");
+    }
+
+    #[test]
+    fn next_id_handles_zero_padded_legacy_files() {
+        let dir = TempDir::new().unwrap();
+        std::fs::write(dir.path().join("00003-foo.md"), "").unwrap();
+        std::fs::write(dir.path().join("5-bar.md"), "").unwrap();
+        assert_eq!(next_id(dir.path()).unwrap(), "6");
     }
 
     #[test]

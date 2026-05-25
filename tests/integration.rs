@@ -25,9 +25,9 @@ fn create_writes_file() {
         .args(["create", "My Issue", "--area", "core"])
         .assert()
         .success()
-        .stdout(predicate::str::contains("00001-my-issue.md"));
+        .stdout(predicate::str::contains("1-my-issue.md"));
 
-    let content = fs::read_to_string(dir.path().join("issues/00001-my-issue.md")).unwrap();
+    let content = fs::read_to_string(dir.path().join("issues/1-my-issue.md")).unwrap();
     assert!(content.contains("status: open"));
     assert!(content.contains("area: core"));
     assert!(content.contains("# My Issue"));
@@ -48,7 +48,7 @@ fn create_with_priority_and_body() {
         .assert()
         .success();
 
-    let content = fs::read_to_string(dir.path().join("issues/00001-bug.md")).unwrap();
+    let content = fs::read_to_string(dir.path().join("issues/1-bug.md")).unwrap();
     assert!(content.contains("priority: high"));
     assert!(content.contains("details here"));
 }
@@ -60,7 +60,7 @@ fn create_with_explicit_slug() {
         .args(["create", "My Issue", "--slug", "custom-slug"])
         .assert()
         .success()
-        .stdout(predicate::str::contains("00001-custom-slug.md"));
+        .stdout(predicate::str::contains("1-custom-slug.md"));
 }
 
 #[test]
@@ -71,7 +71,7 @@ fn create_sequential_ids() {
         .args(["create", "Second"])
         .assert()
         .success()
-        .stdout(predicate::str::contains("00002"));
+        .stdout(predicate::str::contains("2-second.md"));
 }
 
 #[test]
@@ -161,12 +161,12 @@ fn done_moves_file_to_done_dir() {
         .args(["done", "1"])
         .assert()
         .success()
-        .stdout(predicate::str::contains("done/00001"));
+        .stdout(predicate::str::contains("done/1-todo.md"));
 
-    assert!(!dir.path().join("issues/00001-todo.md").exists());
-    assert!(dir.path().join("issues/done/00001-todo.md").exists());
+    assert!(!dir.path().join("issues/1-todo.md").exists());
+    assert!(dir.path().join("issues/done/1-todo.md").exists());
 
-    let content = fs::read_to_string(dir.path().join("issues/done/00001-todo.md")).unwrap();
+    let content = fs::read_to_string(dir.path().join("issues/done/1-todo.md")).unwrap();
     assert!(content.contains("status: done"));
 }
 
@@ -188,7 +188,7 @@ fn pending_sets_status() {
     fbim(&dir).args(["create", "Work"]).assert().success();
     fbim(&dir).args(["pending", "1"]).assert().success();
 
-    let content = fs::read_to_string(dir.path().join("issues/00001-work.md")).unwrap();
+    let content = fs::read_to_string(dir.path().join("issues/1-work.md")).unwrap();
     assert!(content.contains("status: pending"));
 }
 
@@ -213,12 +213,12 @@ fn reopen_moves_from_done() {
         .args(["reopen", "1"])
         .assert()
         .success()
-        .stdout(predicate::str::contains("issues/00001"));
+        .stdout(predicate::str::contains("issues/1-old.md"));
 
-    assert!(dir.path().join("issues/00001-old.md").exists());
-    assert!(!dir.path().join("issues/done/00001-old.md").exists());
+    assert!(dir.path().join("issues/1-old.md").exists());
+    assert!(!dir.path().join("issues/done/1-old.md").exists());
 
-    let content = fs::read_to_string(dir.path().join("issues/00001-old.md")).unwrap();
+    let content = fs::read_to_string(dir.path().join("issues/1-old.md")).unwrap();
     assert!(content.contains("status: open"));
 }
 
@@ -229,7 +229,7 @@ fn reopen_pending_issue() {
     fbim(&dir).args(["pending", "1"]).assert().success();
     fbim(&dir).args(["reopen", "1"]).assert().success();
 
-    let content = fs::read_to_string(dir.path().join("issues/00001-blocked.md")).unwrap();
+    let content = fs::read_to_string(dir.path().join("issues/1-blocked.md")).unwrap();
     assert!(content.contains("status: open"));
 }
 
@@ -304,7 +304,7 @@ fn complete_done_shows_open_issues() {
         .args(["__complete", "fbim", "done", ""])
         .assert()
         .success()
-        .stdout(predicate::str::contains("00001"))
+        .stdout(predicate::str::contains("1\t"))
         .stdout(predicate::str::contains("My Task"));
 }
 
@@ -318,7 +318,7 @@ fn complete_reopen_shows_done_issues() {
         .args(["__complete", "fbim", "reopen", ""])
         .assert()
         .success()
-        .stdout(predicate::str::contains("00001"))
+        .stdout(predicate::str::contains("1\t"))
         .stdout(predicate::str::contains("Old Task"));
 }
 
