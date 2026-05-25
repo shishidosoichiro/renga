@@ -94,6 +94,11 @@ fn write_candidates(args: &[String], ctx: &Context) -> io::Result<()> {
     let subcmd = args.get(1).map(|s| s.as_str()).unwrap_or("");
 
     if args.len() <= 2 {
+        if subcmd.starts_with('-') {
+            writeln!(out, "--version\tPrint version")?;
+            writeln!(out, "--help\tPrint help")?;
+            return Ok(());
+        }
         return emit_subcommands(&mut out);
     }
 
