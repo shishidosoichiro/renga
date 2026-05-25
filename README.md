@@ -3,7 +3,7 @@
 [![pipeline status](https://gitlab.home/kiwi/ifbm/badges/main/pipeline.svg)](https://gitlab.home/kiwi/ifbm/-/pipelines)
 [![coverage](https://gitlab.home/kiwi/ifbm/badges/main/coverage.svg)](https://gitlab.home/kiwi/ifbm/-/pipelines)
 
-Issue tracking that lives in your repo. Start in seconds — no account, no configuration, no external service required.
+A CLI tool for managing issues as files.
 
 > Japanese version: [README.ja.md](README.ja.md)
 

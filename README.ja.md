@@ -3,7 +3,7 @@
 [![pipeline status](https://gitlab.home/kiwi/ifbm/badges/main/pipeline.svg)](https://gitlab.home/kiwi/ifbm/-/pipelines)
 [![coverage](https://gitlab.home/kiwi/ifbm/badges/main/coverage.svg)](https://gitlab.home/kiwi/ifbm/-/pipelines)
 
-リポジトリの中で生きる issue 管理。アカウントも設定も外部サービスも不要で、数秒で始められる。
+ファイルベースで issue を管理する CLI ツールです。
 
 > English version: [README.md](README.md)
 
