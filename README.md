@@ -35,10 +35,10 @@ If you need comments, assignments, notifications, or a web UI for non-engineers,
 
 ## Why file-based?
 
-- `fbim init` is all the setup there is. No account, no token, no config file required.
-- Issue files are plain Markdown. Open them in any editor, search with grep, and if you use git, history and diffs are already there.
-- Works without a network connection.
-- Data is plain files on your machine. If you switch tools later, the files are already readable — no export step.
+- **No setup**: `fbim init` is all there is. No account, no token, no config file.
+- **Plain Markdown**: Open issue files in any editor, search with grep, commit to git if you want — they're just files.
+- **Works offline**: No network connection needed.
+- **No export**: Data lives on your machine. If you switch tools later, the files are already readable.
 
 ## Installation
 
