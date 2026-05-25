@@ -1,15 +1,26 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
-## [unreleased]
+## [0.2.1] - 2026-05-25
+
+### 🐛 Bug Fixes
+
+- [`dd476c5`] Fbim -- のタブ補完で --version と --help を表示する
+- [`4414c1e`] List の並び順を数値順に修正する
 
 ### 📚 Documentation
 
 - [`fad6ea7`] CONTRIBUTING.md を追加する
+- [`28f9876`] README のキャッチコピーを修正する
+- [`78c3dde`] README の説明文を改善する
+- [`32521ea`] README を全面的に改善する
+- [`dc545ea`] "Why file-based?" セクションのフォーマットを戻す
+- [`72a4cf3`] AI ツールとの連携を "Why file-based?" セクションに戻す
 
 ### ⚙️ Miscellaneous Tasks
 
 - [`252e740`] .coverage と __pycache__/ を .gitignore に追加する
+- [`242741b`] CHANGELOG にコミット ID を追加する
 ## [0.2.0] - 2026-05-25
 
 ### 🚀 Features
