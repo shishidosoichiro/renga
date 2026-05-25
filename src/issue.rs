@@ -219,7 +219,13 @@ pub fn all_issues(
             .filter(|e| re.is_match(&e.file_name().to_string_lossy()))
             .map(|e| e.path())
             .collect();
-        files.sort();
+        files.sort_by_key(|p| {
+            p.file_name()
+                .and_then(|n| n.to_str())
+                .and_then(|n| n.split('-').next())
+                .and_then(|n| n.parse::<u64>().ok())
+                .unwrap_or(0)
+        });
 
         for path in files {
             let content = std::fs::read_to_string(&path)?;
