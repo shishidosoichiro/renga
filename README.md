@@ -73,6 +73,15 @@ cargo install --path /path/to/fbim
 fbim list --json | jq '.[] | select(.area == "auth")'
 ```
 
+## How fbim finds your issues
+
+When you run any `fbim` command, it walks up from the current directory toward the filesystem root, stopping at the first directory that matches either of these conditions:
+
+1. A `.fbim.yml` file is present — the `issues_dir` value in that file is used as the issues directory (default: `issues`)
+2. An `issues/` subdirectory is present
+
+This means you can run `fbim` from any subdirectory of your project and it will find the right issues directory automatically. If nothing is found, `fbim` falls back to `issues/` relative to the current directory.
+
 ## Shell completions
 
 Enable tab completion for subcommands, flags, and issue IDs.
