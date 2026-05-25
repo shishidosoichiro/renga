@@ -3,7 +3,7 @@
 [![pipeline status](https://gitlab.home/kiwi/ifbm/badges/main/pipeline.svg)](https://gitlab.home/kiwi/ifbm/-/pipelines)
 [![coverage](https://gitlab.home/kiwi/ifbm/badges/main/coverage.svg)](https://gitlab.home/kiwi/ifbm/-/pipelines)
 
-A CLI tool for managing issues as files.
+A CLI tool for managing issues as files. `fbim create "title"` creates a Markdown file, and `fbim done 1` closes it.
 
 > Japanese version: [README.ja.md](README.ja.md)
 

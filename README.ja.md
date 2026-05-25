@@ -3,7 +3,7 @@
 [![pipeline status](https://gitlab.home/kiwi/ifbm/badges/main/pipeline.svg)](https://gitlab.home/kiwi/ifbm/-/pipelines)
 [![coverage](https://gitlab.home/kiwi/ifbm/badges/main/coverage.svg)](https://gitlab.home/kiwi/ifbm/-/pipelines)
 
-ファイルベースで issue を管理する CLI ツールです。
+issue をファイルで管理する CLI ツールです。`fbim create "タイトル"` で Markdown ファイルが作られて、`fbim done 1` で閉じられます。
 
 > English version: [README.md](README.md)
 
