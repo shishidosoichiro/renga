@@ -20,7 +20,7 @@ fbim init
 fbim create "最初のタスク"
 ```
 
-以上。`issues/` ディレクトリにファイルが作られ、そのままコードと一緒に git で管理できる。
+以上。`issues/` ディレクトリにファイルが作られる。
 
 ## こんな人に向いている
 
@@ -35,11 +35,10 @@ fbim create "最初のタスク"
 
 ## なぜファイルベースか
 
-- **即スタート**: `fbim init` だけで始まる。アカウントもトークンも設定ファイルも不要
-- **Git で完結**: 履歴・変更者・差分がすべて `git log` に残る。修正した issue を同じコミットで close できる
-- **オフラインで動く**: ネットワーク接続なしに issue を作成・更新・参照できる
-- **AI と相性がいい**: Markdown ファイルは LLM が読み書きしやすい。Claude Code と組み合わせると、コーディング中に issue 管理も同時にできる
-- **ロックインがない**: データはすべてプレーンファイル。他のツールへの移行もファイルを読むだけ
+- `fbim init` だけで始まる。アカウントもトークンも設定ファイルも要らない。
+- issue ファイルは Markdown なので、エディタで直接開けるし、grep で検索できる。git を使っているなら、履歴も差分もそこに残る。
+- ネットワーク接続がなくても動く。
+- データは手元のファイルなので、ツールを変えるときにエクスポートは要らない。
 
 ## インストール
 
@@ -61,17 +60,26 @@ cargo install --path /path/to/fbim
 |---|---|
 | `fbim init` | issues ディレクトリを初期化する |
 | `fbim create <タイトル>` | issue を作成する |
-| `fbim done <NNNNN>` | issue を完了にする |
-| `fbim pending <NNNNN>` | issue を保留にする |
-| `fbim reopen <NNNNN>` | issue を再開する |
+| `fbim done <N>` | issue を完了にする |
+| `fbim pending <N>` | issue を保留にする |
+| `fbim reopen <N>` | issue を再開する |
 | `fbim list [--status open\|pending\|done] [--area <area>] [--json]` | issue 一覧を表示する |
-| `fbim show <NNNNN>` | issue の詳細を表示する |
+| `fbim show <N>` | issue の詳細を表示する |
 | `fbim help [コマンド]` | ヘルプを表示する |
 
 ```sh
 # JSON 出力を jq にパイプする
 fbim list --json | jq '.[] | select(.area == "auth")'
 ```
+
+## fbim が issues/ を探す仕組み
+
+`fbim` コマンドを実行すると、カレントディレクトリからファイルシステムのルートに向かって上位を辿り、最初に次のいずれかに該当するディレクトリで止まる。
+
+1. `.fbim.yml` が存在する — そのファイルの `issues_dir` の値を issues ディレクトリとして使う（デフォルト: `issues`）
+2. `issues/` サブディレクトリが存在する
+
+サブディレクトリのどこから実行しても、上位の issues ディレクトリを自動的に見つける。何も見つからない場合は、カレントディレクトリの `issues/` にフォールバックする。
 
 ## シェル補完
 
@@ -106,11 +114,11 @@ ln -sf /path/to/fbim/skills/fbim ~/.claude/skills/fbim
 | コマンド | 動作 |
 |---|---|
 | `/fbim [create] <タイトル>` | issue を作成する |
-| `/fbim done <NNNNN>` | 完了にする |
-| `/fbim pending <NNNNN>` | 保留にする |
-| `/fbim reopen <NNNNN>` | 再開する |
+| `/fbim done <N>` | 完了にする |
+| `/fbim pending <N>` | 保留にする |
+| `/fbim reopen <N>` | 再開する |
 | `/fbim list` | open/pending の一覧を表示する |
-| `/fbim show <NNNNN>` | 詳細を表示する |
+| `/fbim show <N>` | 詳細を表示する |
 
 Claude が作業しながら issue を作り、完了したら close する——コーディングのフローを止めずに issue 管理が回る。
 

@@ -20,7 +20,7 @@ fbim init
 fbim create "My first task"
 ```
 
-That's it. Issue files appear in `issues/` alongside your code.
+That's it. Issue files appear in `issues/`.
 
 ## Who is it for?
 
@@ -35,11 +35,10 @@ If you need comments, assignments, notifications, or a web UI for non-engineers,
 
 ## Why file-based?
 
-- **Zero friction**: `fbim init` and you're done. No accounts, tokens, or config files required.
-- **Git-native**: History, authorship, and diffs live in `git log`. Close an issue in the same commit as the fix.
-- **Works offline**: Create, update, and browse issues without a network connection.
-- **AI-friendly**: Plain Markdown files are easy for LLMs to read, create, and update. Pair with Claude Code to manage issues without leaving your editor.
-- **No lock-in**: All data is plain files. Migrate to another tracker later by reading those files — no export step needed.
+- `fbim init` is all the setup there is. No account, no token, no config file required.
+- Issue files are plain Markdown. Open them in any editor, search with grep, and if you use git, history and diffs are already there.
+- Works without a network connection.
+- Data is plain files on your machine. If you switch tools later, the files are already readable — no export step.
 
 ## Installation
 
@@ -61,11 +60,11 @@ cargo install --path /path/to/fbim
 |---|---|
 | `fbim init` | Initialize the issues directory |
 | `fbim create <title>` | Create an issue |
-| `fbim done <NNNNN>` | Mark an issue as done |
-| `fbim pending <NNNNN>` | Put an issue on hold |
-| `fbim reopen <NNNNN>` | Reopen a closed issue |
+| `fbim done <N>` | Mark an issue as done |
+| `fbim pending <N>` | Put an issue on hold |
+| `fbim reopen <N>` | Reopen a closed issue |
 | `fbim list [--status open\|pending\|done] [--area <area>] [--json]` | List issues |
-| `fbim show <NNNNN>` | Show issue details |
+| `fbim show <N>` | Show issue details |
 | `fbim help [command]` | Show help |
 
 ```sh
@@ -115,11 +114,11 @@ ln -sf /path/to/fbim/skills/fbim ~/.claude/skills/fbim
 | Command | Description |
 |---|---|
 | `/fbim [create] <title>` | Create an issue |
-| `/fbim done <NNNNN>` | Mark as done |
-| `/fbim pending <NNNNN>` | Put on hold |
-| `/fbim reopen <NNNNN>` | Reopen |
+| `/fbim done <N>` | Mark as done |
+| `/fbim pending <N>` | Put on hold |
+| `/fbim reopen <N>` | Reopen |
 | `/fbim list` | List open and pending issues |
-| `/fbim show <NNNNN>` | Show details |
+| `/fbim show <N>` | Show details |
 
 Claude can create issues as it works, close them when done, and keep the list current — all without interrupting the coding flow.
 
