@@ -38,6 +38,7 @@ If you need comments, assignments, notifications, or a web UI for non-engineers,
 - **No setup**: `fbim init` is all there is. No account, no token, no config file.
 - **Plain Markdown**: Open issue files in any editor, search with grep, commit to git if you want — they're just files.
 - **Works offline**: No network connection needed.
+- **Works with AI tools**: Plain Markdown files are easy for LLMs to read and write. Pair with Claude Code to manage issues without leaving your editor.
 - **No export**: Data lives on your machine. If you switch tools later, the files are already readable.
 
 ## Installation
