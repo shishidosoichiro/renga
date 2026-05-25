@@ -89,4 +89,21 @@ mod tests {
         assert_eq!(root, canonical);
         assert_eq!(issues, canonical.join("my-issues"));
     }
+
+    #[test]
+    fn finds_root_from_subdirectory() {
+        let dir = TempDir::new().unwrap();
+        fs::create_dir(dir.path().join("issues")).unwrap();
+        let subdir = dir.path().join("docs").join("adr");
+        fs::create_dir_all(&subdir).unwrap();
+        let canonical_root = dir.path().canonicalize().unwrap();
+
+        let original = std::env::current_dir().unwrap();
+        std::env::set_current_dir(&subdir).unwrap();
+        let (root, issues) = find_project_root();
+        std::env::set_current_dir(original).unwrap();
+
+        assert_eq!(root, canonical_root);
+        assert_eq!(issues, canonical_root.join("issues"));
+    }
 }
