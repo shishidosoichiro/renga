@@ -13,12 +13,17 @@ use walkdir::WalkDir;
 
 /// Status of an issue.
 ///
+/// `Unknown` is assigned when a Markdown file cannot be parsed as an issue
+/// (e.g. frontmatter is absent). It is read-only: fbim never writes it to a file.
+///
 /// # Examples
 ///
 /// ```
 /// use fbim::issue::Status;
 /// assert_eq!(Status::Open.to_string(), "open");
 /// assert_eq!("pending".parse::<Status>().unwrap(), Status::Pending);
+/// assert_eq!(Status::Unknown.to_string(), "unknown");
+/// assert_eq!("unknown".parse::<Status>().unwrap(), Status::Unknown);
 /// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(rename_all = "lowercase")]
