@@ -114,7 +114,7 @@ pub struct ReopenArgs {
 /// Arguments for `fbim list`.
 #[derive(Args)]
 pub struct ListArgs {
-    /// Filter by status. Comma-separated: `open`, `pending`, `done`.
+    /// Filter by status. Comma-separated: `open`, `pending`, `done`, `unknown`.
     #[arg(long)]
     pub status: Option<String>,
     /// Filter by area.

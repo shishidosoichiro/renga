@@ -107,8 +107,15 @@ fn write_candidates(args: &[String], ctx: &Context) -> io::Result<()> {
     let prev = args.get(args.len() - 2).map(|s| s.as_str()).unwrap_or("");
 
     match subcmd {
-        "done" | "pending" | "show" => emit_open_issues(&mut out, ctx)?,
-        "reopen" => emit_done_issues(&mut out, ctx)?,
+        "done" | "pending" => emit_open_issues(&mut out, ctx)?,
+        "show" => {
+            emit_open_issues(&mut out, ctx)?;
+            emit_done_issues(&mut out, ctx)?;
+        }
+        "reopen" => {
+            emit_open_issues(&mut out, ctx)?;
+            emit_done_issues(&mut out, ctx)?;
+        }
         "completions" => {
             for shell in ["bash", "zsh", "fish", "powershell", "elvish"] {
                 writeln!(out, "{shell}")?;
@@ -138,6 +145,8 @@ fn write_candidates(args: &[String], ctx: &Context) -> io::Result<()> {
                 writeln!(out, "--slug\tCustom filename slug")?;
                 writeln!(out, "--priority\tPriority level")?;
                 writeln!(out, "--area\tArea")?;
+                writeln!(out, "--label\tLabel")?;
+                writeln!(out, "--milestone\tMilestone")?;
                 writeln!(out, "--body\tBody text")?;
             }
         },

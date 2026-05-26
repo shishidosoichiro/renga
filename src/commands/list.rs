@@ -1,6 +1,6 @@
 //! `fbim list` command handler.
 
-use anyhow::Result;
+use anyhow::{Context as _, Result};
 use serde::Serialize;
 
 use crate::{
@@ -14,7 +14,14 @@ pub fn run(args: ListArgs, ctx: &Context) -> Result<()> {
     ctx.check_issues_dir()?;
 
     let status_filter: Vec<Status> = match args.status.as_deref() {
-        Some(s) => s.split(',').filter_map(|p| p.trim().parse().ok()).collect(),
+        Some(s) => s
+            .split(',')
+            .map(|p| {
+                p.trim()
+                    .parse::<Status>()
+                    .with_context(|| format!("unknown status: '{}'", p.trim()))
+            })
+            .collect::<Result<Vec<_>>>()?,
         None => vec![Status::Open, Status::Pending],
     };
 
