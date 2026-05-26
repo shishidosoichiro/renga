@@ -1,6 +1,19 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [0.3.0] - 2026-05-26
+
+### 🚀 Features
+
+- `Priority::Unknown` を追加する（フロントマターのない issue の priority を `-` と表示する）
+
+### 🐛 Bug Fixes
+
+- `all_issues` と `find_issue` が `issues/` を再帰的に検索するよう修正する（サブディレクトリ対応）
+- `--status unknown` が `done/` サブディレクトリ内の issue も表示するよう修正する
+- `reopen` コマンドが `done/` 以外のサブディレクトリにある issue も正しく移動するよう修正する
+- `next_id` が `issues/` を再帰的にスキャンするよう修正する
+
 ## [0.2.1] - 2026-05-25
 
 ### 🐛 Bug Fixes

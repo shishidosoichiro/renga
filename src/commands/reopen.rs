@@ -24,7 +24,7 @@ pub fn run(args: ReopenArgs, ctx: &Context) -> Result<()> {
     let updated = set_frontmatter_field(&content, "status", "open");
     std::fs::write(&dest, &updated)?;
 
-    if path.starts_with(&ctx.done_dir) {
+    if path != dest {
         std::fs::remove_file(&path)?;
     }
 

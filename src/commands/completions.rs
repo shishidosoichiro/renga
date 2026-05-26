@@ -4,6 +4,8 @@ use std::fs;
 use std::io::{self, Write};
 use std::path::Path;
 
+use walkdir::WalkDir;
+
 use anyhow::Result;
 use clap::CommandFactory;
 
@@ -159,40 +161,46 @@ fn emit_subcommands<W: Write>(out: &mut W) -> io::Result<()> {
 }
 
 fn emit_open_issues<W: Write>(out: &mut W, ctx: &Context) -> io::Result<()> {
-    if ctx.issues_dir.exists() {
-        emit_issues_in_dir(out, &ctx.issues_dir)?;
+    if !ctx.issues_dir.exists() {
+        return Ok(());
     }
-    Ok(())
+    emit_issues_recursive(out, &ctx.issues_dir, false)
 }
 
 fn emit_done_issues<W: Write>(out: &mut W, ctx: &Context) -> io::Result<()> {
-    if ctx.done_dir.exists() {
-        emit_issues_in_dir(out, &ctx.done_dir)?;
+    if !ctx.issues_dir.exists() {
+        return Ok(());
     }
-    Ok(())
+    emit_issues_recursive(out, &ctx.issues_dir, true)
 }
 
-fn emit_issues_in_dir<W: Write>(out: &mut W, dir: &Path) -> io::Result<()> {
-    let mut entries: Vec<_> = fs::read_dir(dir)
-        .map_err(io::Error::other)?
+fn emit_issues_recursive<W: Write>(out: &mut W, issues_dir: &Path, only_done: bool) -> io::Result<()> {
+    let mut entries: Vec<_> = WalkDir::new(issues_dir)
+        .min_depth(1)
+        .into_iter()
         .filter_map(|e| e.ok())
+        .filter(|e| e.file_type().is_file())
         .filter(|e| {
-            let name = e.file_name();
-            let s = name.to_string_lossy();
-            s.ends_with(".md")
-                && s.chars()
+            let rel = e.path().strip_prefix(issues_dir).unwrap_or(e.path());
+            let in_done = rel.starts_with("done");
+            if only_done { in_done } else { !in_done }
+        })
+        .filter(|e| {
+            let name = e.file_name().to_string_lossy().into_owned();
+            name.ends_with(".md")
+                && name.chars()
                     .next()
                     .map(|c| c.is_ascii_digit())
                     .unwrap_or(false)
         })
         .collect();
-    entries.sort_by_key(|e| e.file_name());
+    entries.sort_by(|a, b| a.file_name().cmp(b.file_name()));
 
     for entry in entries {
         let path = entry.path();
         let stem = path.file_stem().unwrap_or_default().to_string_lossy();
         let id = stem.split('-').next().unwrap_or("").to_string();
-        let title = read_title(&path).unwrap_or_else(|| stem.to_string());
+        let title = read_title(path).unwrap_or_else(|| stem.to_string());
         writeln!(out, "{id}\t{title}")?;
     }
     Ok(())

@@ -58,6 +58,7 @@ pub fn run(args: ListArgs, ctx: &Context) -> Result<()> {
                     Priority::High => "high",
                     Priority::Medium => "medium",
                     Priority::Low => "low",
+                    Priority::Unknown => "-",
                 },
                 area: &i.area,
                 labels: &i.labels,

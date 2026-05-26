@@ -66,12 +66,17 @@ impl FromStr for Status {
 
 /// Priority of an issue.
 ///
+/// `Unknown` is assigned when a file has no frontmatter or the `priority`
+/// field is absent.
+///
 /// # Examples
 ///
 /// ```
 /// use fbim::issue::Priority;
 /// assert_eq!(Priority::High.to_string(), "high");
 /// assert_eq!("low".parse::<Priority>().unwrap(), Priority::Low);
+/// assert_eq!(Priority::Unknown.to_string(), "-");
+/// assert_eq!("-".parse::<Priority>().unwrap(), Priority::Unknown);
 /// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(rename_all = "lowercase")]
@@ -82,6 +87,8 @@ pub enum Priority {
     Medium,
     /// Low priority.
     Low,
+    /// Priority is not set (file has no frontmatter or missing field).
+    Unknown,
 }
 
 impl fmt::Display for Priority {
@@ -90,6 +97,7 @@ impl fmt::Display for Priority {
             Priority::High => write!(f, "high"),
             Priority::Medium => write!(f, "medium"),
             Priority::Low => write!(f, "low"),
+            Priority::Unknown => write!(f, "-"),
         }
     }
 }
@@ -102,6 +110,7 @@ impl FromStr for Priority {
             "high" => Ok(Priority::High),
             "medium" => Ok(Priority::Medium),
             "low" => Ok(Priority::Low),
+            "-" => Ok(Priority::Unknown),
             other => Err(anyhow::anyhow!("unknown priority: {other}")),
         }
     }
@@ -172,111 +181,104 @@ impl Issue {
     }
 }
 
-/// Search `issues_dir` (and optionally `done/`) for an issue by ID.
+/// Search `issues_dir` recursively for an issue by ID.
 ///
 /// The `id` argument is parsed as an integer so both `"42"` and `"00042"` match
-/// the same file.
+/// the same file. When `include_done` is `false`, files under the `done/`
+/// subtree are skipped.
 pub fn find_issue(issues_dir: &Path, id: &str, include_done: bool) -> Result<Option<PathBuf>> {
     let num: u64 = id
         .parse()
         .with_context(|| format!("invalid issue ID: {id}"))?;
     let re = Regex::new(r"^(\d+)-.*\.md$").unwrap();
 
-    let mut dirs = vec![issues_dir.to_path_buf()];
-    if include_done {
-        dirs.push(issues_dir.join("done"));
-    }
-
-    for dir in &dirs {
-        if !dir.exists() {
+    for entry in WalkDir::new(issues_dir).min_depth(1) {
+        let entry = entry?;
+        if !entry.file_type().is_file() {
             continue;
         }
-        for entry in std::fs::read_dir(dir)? {
-            let entry = entry?;
-            let name = entry.file_name().to_string_lossy().to_string();
-            if let Some(cap) = re.captures(&name) {
-                if cap[1].parse::<u64>().unwrap_or(0) == num {
-                    return Ok(Some(entry.path()));
-                }
+        let name = entry.file_name().to_string_lossy();
+        if !re.is_match(name.as_ref()) {
+            continue;
+        }
+        if !include_done {
+            let rel = entry.path().strip_prefix(issues_dir).unwrap_or(entry.path());
+            if rel.starts_with("done") {
+                continue;
+            }
+        }
+        if let Some(cap) = re.captures(name.as_ref()) {
+            if cap[1].parse::<u64>().unwrap_or(0) == num {
+                return Ok(Some(entry.path().to_path_buf()));
             }
         }
     }
     Ok(None)
 }
 
-/// Collect issues from `issues_dir`, applying optional filters.
+/// Collect issues from `issues_dir` recursively, applying optional filters.
 ///
 /// `status_filter`:
-/// - `None` — return all statuses from all directories (including `done/`)
-/// - `Some(statuses)` — return only matching statuses; include `done/` only if
-///   [`Status::Done`] is in the slice
+/// - `None` — return all issues regardless of status
+/// - `Some(statuses)` — return only issues whose status is in the slice
 pub fn all_issues(
     issues_dir: &Path,
     status_filter: Option<&[Status]>,
     area_filter: Option<&str>,
     label_filter: Option<&str>,
 ) -> Result<Vec<Issue>> {
-    let done_dir = issues_dir.join("done");
-    let mut dirs = vec![issues_dir.to_path_buf()];
-    match status_filter {
-        None => dirs.push(done_dir),
-        Some(statuses) if statuses.contains(&Status::Done) => dirs.push(done_dir),
-        _ => {}
-    }
-
     let re = Regex::new(r"^\d+-.*\.md$").unwrap();
+
+    let mut files: Vec<PathBuf> = WalkDir::new(issues_dir)
+        .min_depth(1)
+        .into_iter()
+        .filter_map(|e| e.ok())
+        .filter(|e| e.file_type().is_file())
+        .filter(|e| re.is_match(&e.file_name().to_string_lossy()))
+        .map(|e| e.path().to_path_buf())
+        .collect();
+
+    files.sort_by_key(|p| {
+        p.file_name()
+            .and_then(|n| n.to_str())
+            .and_then(|n| n.split('-').next())
+            .and_then(|n| n.parse::<u64>().ok())
+            .unwrap_or(0)
+    });
+
     let mut results = Vec::new();
+    for path in files {
+        let content = std::fs::read_to_string(&path)?;
+        let issue = match Issue::parse(&path, &content) {
+            Ok(i) => i,
+            Err(_) => Issue {
+                id: extract_id(&path),
+                path: path.clone(),
+                status: Status::Unknown,
+                priority: Priority::Unknown,
+                area: String::new(),
+                labels: vec![],
+                title: extract_title(&content),
+                raw_content: content,
+            },
+        };
 
-    for dir in &dirs {
-        if !dir.exists() {
-            continue;
+        if let Some(statuses) = status_filter {
+            if !statuses.contains(&issue.status) {
+                continue;
+            }
         }
-        let mut files: Vec<PathBuf> = std::fs::read_dir(dir)?
-            .filter_map(|e| e.ok())
-            .filter(|e| re.is_match(&e.file_name().to_string_lossy()))
-            .map(|e| e.path())
-            .collect();
-        files.sort_by_key(|p| {
-            p.file_name()
-                .and_then(|n| n.to_str())
-                .and_then(|n| n.split('-').next())
-                .and_then(|n| n.parse::<u64>().ok())
-                .unwrap_or(0)
-        });
-
-        for path in files {
-            let content = std::fs::read_to_string(&path)?;
-            let issue = match Issue::parse(&path, &content) {
-                Ok(i) => i,
-                Err(_) => Issue {
-                    id: extract_id(&path),
-                    path: path.clone(),
-                    status: Status::Unknown,
-                    priority: Priority::Medium,
-                    area: String::new(),
-                    labels: vec![],
-                    title: extract_title(&content),
-                    raw_content: content,
-                },
-            };
-
-            if let Some(statuses) = status_filter {
-                if !statuses.contains(&issue.status) {
-                    continue;
-                }
+        if let Some(area) = area_filter {
+            if issue.area != area {
+                continue;
             }
-            if let Some(area) = area_filter {
-                if issue.area != area {
-                    continue;
-                }
-            }
-            if let Some(label) = label_filter {
-                if !issue.labels.iter().any(|l| l == label) {
-                    continue;
-                }
-            }
-            results.push(issue);
         }
+        if let Some(label) = label_filter {
+            if !issue.labels.iter().any(|l| l == label) {
+                continue;
+            }
+        }
+        results.push(issue);
     }
 
     Ok(results)
@@ -291,7 +293,7 @@ pub fn next_id(issues_dir: &Path) -> Result<String> {
     let re = Regex::new(r"^(\d+)-").unwrap();
     let mut max: u64 = 0;
 
-    for entry in WalkDir::new(issues_dir).max_depth(2) {
+    for entry in WalkDir::new(issues_dir) {
         let entry = entry?;
         if !entry.file_type().is_file() {
             continue;
