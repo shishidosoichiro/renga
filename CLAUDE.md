@@ -23,8 +23,7 @@ File-Based Issue Management。詳細仕様は `spec.ja.md` を参照。
 
 ## 後方互換
 
-- issue ファイルの 4 桁 ID（`NNNN-*.md`）と 5 桁 ID（`NNNNN-*.md`）の両方を読み込む
-- 新規作成は常に 5 桁
+- issue ファイルの 4 桁・5 桁のゼロ埋め ID（`NNNN-*.md`、`NNNNN-*.md`）は読み込めるが、新規作成はゼロ埋めなしの整数（`1`、`42` など）
 
 ## ドキュメント更新ルール
 
