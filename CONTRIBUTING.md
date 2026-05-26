@@ -6,6 +6,7 @@
 
 - Rust 1.95.0 (pinned via `rust-toolchain.toml` — `rustup` picks it up automatically)
 - `git-cliff` for changelog generation: `cargo install git-cliff`
+- `cargo-llvm-cov` for coverage: `cargo install cargo-llvm-cov --locked`
 
 **Build and test**
 
@@ -19,6 +20,15 @@ cargo clippy -- -D warnings      # lint (must be clean)
 cargo fmt --check                # format check
 cargo doc --no-deps              # verify doc generation
 ```
+
+## Coverage
+
+```sh
+cargo llvm-cov --summary-only -- --test-threads=1   # summary (check before committing)
+cargo llvm-cov --html -- --test-threads=1           # HTML report (target/llvm-cov/)
+```
+
+Check coverage both after implementation and after applying review feedback.
 
 ## Commit messages
 

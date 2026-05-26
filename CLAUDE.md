@@ -40,6 +40,18 @@ File-Based Issue Management。詳細仕様は `spec.ja.md` を参照。
 
 英語版と日本語版（`README.md` / `README.ja.md`、`spec.md` / `spec.ja.md`）は常に同期する。片方だけ更新しない。
 
+## 実装フロー
+
+コードを変更するときは以下の順序で進める。
+
+1. 実装 + テスト追加
+2. カバレッジ確認（`cargo llvm-cov --summary-only -- --test-threads=1`）
+3. `Agent(subagent_type="review")` でレビューを受ける（Claude Code のサブエージェント）
+4. 指摘を反映してからコミット
+5. issue を close する（`fbim done <N>`）
+
+カバレッジは実装時とレビュー時の両方で確認する。
+
 ## Issue 管理
 
 このリポジトリ自体の issue は FBIM で管理する（自己ホスト）。
