@@ -55,6 +55,14 @@ Closed issues are moved to `done/`.
 
 ---
 
+## misc
+
+| # | status | priority | title |
+|---|---|---|---|
+| [38](38-retro-self-improve-area.md) | open | medium | retro: self-improve 経由ルールの違反と新 area 追加 |
+
+---
+
 ## test
 
 | # | status | priority | title |

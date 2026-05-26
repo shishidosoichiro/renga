@@ -12,7 +12,7 @@
 | OSS 公開用ドキュメント執筆・改善 | `Agent(subagent_type="docs-writer")` | `.claude/agents/docs-writer.md` |
 | OSS ローンチ実行（投稿文・公開順序） | `Agent(subagent_type="launch-orchestrator")` | `.claude/agents/launch-orchestrator.md` |
 
-**`.claude/` の変更は self-improve 経由のみ**: `CLAUDE.md`・`.claude/agents/` を変更する場合は、必ず retro issue（`area: misc, labels: [retro]`）を起票してから `self-improve` エージェントを呼ぶ。「局所的な変更だから直接やる」という判断は行わない。
+**`.claude/` の変更は self-improve 経由のみ**: `CLAUDE.md`・`.claude/agents/` を変更する場合は、必ず retro issue（`area: agent, labels: [retro]`）を起票してから `self-improve` エージェントを呼ぶ。「局所的な変更だから直接やる」という判断は行わない。
 
 File-Based Issue Management。詳細仕様は `spec.ja.md` を参照。
 `skills/` は Claude Code スキルの配布用ディレクトリ（ユーザーが `~/.claude/skills/` にシンボリックリンクして使う）。インストール方法・コマンド一覧は `README.md` の "Claude Code skill" セクションを参照。
@@ -92,4 +92,5 @@ fbim done <N>
 | `test` | テストの追加・修正 |
 | `docs` | ドキュメント・README・CONTRIBUTING |
 | `ci` | CI/CD パイプライン |
+| `agent` | CLAUDE.md・`.claude/agents/` の変更・retro issue |
 | `misc` | 上記に当てはまらないもの |

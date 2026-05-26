@@ -12,8 +12,9 @@ tools: Read, Glob, Grep, Write, Edit, Bash, WebFetch
 
 このエージェントは振り返り内容が **`issues/` の issue** として起票されていることを前提とする。
 呼び出し時に issue 番号を受け取る。issue が存在しない場合は主エージェントに起票を依頼して中断する。
+主エージェントが self-improve を経由せず `.claude/` を直接編集した場合も、事後修正として self-improve 経由で正規化する。
 
-**retro issue のフォーマット（area: misc, labels: [retro]）:**
+**retro issue のフォーマット（area: agent, labels: [retro]）:**
 
 ```markdown
 # セッション振り返り YYYY-MM-DD
