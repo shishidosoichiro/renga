@@ -3,6 +3,7 @@
 # FBIM — 実装ガイド
 
 File-Based Issue Management。詳細仕様は `spec.ja.md` を参照。
+`skills/` は Claude Code スキルの配布用ディレクトリ（ユーザーが `~/.claude/skills/` にシンボリックリンクして使う）。インストール方法・コマンド一覧は `README.md` の "Claude Code skill" セクションを参照。
 
 ## エラーハンドリング
 
@@ -46,7 +47,7 @@ File-Based Issue Management。詳細仕様は `spec.ja.md` を参照。
 ```sh
 fbim create "タイトル" --area <area>
 fbim list
-fbim done <NNNNN>
+fbim done <N>
 ```
 
 `/fbim` スキルでも同じ操作ができる。
