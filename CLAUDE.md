@@ -176,6 +176,20 @@ mod tests {
 Python 実装を読み解いてゼロから書き直す。既存コードを Rust に逐語訳しない。
 Rust らしい構造（`Result`/`Option`、イテレータ、`From` トレイトなど）を自然に使う。
 
+## ドキュメント更新ルール
+
+コードを変更したときは、影響するドキュメントを必ず同じコミットまたは直後のコミットで更新する。
+
+| 変更の種類 | 更新が必要なドキュメント |
+|---|---|
+| CLI の動作・引数・出力形式 | `README.md`, `README.ja.md` |
+| issue ファイルの形式・ID・タイトルの仕様 | `spec.md`, `spec.ja.md` |
+| 公開 struct / enum / fn | `src/` の doc コメント（`///`） |
+| リリース | `CHANGELOG.md`, `Cargo.toml` のバージョン |
+| 開発フロー・規約 | `CONTRIBUTING.md` |
+
+英語版と日本語版（`README.md` / `README.ja.md`、`spec.md` / `spec.ja.md`）は常に同期する。片方だけ更新しない。
+
 ## ビルドと CI
 
 ```sh
