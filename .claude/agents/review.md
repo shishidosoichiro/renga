@@ -15,6 +15,7 @@ tools: Read, Glob, Grep, Bash, Write
 - `cargo clippy -- -D warnings` が通るか
 - `cargo fmt --check` が通るか
 - `cargo test` が全件通るか
+- `cargo llvm-cov --summary-only -- --test-threads=1` でカバレッジを確認する
 - `cargo doc --no-deps` がエラーなく通るか（`#![deny(missing_docs)]` 違反がないか）
 - `unwrap()` / `expect()` がテスト外で使われていないか
 

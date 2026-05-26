@@ -2,6 +2,15 @@
 
 # FBIM — 実装ガイド
 
+## エージェント活用方針
+
+| コンテキスト | トリガー | 指示ファイル |
+|---|---|---|
+| コード品質・仕様・ドキュメントのレビュー | `Agent(subagent_type="review")` | `.claude/agents/review.md` |
+| 自己改善 | `Agent(subagent_type="self-improve")` ※事前に retro ファイルを書く | `.claude/agents/self-improve.md` |
+
+**`.claude/` の変更は self-improve 経由のみ**: `CLAUDE.md`・`.claude/agents/` を変更する場合は、必ず `notes/retro-YYYY-MM-DD.md` を書いてから `self-improve` エージェントを呼ぶ。「局所的な変更だから直接やる」という判断は行わない。
+
 File-Based Issue Management。詳細仕様は `spec.ja.md` を参照。
 `skills/` は Claude Code スキルの配布用ディレクトリ（ユーザーが `~/.claude/skills/` にシンボリックリンクして使う）。インストール方法・コマンド一覧は `README.md` の "Claude Code skill" セクションを参照。
 
