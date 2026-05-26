@@ -1,3 +1,5 @@
+@CONTRIBUTING.md
+
 # FBIM — Rust 実装ガイド
 
 FBIM (File-Based Issue Management) を Rust で実装する。
