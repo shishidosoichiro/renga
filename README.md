@@ -60,12 +60,13 @@ cargo install --path /path/to/fbim
 | Command | Description |
 |---|---|
 | `fbim init` | Initialize the issues directory |
-| `fbim create <title>` | Create an issue |
+| `fbim create <title> [--slug <slug>] [--priority high\|medium\|low] [--area <area>] [--body <text>] [--milestone <milestone>]` | Create an issue |
 | `fbim done <N>` | Mark an issue as done |
 | `fbim pending <N>` | Put an issue on hold |
 | `fbim reopen <N>` | Reopen a closed issue |
-| `fbim list [--status open\|pending\|done\|unknown] [--area <area>] [--milestone <milestone>] [--json]` | List issues |
+| `fbim list [--status open\|pending\|done\|unknown] [--area <area>] [--label <label>] [--milestone <milestone>] [--json]` | List issues |
 | `fbim show <N>` | Show issue details |
+| `fbim completions bash\|zsh\|fish` | Print shell completion script |
 | `fbim help [command]` | Show help |
 
 ```sh

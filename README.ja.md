@@ -60,12 +60,13 @@ cargo install --path /path/to/fbim
 | コマンド | 動作 |
 |---|---|
 | `fbim init` | issues ディレクトリを初期化する |
-| `fbim create <タイトル>` | issue を作成する |
+| `fbim create <タイトル> [--slug <slug>] [--priority high\|medium\|low] [--area <area>] [--body <テキスト>] [--milestone <milestone>]` | issue を作成する |
 | `fbim done <N>` | issue を完了にする |
 | `fbim pending <N>` | issue を保留にする |
 | `fbim reopen <N>` | issue を再開する |
-| `fbim list [--status open\|pending\|done\|unknown] [--area <area>] [--milestone <milestone>] [--json]` | issue 一覧を表示する |
+| `fbim list [--status open\|pending\|done\|unknown] [--area <area>] [--label <label>] [--milestone <milestone>] [--json]` | issue 一覧を表示する |
 | `fbim show <N>` | issue の詳細を表示する |
+| `fbim completions bash\|zsh\|fish` | シェル補完スクリプトを表示する |
 | `fbim help [コマンド]` | ヘルプを表示する |
 
 ```sh
