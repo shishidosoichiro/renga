@@ -185,23 +185,10 @@ Rust らしい構造（`Result`/`Option`、イテレータ、`From` トレイト
 | CLI の動作・引数・出力形式 | `README.md`, `README.ja.md` |
 | issue ファイルの形式・ID・タイトルの仕様 | `spec.md`, `spec.ja.md` |
 | 公開 struct / enum / fn | `src/` の doc コメント（`///`） |
-| リリース | `CHANGELOG.md`（git-cliff で生成）, `Cargo.toml` のバージョン |
+| リリース | `CHANGELOG.md`, `Cargo.toml` のバージョン |
 | 開発フロー・規約 | `CONTRIBUTING.md` |
 
 英語版と日本語版（`README.md` / `README.ja.md`、`spec.md` / `spec.ja.md`）は常に同期する。片方だけ更新しない。
-
-## リリース手順
-
-```sh
-# 1. バージョンを Cargo.toml で更新する
-# 2. CHANGELOG を git-cliff で生成する（手書き禁止）
-git cliff --tag v0.x.0 -o CHANGELOG.md
-# 3. コミットしてタグを打つ
-git add CHANGELOG.md Cargo.toml
-git commit -m "chore(release): prepare for v0.x.0"
-git tag v0.x.0
-git push origin main && git push origin v0.x.0
-```
 
 ## ビルドと CI
 
