@@ -366,12 +366,19 @@ pub fn make_slug(title: &str) -> String {
 pub fn set_frontmatter_field(content: &str, field: &str, value: &str) -> String {
     let prefix = format!("{field}:");
     let mut in_fm = false;
+    let mut fm_closed = false;
     let mut found = false;
     let mut out: Vec<String> = Vec::new();
 
     for line in content.lines() {
-        if line.trim() == "---" {
-            in_fm = !in_fm;
+        if !fm_closed && line.trim() == "---" {
+            if in_fm {
+                in_fm = false;
+                fm_closed = true;
+            } else if out.is_empty() {
+                // opening fence must be the very first line
+                in_fm = true;
+            }
             out.push(line.to_string());
             continue;
         }
@@ -463,6 +470,29 @@ mod tests {
         assert!(updated.contains("priority: high"));
         assert!(updated.contains("area: core"));
         assert!(updated.ends_with('\n'));
+    }
+
+    #[test]
+    fn set_frontmatter_field_ignores_hr_in_body() {
+        // '---' in the body must not re-enable frontmatter parsing
+        let content = "---\nstatus: open\n---\n\n# Title\n\n---\nstatus: see notes\n";
+        let updated = set_frontmatter_field(content, "status", "done");
+        assert!(
+            updated.contains("status: done"),
+            "frontmatter status should be updated"
+        );
+        assert!(
+            updated.contains("status: see notes"),
+            "body line must not be modified"
+        );
+    }
+
+    #[test]
+    fn set_frontmatter_field_no_frontmatter_content_unchanged() {
+        // content without frontmatter must be returned as-is
+        let content = "# Title\n\n---\nstatus: open\n---\n";
+        let updated = set_frontmatter_field(content, "status", "done");
+        assert_eq!(updated, content);
     }
 
     #[test]
