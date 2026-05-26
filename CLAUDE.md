@@ -46,7 +46,7 @@ File-Based Issue Management。詳細仕様は `spec.ja.md` を参照。
 
 1. 実装 + テスト追加
 2. カバレッジ確認（`cargo llvm-cov --summary-only -- --test-threads=1`）
-3. `Agent(subagent_type="review")` でレビューを受ける（Claude Code のサブエージェント）
+3. `Agent(subagent_type="review")` でレビューを受ける（Claude Code のサブエージェント）。レビュー観点にはカバレッジ確認（`cargo llvm-cov --summary-only -- --test-threads=1`）を含める
 4. 指摘を反映してからコミット
 5. issue を close する（`fbim done <N>`）
 
