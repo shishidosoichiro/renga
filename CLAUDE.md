@@ -7,12 +7,12 @@
 | コンテキスト | トリガー | 指示ファイル |
 |---|---|---|
 | コード品質・仕様・ドキュメントのレビュー | `Agent(subagent_type="review")` | `.claude/agents/review.md` |
-| 自己改善 | `Agent(subagent_type="self-improve")` ※事前に retro ファイルを書く | `.claude/agents/self-improve.md` |
+| 自己改善 | `Agent(subagent_type="self-improve")` ※事前に retro issue を起票する | `.claude/agents/self-improve.md` |
 | OSS ポジショニング・ローンチ計画 | `Agent(subagent_type="marketing-strategist")` | `.claude/agents/marketing-strategist.md` |
 | OSS 公開用ドキュメント執筆・改善 | `Agent(subagent_type="docs-writer")` | `.claude/agents/docs-writer.md` |
 | OSS ローンチ実行（投稿文・公開順序） | `Agent(subagent_type="launch-orchestrator")` | `.claude/agents/launch-orchestrator.md` |
 
-**`.claude/` の変更は self-improve 経由のみ**: `CLAUDE.md`・`.claude/agents/` を変更する場合は、必ず `notes/retro-YYYY-MM-DD.md` を書いてから `self-improve` エージェントを呼ぶ。「局所的な変更だから直接やる」という判断は行わない。
+**`.claude/` の変更は self-improve 経由のみ**: `CLAUDE.md`・`.claude/agents/` を変更する場合は、必ず retro issue（`area: misc, labels: [retro]`）を起票してから `self-improve` エージェントを呼ぶ。「局所的な変更だから直接やる」という判断は行わない。
 
 File-Based Issue Management。詳細仕様は `spec.ja.md` を参照。
 `skills/` は Claude Code スキルの配布用ディレクトリ（ユーザーが `~/.claude/skills/` にシンボリックリンクして使う）。インストール方法・コマンド一覧は `README.md` の "Claude Code skill" セクションを参照。

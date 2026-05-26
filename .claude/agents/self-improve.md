@@ -1,6 +1,6 @@
 ---
 name: self-improve
-description: セッション後の CLAUDE.md・.claude/・skills/ 改善。notes/retro-*.md と git log を読み、実績とのギャップを直接編集する。推測的変更は行わない。明示的呼び出しのみ。
+description: セッション後の CLAUDE.md・.claude/・skills/ 改善。retro issue と git log を読み、実績とのギャップを直接編集する。推測的変更は行わない。明示的呼び出しのみ。
 tools: Read, Glob, Grep, Write, Edit, Bash, WebFetch
 ---
 
@@ -8,11 +8,12 @@ tools: Read, Glob, Grep, Write, Edit, Bash, WebFetch
 
 **目的**: 実際に起きたことを根拠として CLAUDE.md・`.claude/`・`skills/` を改善する。経験のない推測的な変更は行わない。
 
-## 前提: 主エージェントが retro ファイルを書いてから呼ぶ
+## 前提: 主エージェントが retro issue を起票してから呼ぶ
 
-このエージェントは **`notes/retro-YYYY-MM-DD.md`** が存在することを前提とする。retro ファイルは `.gitignore` で追跡対象外。
+このエージェントは振り返り内容が **`issues/` の issue** として起票されていることを前提とする。
+呼び出し時に issue 番号を受け取る。issue が存在しない場合は主エージェントに起票を依頼して中断する。
 
-**retro ファイルのフォーマット:**
+**retro issue のフォーマット（area: misc, labels: [retro]）:**
 
 ```markdown
 # セッション振り返り YYYY-MM-DD
@@ -23,13 +24,11 @@ tools: Read, Glob, Grep, Write, Edit, Bash, WebFetch
 ## その他気づき
 ```
 
-retro ファイルが存在しない場合は主エージェントに作成を依頼して中断する。
-
 ## 手順
 
-### Step 1: retro ファイルを読む
+### Step 1: retro issue を読む
 
-`notes/retro-YYYY-MM-DD.md` を読む。
+指定された issue 番号のファイルを `issues/` または `issues/done/` から読む。
 
 ### Step 2: 指示ファイルをすべて読む
 
