@@ -109,7 +109,11 @@ struct FrontmatterRaw {
 /// A parsed issue file.
 #[derive(Debug)]
 pub struct Issue {
-    /// Zero-padded ID extracted from the filename (e.g. `"00042"`).
+    /// Integer ID extracted from the filename prefix (e.g. `"42"`).
+    ///
+    /// The ID lives only in the filename — not in frontmatter or body.
+    /// Legacy zero-padded filenames (e.g. `00042-foo.md`) are supported;
+    /// their ID string preserves the original form from the filename.
     pub id: String,
     /// Absolute path to the issue file.
     pub path: PathBuf,
@@ -121,7 +125,10 @@ pub struct Issue {
     pub area: String,
     /// Labels attached to the issue.
     pub labels: Vec<String>,
-    /// Title from the first `# Heading` in the body.
+    /// Title extracted from the first `# Heading` line in the body.
+    ///
+    /// The title lives only in the body — not in frontmatter.
+    /// Falls back to the file stem if no heading is found.
     pub title: String,
     /// Raw file content, preserved for display and in-place updates.
     pub raw_content: String,
