@@ -1,6 +1,32 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [0.4.0] - 2026-05-26
+
+### 🚀 Features
+
+- [`cfb6ff4`] *(core)* Issue に milestone フィールドを追加する
+
+### 🐛 Bug Fixes
+
+- [`d0b951b`] Area デフォルトを空文字に統一し Regex を LazyLock 化する
+
+### 📚 Documentation
+
+- [`a388c5f`] CLAUDE.md にリリース手順と git-cliff の使用を明記する
+- [`e1e7c6c`] Install・release スキルを追加し CONTRIBUTING.md を CLAUDE.md にインポートする
+- [`f1aaa3f`] Self-improve・review サブエージェントを追加する
+- [`041cb4a`] CLAUDE.md を63行に削減する
+- [`a5008a2`] CLAUDE.md の ID 仕様を整数 ID に修正する（ゼロ埋め廃止済み）
+- [`e04b4ce`] *(issues)* Issue 7〜16 の状態を更新する
+- [`521ba36`] 実装フローとカバレッジ確認手順を CLAUDE.md・CONTRIBUTING.md に追加する
+- [`9229c50`] Review サブエージェントの観点にカバレッジ確認を明示する
+- [`9d5ec5b`] エージェント活用方針と .claude/ 変更ルールを CLAUDE.md に追加し review にカバレッジ確認を加える
+- [`c916c1a`] *(claude)* Retro の指摘を CLAUDE.md に反映する
+
+### ⚙️ Miscellaneous Tasks
+
+- [`1be9807`] Skills を .claude/skills に移動し CLAUDE.md を更新する
 ## [0.3.0] - 2026-05-26
 
 ### 🚀 Features
