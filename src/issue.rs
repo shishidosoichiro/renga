@@ -29,6 +29,9 @@ pub enum Status {
     Pending,
     /// The issue is complete.
     Done,
+    /// The status could not be determined (e.g. frontmatter is missing).
+    #[serde(other)]
+    Unknown,
 }
 
 impl fmt::Display for Status {
@@ -37,6 +40,7 @@ impl fmt::Display for Status {
             Status::Open => write!(f, "open"),
             Status::Pending => write!(f, "pending"),
             Status::Done => write!(f, "done"),
+            Status::Unknown => write!(f, "unknown"),
         }
     }
 }
@@ -49,6 +53,7 @@ impl FromStr for Status {
             "open" => Ok(Status::Open),
             "pending" => Ok(Status::Pending),
             "done" => Ok(Status::Done),
+            "unknown" => Ok(Status::Unknown),
             other => Err(anyhow::anyhow!("unknown status: {other}")),
         }
     }
@@ -241,7 +246,7 @@ pub fn all_issues(
                 Err(_) => Issue {
                     id: extract_id(&path),
                     path: path.clone(),
-                    status: Status::Open,
+                    status: Status::Unknown,
                     priority: Priority::Medium,
                     area: String::new(),
                     labels: vec![],

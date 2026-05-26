@@ -52,6 +52,7 @@ pub fn run(args: ListArgs, ctx: &Context) -> Result<()> {
                     Status::Open => "open",
                     Status::Pending => "pending",
                     Status::Done => "done",
+                    Status::Unknown => "unknown",
                 },
                 priority: match i.priority {
                     Priority::High => "high",

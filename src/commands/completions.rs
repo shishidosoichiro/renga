@@ -117,6 +117,7 @@ fn write_candidates(args: &[String], ctx: &Context) -> io::Result<()> {
                 writeln!(out, "open")?;
                 writeln!(out, "pending")?;
                 writeln!(out, "done")?;
+                writeln!(out, "unknown")?;
             }
             _ => {
                 writeln!(out, "--status\tFilter by status")?;
