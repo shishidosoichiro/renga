@@ -174,7 +174,11 @@ fn emit_done_issues<W: Write>(out: &mut W, ctx: &Context) -> io::Result<()> {
     emit_issues_recursive(out, &ctx.issues_dir, true)
 }
 
-fn emit_issues_recursive<W: Write>(out: &mut W, issues_dir: &Path, only_done: bool) -> io::Result<()> {
+fn emit_issues_recursive<W: Write>(
+    out: &mut W,
+    issues_dir: &Path,
+    only_done: bool,
+) -> io::Result<()> {
     let mut entries: Vec<_> = WalkDir::new(issues_dir)
         .min_depth(1)
         .into_iter()
@@ -183,12 +187,17 @@ fn emit_issues_recursive<W: Write>(out: &mut W, issues_dir: &Path, only_done: bo
         .filter(|e| {
             let rel = e.path().strip_prefix(issues_dir).unwrap_or(e.path());
             let in_done = rel.starts_with("done");
-            if only_done { in_done } else { !in_done }
+            if only_done {
+                in_done
+            } else {
+                !in_done
+            }
         })
         .filter(|e| {
             let name = e.file_name().to_string_lossy().into_owned();
             name.ends_with(".md")
-                && name.chars()
+                && name
+                    .chars()
                     .next()
                     .map(|c| c.is_ascii_digit())
                     .unwrap_or(false)

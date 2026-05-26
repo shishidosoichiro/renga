@@ -32,13 +32,15 @@ N-short-name.md
 ```markdown
 ---
 status: open
-priority: high|medium|low
-area: area-name (e.g. core, cli, docs)
+priority: high|medium|low   # optional
+area: area-name             # optional (e.g. core, cli, docs)
 labels: []
 ---
 ```
 
-Frontmatter is optional. When absent, `status` is set to `unknown` and other fields use defaults: `priority: medium`, `area: ""`.
+Frontmatter is optional. When absent, `status` is `unknown`, `priority` is `-` (unknown), and `area` is empty (no group).
+
+`area` and `priority` fields are optional even when frontmatter is present. Omitting `area` places the issue in no group (shown without a heading in `issues/README.md`). Omitting `priority` defaults to `medium`.
 
 **status values**
 
@@ -56,6 +58,7 @@ Frontmatter is optional. When absent, `status` is set to `unknown` and other fie
 | `high` | Needs immediate attention. |
 | `medium` | Needs action but not urgent. |
 | `low` | Suggestion or improvement opportunity. |
+| `-` | Unknown — frontmatter is absent or the field is missing. Read-only. |
 
 ## Title
 
@@ -77,6 +80,22 @@ labels: []
 
 Brief description of what needs to be done.
 ```
+
+## Commands
+
+```
+fbim init
+fbim create <title> [--slug <slug>] [--priority high|medium|low] [--area <area>] [--body <text>]
+fbim done <N>
+fbim pending <N>
+fbim reopen <N>
+fbim list [--status open|pending|done|unknown] [--area <area>] [--label <label>] [--json]
+fbim show <N>
+fbim completions <bash|zsh|fish>
+fbim help [command]
+```
+
+`N` is the plain integer issue ID (e.g. `42`). Legacy zero-padded IDs (e.g. `00042`) are also accepted.
 
 ## `.fbim.yml`
 

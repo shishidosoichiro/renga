@@ -4,12 +4,20 @@ use std::{
     fmt,
     path::{Path, PathBuf},
     str::FromStr,
+    sync::LazyLock,
 };
 
 use anyhow::{Context as _, Result};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use walkdir::WalkDir;
+
+static RE_ISSUE_FILE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^\d+-.*\.md$").unwrap());
+static RE_ISSUE_FILE_CAP: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^(\d+)-.*\.md$").unwrap());
+static RE_ID_PREFIX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^(\d+)-").unwrap());
+static RE_SLUG_SEPARATOR: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"[^a-zA-Z0-9]+").unwrap());
+static RE_LINENUM_PREFIX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^\d+:\s*").unwrap());
 
 /// Status of an issue.
 ///
@@ -166,7 +174,7 @@ impl Issue {
             path: path.to_path_buf(),
             status: fm.status.unwrap_or(Status::Open),
             priority: fm.priority.unwrap_or(Priority::Medium),
-            area: fm.area.unwrap_or_else(|| "misc".to_string()),
+            area: fm.area.unwrap_or_default(),
             labels: fm.labels,
             title: extract_title(body),
             raw_content: content.to_string(),
@@ -190,24 +198,25 @@ pub fn find_issue(issues_dir: &Path, id: &str, include_done: bool) -> Result<Opt
     let num: u64 = id
         .parse()
         .with_context(|| format!("invalid issue ID: {id}"))?;
-    let re = Regex::new(r"^(\d+)-.*\.md$").unwrap();
-
     for entry in WalkDir::new(issues_dir).min_depth(1) {
         let entry = entry?;
         if !entry.file_type().is_file() {
             continue;
         }
         let name = entry.file_name().to_string_lossy();
-        if !re.is_match(name.as_ref()) {
+        if !RE_ISSUE_FILE_CAP.is_match(name.as_ref()) {
             continue;
         }
         if !include_done {
-            let rel = entry.path().strip_prefix(issues_dir).unwrap_or(entry.path());
+            let rel = entry
+                .path()
+                .strip_prefix(issues_dir)
+                .unwrap_or(entry.path());
             if rel.starts_with("done") {
                 continue;
             }
         }
-        if let Some(cap) = re.captures(name.as_ref()) {
+        if let Some(cap) = RE_ISSUE_FILE_CAP.captures(name.as_ref()) {
             if cap[1].parse::<u64>().unwrap_or(0) == num {
                 return Ok(Some(entry.path().to_path_buf()));
             }
@@ -227,14 +236,12 @@ pub fn all_issues(
     area_filter: Option<&str>,
     label_filter: Option<&str>,
 ) -> Result<Vec<Issue>> {
-    let re = Regex::new(r"^\d+-.*\.md$").unwrap();
-
     let mut files: Vec<PathBuf> = WalkDir::new(issues_dir)
         .min_depth(1)
         .into_iter()
         .filter_map(|e| e.ok())
         .filter(|e| e.file_type().is_file())
-        .filter(|e| re.is_match(&e.file_name().to_string_lossy()))
+        .filter(|e| RE_ISSUE_FILE.is_match(&e.file_name().to_string_lossy()))
         .map(|e| e.path().to_path_buf())
         .collect();
 
@@ -290,7 +297,6 @@ pub fn all_issues(
 /// Existing zero-padded filenames (e.g. `00042-foo.md`) are recognised and
 /// their numeric value is included when computing the next ID.
 pub fn next_id(issues_dir: &Path) -> Result<String> {
-    let re = Regex::new(r"^(\d+)-").unwrap();
     let mut max: u64 = 0;
 
     for entry in WalkDir::new(issues_dir) {
@@ -299,7 +305,7 @@ pub fn next_id(issues_dir: &Path) -> Result<String> {
             continue;
         }
         let name = entry.file_name().to_string_lossy();
-        if let Some(cap) = re.captures(&name) {
+        if let Some(cap) = RE_ID_PREFIX.captures(&name) {
             if let Ok(n) = cap[1].parse::<u64>() {
                 max = max.max(n);
             }
@@ -320,9 +326,8 @@ pub fn next_id(issues_dir: &Path) -> Result<String> {
 /// assert_eq!(make_slug(""), "issue");
 /// ```
 pub fn make_slug(title: &str) -> String {
-    let re = Regex::new(r"[^a-zA-Z0-9]+").unwrap();
     let lower = title.to_lowercase();
-    let slug = re.replace_all(&lower, "-");
+    let slug = RE_SLUG_SEPARATOR.replace_all(&lower, "-");
     let slug = slug.trim_matches('-');
     // slug is ASCII-only after replacement, so byte slicing is safe
     let slug = if slug.len() > 30 { &slug[..30] } else { slug };
@@ -388,19 +393,15 @@ fn split_frontmatter(content: &str) -> Option<(&str, &str)> {
 fn extract_id(path: &Path) -> String {
     path.file_stem()
         .and_then(|s| s.to_str())
-        .and_then(|s| {
-            let re = Regex::new(r"^(\d+)-").ok()?;
-            Some(re.captures(s)?[1].to_string())
-        })
+        .and_then(|s| Some(RE_ID_PREFIX.captures(s)?[1].to_string()))
         .unwrap_or_default()
 }
 
 fn extract_title(body: &str) -> String {
     // Strip legacy "NNN: " numeric prefix if present
-    let prefix_re = Regex::new(r"^\d+:\s*").unwrap();
     for line in body.lines() {
         if let Some(rest) = line.strip_prefix("# ") {
-            return prefix_re.replace(rest.trim(), "").to_string();
+            return RE_LINENUM_PREFIX.replace(rest.trim(), "").to_string();
         }
     }
     String::new()

@@ -51,7 +51,25 @@ pub fn generate(issues: &[Issue], config: &Config) -> String {
         String::new(),
     ];
 
-    for area in ordered_areas {
+    // Issues with no area are emitted first, flat (no heading).
+    if let Some(no_area) = by_area.get("") {
+        if !no_area.is_empty() {
+            lines.push("| # | status | priority | title |".to_string());
+            lines.push("|---|---|---|---|".to_string());
+            for issue in no_area.iter() {
+                let file = issue.path.file_name().unwrap_or_default().to_string_lossy();
+                lines.push(format!(
+                    "| [{}]({}) | {} | {} | {} |",
+                    issue.id, file, issue.status, issue.priority, issue.title
+                ));
+            }
+            lines.push(String::new());
+            lines.push("---".to_string());
+            lines.push(String::new());
+        }
+    }
+
+    for area in ordered_areas.iter().filter(|a| !a.is_empty()) {
         let area_issues = match by_area.get(area) {
             Some(v) if !v.is_empty() => v,
             _ => continue,
@@ -59,7 +77,7 @@ pub fn generate(issues: &[Issue], config: &Config) -> String {
 
         let display = config
             .area_labels
-            .get(area)
+            .get(*area)
             .map(|s| s.as_str())
             .unwrap_or(area);
         lines.push(format!("## {display}"));

@@ -32,13 +32,15 @@ N-short-name.md
 ```markdown
 ---
 status: open
-priority: high/medium/low
-area: エリア名（例: core, cli, docs）
+priority: high/medium/low   # 省略可能
+area: エリア名              # 省略可能（例: core, cli, docs）
 labels: []
 ---
 ```
 
-frontmatter は省略可能。省略した場合は `status: unknown` として扱い、他のフィールドはデフォルト値（`priority: medium`、`area: ""`）を使う。
+frontmatter は省略可能。省略した場合は `status: unknown`、`priority` は `-`（unknown）、`area` は空（グループなし）として扱う。
+
+`area` と `priority` は frontmatter がある場合でも省略可能。`area` を省略すると issue はグループなし扱いになり、`issues/README.md` では見出しなしで表示される。`priority` を省略すると `medium` がデフォルトになる。
 
 **status の値**
 
@@ -56,6 +58,7 @@ frontmatter は省略可能。省略した場合は `status: unknown` として�
 | `high` | すぐに対応が必要 |
 | `medium` | 要対応だが緊急ではない |
 | `low` | 提案・改善の余地 |
+| `-` | 不明 — frontmatter がないかフィールドが欠落。読み取り専用 |
 
 ## タイトル
 
@@ -77,6 +80,22 @@ labels: []
 
 何をするかの説明。
 ```
+
+## コマンド
+
+```
+fbim init
+fbim create <title> [--slug <slug>] [--priority high|medium|low] [--area <area>] [--body <text>]
+fbim done <N>
+fbim pending <N>
+fbim reopen <N>
+fbim list [--status open|pending|done|unknown] [--area <area>] [--label <label>] [--json]
+fbim show <N>
+fbim completions <bash|zsh|fish>
+fbim help [command]
+```
+
+`N` はゼロ埋めなしの整数 ID（例: `42`）。レガシーのゼロ埋め ID（例: `00042`）も受け付ける。
 
 ## `.fbim.yml` の仕様
 
