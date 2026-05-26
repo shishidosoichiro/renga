@@ -5,15 +5,20 @@ All notable changes to this project will be documented in this file.
 
 ### 🚀 Features
 
-- `Priority::Unknown` を追加する（フロントマターのない issue の priority を `-` と表示する）
+- [`016446f`] Frontmatter のないファイルの status を unknown にする
+- [`382e339`] Issues/ を再帰的に検索し Priority::Unknown を追加する
 
 ### 🐛 Bug Fixes
 
-- `all_issues` と `find_issue` が `issues/` を再帰的に検索するよう修正する（サブディレクトリ対応）
-- `--status unknown` が `done/` サブディレクトリ内の issue も表示するよう修正する
-- `reopen` コマンドが `done/` 以外のサブディレクトリにある issue も正しく移動するよう修正する
-- `next_id` が `issues/` を再帰的にスキャンするよう修正する
+- [`4f62bf8`] Parse できない issue ファイルをスキップして警告を出す
+- [`2f3463d`] Frontmatter のない Markdown ファイルもデフォルト値で表示する
 
+### 📚 Documentation
+
+- [`b07f22e`] ID とタイトルの取得元を spec と doc コメントに明記する
+- [`2a4a9f8`] Spec.md を Rust 版に更新し、CLAUDE.md にドキュメント更新ルールを追記する
+- [`be0b7d4`] Unknown status を spec と README に追記する
+- [`d1027ed`] Status::Unknown の doc コメントと doctest を追加する
 ## [0.2.1] - 2026-05-25
 
 ### 🐛 Bug Fixes
