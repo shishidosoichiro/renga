@@ -180,7 +180,7 @@ impl Issue {
             area: fm.area.unwrap_or_default(),
             labels: fm.labels,
             milestone: fm.milestone,
-            title: extract_title(body),
+            title: title_or_stem(body, path),
             raw_content: content.to_string(),
         })
     }
@@ -263,17 +263,22 @@ pub fn all_issues(
         let content = std::fs::read_to_string(&path)?;
         let issue = match Issue::parse(&path, &content) {
             Ok(i) => i,
-            Err(_) => Issue {
-                id: extract_id(&path),
-                path: path.clone(),
-                status: Status::Unknown,
-                priority: Priority::Unknown,
-                area: String::new(),
-                labels: vec![],
-                milestone: None,
-                title: extract_title(&content),
-                raw_content: content,
-            },
+            Err(_) => {
+                let title_src = split_frontmatter(&content)
+                    .map(|(_, b)| b)
+                    .unwrap_or(&content);
+                Issue {
+                    id: extract_id(&path),
+                    path: path.clone(),
+                    status: Status::Unknown,
+                    priority: Priority::Unknown,
+                    area: String::new(),
+                    labels: vec![],
+                    milestone: None,
+                    title: title_or_stem(title_src, &path),
+                    raw_content: content,
+                }
+            }
         };
 
         if let Some(statuses) = status_filter {
@@ -426,6 +431,18 @@ fn extract_title(body: &str) -> String {
     String::new()
 }
 
+fn title_or_stem(body: &str, path: &Path) -> String {
+    let t = extract_title(body);
+    if t.is_empty() {
+        path.file_stem()
+            .and_then(|s| s.to_str())
+            .unwrap_or_default()
+            .to_string()
+    } else {
+        t
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -461,6 +478,19 @@ mod tests {
         let issue = Issue::load(&path).unwrap();
         assert_eq!(issue.id, "0042");
         assert_eq!(issue.status, Status::Pending);
+    }
+
+    #[test]
+    fn parse_issue_falls_back_to_stem_when_no_title() {
+        let dir = TempDir::new().unwrap();
+        let path = dir.path().join("7-no-title.md");
+        std::fs::write(
+            &path,
+            "---\nstatus: open\npriority: medium\narea: misc\nlabels: []\n---\n\nNo H1 heading here.\n",
+        )
+        .unwrap();
+        let issue = Issue::load(&path).unwrap();
+        assert_eq!(issue.title, "7-no-title");
     }
 
     #[test]
@@ -545,6 +575,34 @@ mod tests {
         std::fs::write(dir.path().join("00003-foo.md"), "").unwrap();
         std::fs::write(dir.path().join("5-bar.md"), "").unwrap();
         assert_eq!(next_id(dir.path()).unwrap(), "6");
+    }
+
+    #[test]
+    fn all_issues_unknown_fallback_uses_body_for_title() {
+        let dir = TempDir::new().unwrap();
+        // Invalid YAML (not: a valid mapping) but with a frontmatter block and H1 in body.
+        std::fs::write(
+            dir.path().join("5-bad.md"),
+            "---\nnot valid yaml: [\n---\n\n# My Title\n",
+        )
+        .unwrap();
+        let issues = all_issues(dir.path(), None, None, None, None).unwrap();
+        let issue = issues.iter().find(|i| i.id == "5").unwrap();
+        assert_eq!(issue.status, Status::Unknown);
+        assert_eq!(issue.title, "My Title");
+    }
+
+    #[test]
+    fn all_issues_unknown_fallback_uses_stem_when_no_title() {
+        let dir = TempDir::new().unwrap();
+        std::fs::write(
+            dir.path().join("6-no-title.md"),
+            "---\nnot valid yaml: [\n---\n\nno h1 here\n",
+        )
+        .unwrap();
+        let issues = all_issues(dir.path(), None, None, None, None).unwrap();
+        let issue = issues.iter().find(|i| i.id == "6").unwrap();
+        assert_eq!(issue.title, "6-no-title");
     }
 
     #[test]
