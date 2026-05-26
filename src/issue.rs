@@ -229,7 +229,13 @@ pub fn all_issues(
 
         for path in files {
             let content = std::fs::read_to_string(&path)?;
-            let issue = Issue::parse(&path, &content)?;
+            let issue = match Issue::parse(&path, &content) {
+                Ok(i) => i,
+                Err(e) => {
+                    eprintln!("warning: skipping {}: {e}", path.display());
+                    continue;
+                }
+            };
 
             if let Some(statuses) = status_filter {
                 if !statuses.contains(&issue.status) {
