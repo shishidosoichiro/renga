@@ -108,6 +108,7 @@ pub fn write_readme(issues_dir: &Path, config: &Config) -> Result<()> {
         Some(&[Status::Open, Status::Pending]),
         None,
         None,
+        None,
     )?;
     let content = generate(&issues, config);
     std::fs::write(issues_dir.join("README.md"), content + "\n")?;

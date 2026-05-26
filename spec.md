@@ -35,12 +35,13 @@ status: open
 priority: high|medium|low   # optional
 area: area-name             # optional (e.g. core, cli, docs)
 labels: []
+milestone: v1.0             # optional (e.g. v1.0, 2026-Q3, sprint-3)
 ---
 ```
 
 Frontmatter is optional. When absent, `status` is `unknown`, `priority` is `-` (unknown), and `area` is empty (no group).
 
-`area` and `priority` fields are optional even when frontmatter is present. Omitting `area` places the issue in no group (shown without a heading in `issues/README.md`). Omitting `priority` defaults to `medium`.
+`area`, `priority`, and `milestone` fields are optional even when frontmatter is present. Omitting `area` places the issue in no group (shown without a heading in `issues/README.md`). Omitting `priority` defaults to `medium`. Omitting `milestone` means the issue belongs to no milestone.
 
 **status values**
 
@@ -85,11 +86,11 @@ Brief description of what needs to be done.
 
 ```
 fbim init
-fbim create <title> [--slug <slug>] [--priority high|medium|low] [--area <area>] [--body <text>]
+fbim create <title> [--slug <slug>] [--priority high|medium|low] [--area <area>] [--body <text>] [--milestone <milestone>]
 fbim done <N>
 fbim pending <N>
 fbim reopen <N>
-fbim list [--status open|pending|done|unknown] [--area <area>] [--label <label>] [--json]
+fbim list [--status open|pending|done|unknown] [--area <area>] [--label <label>] [--milestone <milestone>] [--json]
 fbim show <N>
 fbim completions <bash|zsh|fish>
 fbim help [command]

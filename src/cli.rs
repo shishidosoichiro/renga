@@ -85,6 +85,9 @@ pub struct CreateArgs {
     /// Body text to append to the issue file.
     #[arg(long)]
     pub body: Option<String>,
+    /// Milestone to assign (e.g. `v1.0`, `2026-Q3`).
+    #[arg(long)]
+    pub milestone: Option<String>,
 }
 
 /// Arguments for `fbim done`.
@@ -120,6 +123,9 @@ pub struct ListArgs {
     /// Filter by label.
     #[arg(long)]
     pub label: Option<String>,
+    /// Filter by milestone.
+    #[arg(long)]
+    pub milestone: Option<String>,
     /// Output as JSON.
     #[arg(long)]
     pub json: bool,

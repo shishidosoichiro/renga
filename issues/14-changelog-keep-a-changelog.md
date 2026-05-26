@@ -1,5 +1,5 @@
 ---
-status: open
+status: pending
 priority: medium
 area: docs
 labels: []

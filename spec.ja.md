@@ -35,12 +35,13 @@ status: open
 priority: high/medium/low   # 省略可能
 area: エリア名              # 省略可能（例: core, cli, docs）
 labels: []
+milestone: v1.0             # 省略可能（例: v1.0, 2026-Q3, sprint-3）
 ---
 ```
 
 frontmatter は省略可能。省略した場合は `status: unknown`、`priority` は `-`（unknown）、`area` は空（グループなし）として扱う。
 
-`area` と `priority` は frontmatter がある場合でも省略可能。`area` を省略すると issue はグループなし扱いになり、`issues/README.md` では見出しなしで表示される。`priority` を省略すると `medium` がデフォルトになる。
+`area`・`priority`・`milestone` は frontmatter がある場合でも省略可能。`area` を省略すると issue はグループなし扱いになり、`issues/README.md` では見出しなしで表示される。`priority` を省略すると `medium` がデフォルトになる。`milestone` を省略するとどのマイルストーンにも属さない。
 
 **status の値**
 
@@ -85,11 +86,11 @@ labels: []
 
 ```
 fbim init
-fbim create <title> [--slug <slug>] [--priority high|medium|low] [--area <area>] [--body <text>]
+fbim create <title> [--slug <slug>] [--priority high|medium|low] [--area <area>] [--body <text>] [--milestone <milestone>]
 fbim done <N>
 fbim pending <N>
 fbim reopen <N>
-fbim list [--status open|pending|done|unknown] [--area <area>] [--label <label>] [--json]
+fbim list [--status open|pending|done|unknown] [--area <area>] [--label <label>] [--milestone <milestone>] [--json]
 fbim show <N>
 fbim completions <bash|zsh|fish>
 fbim help [command]

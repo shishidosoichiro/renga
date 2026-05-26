@@ -131,6 +131,7 @@ struct FrontmatterRaw {
     area: Option<String>,
     #[serde(default)]
     labels: Vec<String>,
+    milestone: Option<String>,
 }
 
 /// A parsed issue file.
@@ -152,6 +153,8 @@ pub struct Issue {
     pub area: String,
     /// Labels attached to the issue.
     pub labels: Vec<String>,
+    /// Milestone the issue belongs to (e.g. `"v1.0"`, `"2026-Q3"`). Optional.
+    pub milestone: Option<String>,
     /// Title extracted from the first `# Heading` line in the body.
     ///
     /// The title lives only in the body — not in frontmatter.
@@ -176,6 +179,7 @@ impl Issue {
             priority: fm.priority.unwrap_or(Priority::Medium),
             area: fm.area.unwrap_or_default(),
             labels: fm.labels,
+            milestone: fm.milestone,
             title: extract_title(body),
             raw_content: content.to_string(),
         })
@@ -235,6 +239,7 @@ pub fn all_issues(
     status_filter: Option<&[Status]>,
     area_filter: Option<&str>,
     label_filter: Option<&str>,
+    milestone_filter: Option<&str>,
 ) -> Result<Vec<Issue>> {
     let mut files: Vec<PathBuf> = WalkDir::new(issues_dir)
         .min_depth(1)
@@ -265,6 +270,7 @@ pub fn all_issues(
                 priority: Priority::Unknown,
                 area: String::new(),
                 labels: vec![],
+                milestone: None,
                 title: extract_title(&content),
                 raw_content: content,
             },
@@ -282,6 +288,11 @@ pub fn all_issues(
         }
         if let Some(label) = label_filter {
             if !issue.labels.iter().any(|l| l == label) {
+                continue;
+            }
+        }
+        if let Some(milestone) = milestone_filter {
+            if issue.milestone.as_deref() != Some(milestone) {
                 continue;
             }
         }

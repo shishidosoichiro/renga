@@ -22,8 +22,13 @@ pub fn run(args: CreateArgs, ctx: &Context) -> Result<()> {
         _ => "\n".to_string(),
     };
 
+    let milestone_line = match &args.milestone {
+        Some(m) => format!("milestone: {m}\n"),
+        None => String::new(),
+    };
+
     let content = format!(
-        "---\nstatus: open\npriority: {}\narea: {}\nlabels: []\n---\n\n# {}\n{}",
+        "---\nstatus: open\npriority: {}\narea: {}\nlabels: []\n{milestone_line}---\n\n# {}\n{}",
         args.priority, args.area, title, body_section
     );
 
