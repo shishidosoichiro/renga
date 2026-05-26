@@ -231,10 +231,16 @@ pub fn all_issues(
             let content = std::fs::read_to_string(&path)?;
             let issue = match Issue::parse(&path, &content) {
                 Ok(i) => i,
-                Err(e) => {
-                    eprintln!("warning: skipping {}: {e}", path.display());
-                    continue;
-                }
+                Err(_) => Issue {
+                    id: extract_id(&path),
+                    path: path.clone(),
+                    status: Status::Open,
+                    priority: Priority::Medium,
+                    area: String::new(),
+                    labels: vec![],
+                    title: extract_title(&content),
+                    raw_content: content,
+                },
             };
 
             if let Some(statuses) = status_filter {
