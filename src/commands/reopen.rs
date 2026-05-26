@@ -20,12 +20,27 @@ pub fn run(args: ReopenArgs, ctx: &Context) -> Result<()> {
         .with_context(|| format!("invalid path: {}", path.display()))?;
     let dest = ctx.issues_dir.join(file_name);
 
+    if path != dest && dest.exists() {
+        anyhow::bail!(
+            "cannot reopen {}: {} already exists as an open issue",
+            args.id,
+            dest.display()
+        );
+    }
+
     let content = std::fs::read_to_string(&path)?;
     let updated = set_frontmatter_field(&content, "status", "open");
-    std::fs::write(&dest, &updated)?;
 
     if path != dest {
+        let tmp = dest.with_extension("tmp");
+        std::fs::write(&tmp, &updated)?;
+        if let Err(e) = std::fs::rename(&tmp, &dest) {
+            let _ = std::fs::remove_file(&tmp);
+            return Err(e.into());
+        }
         std::fs::remove_file(&path)?;
+    } else {
+        std::fs::write(&dest, &updated)?;
     }
 
     readme::write_readme(&ctx.issues_dir, &ctx.config)?;

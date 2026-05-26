@@ -333,3 +333,33 @@ fn complete_list_status_values() {
         .stdout(predicate::str::contains("pending"))
         .stdout(predicate::str::contains("done"));
 }
+
+#[test]
+fn reopen_fails_when_open_issue_with_same_name_exists() {
+    let dir = setup();
+    fbim(&dir).args(["create", "Foo"]).assert().success();
+    fbim(&dir).args(["done", "1"]).assert().success();
+    // manually place a file with the same name in issues/
+    fs::write(
+        dir.path().join("issues/1-foo.md"),
+        "---\nstatus: open\n---\n\n# Foo\n",
+    )
+    .unwrap();
+    fbim(&dir)
+        .args(["reopen", "1"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("already exists"));
+}
+
+#[test]
+fn create_with_milestone() {
+    let dir = setup();
+    fbim(&dir)
+        .args(["create", "Task", "--milestone", "v1.0"])
+        .assert()
+        .success();
+
+    let content = fs::read_to_string(dir.path().join("issues/1-task.md")).unwrap();
+    assert!(content.contains("milestone: v1.0"));
+}

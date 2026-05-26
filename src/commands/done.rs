@@ -24,7 +24,17 @@ pub fn run(args: DoneArgs, ctx: &Context) -> Result<()> {
 
     let content = std::fs::read_to_string(&path)?;
     let updated = set_frontmatter_field(&content, "status", "done");
-    std::fs::write(&dest, &updated)?;
+
+    // Write to a temp file then rename so a crash between write and remove
+    // does not leave both copies with inconsistent status.
+    // dest.exists() is not checked: re-closing an already-done issue is
+    // idempotent and overwrites the stale copy intentionally.
+    let tmp = dest.with_extension("tmp");
+    std::fs::write(&tmp, &updated)?;
+    if let Err(e) = std::fs::rename(&tmp, &dest) {
+        let _ = std::fs::remove_file(&tmp);
+        return Err(e.into());
+    }
     std::fs::remove_file(&path)?;
 
     readme::write_readme(&ctx.issues_dir, &ctx.config)?;

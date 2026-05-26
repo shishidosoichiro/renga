@@ -1,6 +1,6 @@
 //! `fbim create` command handler.
 
-use anyhow::Result;
+use anyhow::{Context as _, Result};
 
 use crate::{
     cli::CreateArgs,
@@ -32,7 +32,14 @@ pub fn run(args: CreateArgs, ctx: &Context) -> Result<()> {
         args.priority, args.area, title, body_section
     );
 
-    std::fs::write(&path, &content)?;
+    std::io::Write::write_all(
+        &mut std::fs::OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&path)
+            .with_context(|| format!("failed to create {}", path.display()))?,
+        content.as_bytes(),
+    )?;
     readme::write_readme(&ctx.issues_dir, &ctx.config)?;
     println!("{}", path.display());
 
