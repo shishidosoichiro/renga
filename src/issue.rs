@@ -342,6 +342,7 @@ pub fn make_slug(title: &str) -> String {
     let slug = slug.trim_matches('-');
     // slug is ASCII-only after replacement, so byte slicing is safe
     let slug = if slug.len() > 30 { &slug[..30] } else { slug };
+    let slug = slug.trim_end_matches('-');
     if slug.is_empty() {
         "issue".to_string()
     } else {
@@ -505,6 +506,14 @@ mod tests {
     fn make_slug_truncates_at_30_chars() {
         let long = "abcdefghijklmnopqrstuvwxyz12345";
         assert_eq!(make_slug(long).len(), 30);
+    }
+
+    #[test]
+    fn make_slug_no_trailing_dash_after_truncation() {
+        // 29 word chars + space + more → dash lands at position 29, truncation at 30 exposes it
+        let title = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaa bb";
+        let slug = make_slug(title);
+        assert!(!slug.ends_with('-'), "slug must not end with dash: {slug}");
     }
 
     #[test]

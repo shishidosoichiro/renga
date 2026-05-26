@@ -80,7 +80,7 @@ pub struct CreateArgs {
     #[arg(long, default_value = "medium", value_parser = ["high", "medium", "low"])]
     pub priority: String,
     /// Area for categorization (e.g. `core`, `cli`, `docs`).
-    #[arg(long, default_value = "misc")]
+    #[arg(long, default_value = "")]
     pub area: String,
     /// Body text to append to the issue file.
     #[arg(long)]
