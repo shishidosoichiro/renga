@@ -2,7 +2,7 @@
 
 use std::{collections::HashMap, path::Path};
 
-use anyhow::Result;
+use anyhow::{Context as _, Result};
 use serde::Deserialize;
 
 /// Project configuration from `.fbim.yml`.
@@ -44,7 +44,9 @@ impl Config {
             return Ok(Config::default());
         }
         let content = std::fs::read_to_string(&path)?;
-        Ok(serde_yaml::from_str(&content).unwrap_or_default())
+        let config = serde_yaml::from_str(&content)
+            .with_context(|| format!("invalid YAML in {}", path.display()))?;
+        Ok(config)
     }
 }
 
@@ -59,6 +61,14 @@ mod tests {
         let config = Config::load(dir.path()).unwrap();
         assert_eq!(config.issues_dir, "issues");
         assert!(config.area_order.is_empty());
+    }
+
+    #[test]
+    fn invalid_yaml_returns_error() {
+        let dir = TempDir::new().unwrap();
+        std::fs::write(dir.path().join(".fbim.yml"), "area_order: [\n").unwrap();
+        let err = Config::load(dir.path()).unwrap_err();
+        assert!(err.to_string().contains(".fbim.yml"), "{err}");
     }
 
     #[test]
