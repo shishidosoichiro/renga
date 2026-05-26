@@ -38,7 +38,7 @@ labels: []
 ---
 ```
 
-frontmatter は省略可能。省略した場合は `status: open` / `priority: medium` / `area: ""` として扱う。
+frontmatter は省略可能。省略した場合は `status: unknown` として扱い、他のフィールドはデフォルト値（`priority: medium`、`area: ""`）を使う。
 
 **status の値**
 
@@ -47,6 +47,7 @@ frontmatter は省略可能。省略した場合は `status: open` / `priority: 
 | `open` | 対応が必要。作業対象 |
 | `pending` | 決定待ち・確認待ち。作業保留 |
 | `done` | 完了（`done/` に移動済み） |
+| `unknown` | frontmatter がないか parse できない。fbim では書き込めない読み取り専用の状態 |
 
 **priority の意味**
 

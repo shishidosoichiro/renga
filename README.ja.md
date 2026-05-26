@@ -64,7 +64,7 @@ cargo install --path /path/to/fbim
 | `fbim done <N>` | issue を完了にする |
 | `fbim pending <N>` | issue を保留にする |
 | `fbim reopen <N>` | issue を再開する |
-| `fbim list [--status open\|pending\|done] [--area <area>] [--json]` | issue 一覧を表示する |
+| `fbim list [--status open\|pending\|done\|unknown] [--area <area>] [--json]` | issue 一覧を表示する |
 | `fbim show <N>` | issue の詳細を表示する |
 | `fbim help [コマンド]` | ヘルプを表示する |
 

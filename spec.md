@@ -38,7 +38,7 @@ labels: []
 ---
 ```
 
-Frontmatter is optional. When absent, defaults are applied: `status: open`, `priority: medium`, `area: ""`.
+Frontmatter is optional. When absent, `status` is set to `unknown` and other fields use defaults: `priority: medium`, `area: ""`.
 
 **status values**
 
@@ -47,6 +47,7 @@ Frontmatter is optional. When absent, defaults are applied: `status: open`, `pri
 | `open` | Needs action. |
 | `pending` | Blocked or deferred. |
 | `done` | Closed (moved to `done/`). |
+| `unknown` | Frontmatter is absent or unparseable. Read-only — not writable by fbim. |
 
 **priority values**
 
