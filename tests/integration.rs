@@ -363,3 +363,30 @@ fn create_with_milestone() {
     let content = fs::read_to_string(dir.path().join("issues/1-task.md")).unwrap();
     assert!(content.contains("milestone: v1.0"));
 }
+
+// ── init ──────────────────────────────────────────────────────────────────────
+
+#[test]
+fn init_creates_issues_and_done_dirs() {
+    let dir = TempDir::new().unwrap();
+    fbim(&dir)
+        .args(["init"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Initialized"));
+
+    assert!(dir.path().join("issues").is_dir());
+    assert!(dir.path().join("issues/done").is_dir());
+}
+
+#[test]
+fn init_is_idempotent() {
+    let dir = TempDir::new().unwrap();
+    fbim(&dir).args(["init"]).assert().success();
+    fbim(&dir)
+        .args(["init"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("already initialized"));
+    assert!(dir.path().join("issues/done").is_dir());
+}
