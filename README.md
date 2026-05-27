@@ -60,7 +60,7 @@ cargo install --path /path/to/fbim
 | Command | Description |
 |---|---|
 | `fbim init` | Initialize the issues directory |
-| `fbim create <title> [--slug <slug>] [--priority high\|medium\|low] [--area <area>] [--body <text>] [--milestone <milestone>]` | Create an issue |
+| `fbim create <title> [--id <N>] [--slug <slug>] [--priority high\|medium\|low] [--area <area>] [--body <text\|-\>] [--milestone <milestone>]` | Create an issue (`--body -` reads from stdin) |
 | `fbim done <N>` | Mark an issue as done |
 | `fbim pending <N>` | Put an issue on hold |
 | `fbim reopen <N>` | Reopen a closed issue |

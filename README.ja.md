@@ -60,7 +60,7 @@ cargo install --path /path/to/fbim
 | コマンド | 動作 |
 |---|---|
 | `fbim init` | issues ディレクトリを初期化する |
-| `fbim create <タイトル> [--slug <slug>] [--priority high\|medium\|low] [--area <area>] [--body <テキスト>] [--milestone <milestone>]` | issue を作成する |
+| `fbim create <タイトル> [--id <N>] [--slug <slug>] [--priority high\|medium\|low] [--area <area>] [--body <テキスト\|-\>] [--milestone <milestone>]` | issue を作成する（`--body -` で標準入力から本文を読む） |
 | `fbim done <N>` | issue を完了にする |
 | `fbim pending <N>` | issue を保留にする |
 | `fbim reopen <N>` | issue を再開する |

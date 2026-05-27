@@ -390,3 +390,45 @@ fn init_is_idempotent() {
         .stdout(predicate::str::contains("already initialized"));
     assert!(dir.path().join("issues/done").is_dir());
 }
+
+// ── create --body - (stdin) ───────────────────────────────────────────────────
+
+#[test]
+fn create_body_from_stdin() {
+    let dir = setup();
+    fbim(&dir)
+        .args(["create", "My Issue", "--body", "-"])
+        .write_stdin("body from stdin\n")
+        .assert()
+        .success();
+
+    let content = fs::read_to_string(dir.path().join("issues/1-my-issue.md")).unwrap();
+    assert!(content.contains("body from stdin"));
+}
+
+// ── create --id ───────────────────────────────────────────────────────────────
+
+#[test]
+fn create_with_custom_id() {
+    let dir = setup();
+    fbim(&dir)
+        .args(["create", "My Issue", "--id", "99"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("99-my-issue.md"));
+
+    assert!(dir.path().join("issues/99-my-issue.md").exists());
+}
+
+#[test]
+fn create_with_custom_id_collision() {
+    let dir = setup();
+    fbim(&dir)
+        .args(["create", "First", "--id", "5"])
+        .assert()
+        .success();
+    fbim(&dir)
+        .args(["create", "Second", "--id", "5", "--slug", "second"])
+        .assert()
+        .failure();
+}

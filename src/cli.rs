@@ -73,6 +73,9 @@ pub struct CreateArgs {
     /// Issue title (multiple words, no quotes required).
     #[arg(required = true)]
     pub title: Vec<String>,
+    /// Issue ID to use instead of auto-incrementing (e.g. `42`).
+    #[arg(long)]
+    pub id: Option<String>,
     /// Kebab-case slug for the filename (auto-generated from title if omitted).
     #[arg(long)]
     pub slug: Option<String>,
@@ -82,7 +85,7 @@ pub struct CreateArgs {
     /// Area for categorization (e.g. `core`, `cli`, `docs`).
     #[arg(long, default_value = "")]
     pub area: String,
-    /// Body text to append to the issue file.
+    /// Body text to append to the issue file. Use `-` to read from stdin.
     #[arg(long)]
     pub body: Option<String>,
     /// Milestone to assign (e.g. `v1.0`, `2026-Q3`).
