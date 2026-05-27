@@ -86,7 +86,7 @@ Brief description of what needs to be done.
 
 ```
 fbim init
-fbim create <title> [--slug <slug>] [--priority high|medium|low] [--area <area>] [--body <text>] [--milestone <milestone>]
+fbim create <title> [--id <N>] [--slug <slug>] [--priority high|medium|low] [--area <area>] [--body <text|-\>] [--milestone <milestone>]
 fbim done <N>
 fbim pending <N>
 fbim reopen <N>

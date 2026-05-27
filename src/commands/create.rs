@@ -18,6 +18,12 @@ pub fn run(args: CreateArgs, ctx: &Context) -> Result<()> {
     let slug = args.slug.unwrap_or_else(|| make_slug(&title));
     let id = match args.id {
         Some(id) => {
+            let n: u64 = id
+                .parse()
+                .with_context(|| format!("invalid id '{}': must be a positive integer", id))?;
+            if n == 0 {
+                anyhow::bail!("invalid id '{}': must be a positive integer", id);
+            }
             if find_issue(&ctx.issues_dir, &id, true)?.is_some() {
                 anyhow::bail!("issue {} already exists", id);
             }

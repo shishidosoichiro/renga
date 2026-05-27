@@ -430,5 +430,26 @@ fn create_with_custom_id_collision() {
     fbim(&dir)
         .args(["create", "Second", "--id", "5", "--slug", "second"])
         .assert()
-        .failure();
+        .failure()
+        .stderr(predicate::str::contains("already exists"));
+}
+
+#[test]
+fn create_with_id_zero_fails() {
+    let dir = setup();
+    fbim(&dir)
+        .args(["create", "Task", "--id", "0"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("positive integer"));
+}
+
+#[test]
+fn create_with_id_non_numeric_fails() {
+    let dir = setup();
+    fbim(&dir)
+        .args(["create", "Task", "--id", "abc"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("positive integer"));
 }
