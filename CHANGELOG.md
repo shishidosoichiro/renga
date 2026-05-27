@@ -1,6 +1,27 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [0.5.0] - 2026-05-27
+
+### 🚀 Features
+
+- [`ad0b6fc`] *(cli)* --body - で標準入力から本文を読む機能と --id でイシュー番号を指定する機能を追加 (#50, #51)
+
+### 🐛 Bug Fixes
+
+- [`9f026e7`] *(core)* Set_frontmatter_field が body の '---' で frontmatter を再解析するバグを修正する (#18, #41)
+- [`ce40887`] *(core)* Reopen/done/create のファイル操作安全性を改善する (#19, #20, #21, #45, #47, #48, #49)
+- [`1d80d02`] *(config)* .fbim.yml の YAML パースエラーを握り潰さずエラーを返す (#22)
+- [`7434c36`] *(core,cli)* Make_slug の末尾ダッシュを除去し --area デフォルト値を空文字に修正する (#25, #28)
+- [`6575e26`] *(cli)* --status 不正値エラー化・補完修正・help 更新 (#23, #24, #26, #27, #31, #35)
+- [`89491bd`] *(core)* タイトル抽出でファイルステムへのフォールバックを実装 (#34)
+- [`8d71b4e`] *(core)* --id 0 と非数値を弾くバリデーション追加、spec に --id と --body - を記載 (#52, #53, #54)
+
+### 🚜 Refactor
+
+- [`e4aa4f6`] Retro を notes/ ファイルから issue に移行し self-improve を更新する
+- [`e23b591`] *(agent)* Retro issue の area を agent に変更し self-improve を更新する
+- [`bbbeabc`] *(agent)* Self-improve.md の「retro」表記を「retro issue」に統一する
 ## [0.4.0] - 2026-05-26
 
 ### 🚀 Features
@@ -10,23 +31,6 @@ All notable changes to this project will be documented in this file.
 ### 🐛 Bug Fixes
 
 - [`d0b951b`] Area デフォルトを空文字に統一し Regex を LazyLock 化する
-
-### 📚 Documentation
-
-- [`a388c5f`] CLAUDE.md にリリース手順と git-cliff の使用を明記する
-- [`e1e7c6c`] Install・release スキルを追加し CONTRIBUTING.md を CLAUDE.md にインポートする
-- [`f1aaa3f`] Self-improve・review サブエージェントを追加する
-- [`041cb4a`] CLAUDE.md を63行に削減する
-- [`a5008a2`] CLAUDE.md の ID 仕様を整数 ID に修正する（ゼロ埋め廃止済み）
-- [`e04b4ce`] *(issues)* Issue 7〜16 の状態を更新する
-- [`521ba36`] 実装フローとカバレッジ確認手順を CLAUDE.md・CONTRIBUTING.md に追加する
-- [`9229c50`] Review サブエージェントの観点にカバレッジ確認を明示する
-- [`9d5ec5b`] エージェント活用方針と .claude/ 変更ルールを CLAUDE.md に追加し review にカバレッジ確認を加える
-- [`c916c1a`] *(claude)* Retro の指摘を CLAUDE.md に反映する
-
-### ⚙️ Miscellaneous Tasks
-
-- [`1be9807`] Skills を .claude/skills に移動し CLAUDE.md を更新する
 ## [0.3.0] - 2026-05-26
 
 ### 🚀 Features
@@ -38,46 +42,17 @@ All notable changes to this project will be documented in this file.
 
 - [`4f62bf8`] Parse できない issue ファイルをスキップして警告を出す
 - [`2f3463d`] Frontmatter のない Markdown ファイルもデフォルト値で表示する
-
-### 📚 Documentation
-
-- [`b07f22e`] ID とタイトルの取得元を spec と doc コメントに明記する
-- [`2a4a9f8`] Spec.md を Rust 版に更新し、CLAUDE.md にドキュメント更新ルールを追記する
-- [`be0b7d4`] Unknown status を spec と README に追記する
-- [`d1027ed`] Status::Unknown の doc コメントと doctest を追加する
 ## [0.2.1] - 2026-05-25
 
 ### 🐛 Bug Fixes
 
 - [`dd476c5`] Fbim -- のタブ補完で --version と --help を表示する
 - [`4414c1e`] List の並び順を数値順に修正する
-
-### 📚 Documentation
-
-- [`fad6ea7`] CONTRIBUTING.md を追加する
-- [`28f9876`] README のキャッチコピーを修正する
-- [`78c3dde`] README の説明文を改善する
-- [`32521ea`] README を全面的に改善する
-- [`dc545ea`] "Why file-based?" セクションのフォーマットを戻す
-- [`72a4cf3`] AI ツールとの連携を "Why file-based?" セクションに戻す
-
-### ⚙️ Miscellaneous Tasks
-
-- [`252e740`] .coverage と __pycache__/ を .gitignore に追加する
-- [`242741b`] CHANGELOG にコミット ID を追加する
 ## [0.2.0] - 2026-05-25
 
 ### 🚀 Features
 
 - [`03c12c7`] ID のゼロ埋めを廃止し整数 ID に変更する
-
-### 📚 Documentation
-
-- [`4e2865b`] Issues/ 探索ルールを README に追記する
-
-### 🧪 Testing
-
-- [`1b6ef36`] サブディレクトリからの issues/ 探索テストを追加する
 ## [0.1.0] - 2026-05-24
 
 ### 🚀 Features
@@ -112,38 +87,6 @@ All notable changes to this project will be documented in this file.
 - [`ee4c2f5`] Zsh 補完スクリプトに compdef _fbim fbim を追加する
 - [`ad040df`] Bash 補完を source <(...) から eval "$(...)" に変更する
 
-### 💼 Other
-
-- [`eabf8b1`] FBIM リポジトリの初期構成を作成する
-- [`2fe479d`] 英語を正とし日本語版を .ja.md として追加する
-
 ### 🚜 Refactor
 
 - [`0c67786`] SKILL.md を bin/fbim 呼び出しに簡略化する
-
-### 📚 Documentation
-
-- [`812c9bd`] Issue ID の表記を5桁に統一する
-- [`c35b47b`] 公開準備として README・LICENSE・スキルを整備する
-- [`30c4091`] README.ja.md を Rust 版・英語版に合わせて全面改訂
-- [`3e3eaa1`] Completions のヘルプと README にシェル補完の使い方を追加
-
-### 🎨 Styling
-
-- [`564faec`] Cargo fmt を適用する（CLI コマンド属性の折り返し）
-
-### 🧪 Testing
-
-- [`15c2bdb`] Bin/ スクリプトの pytest テストスイートを追加する
-- [`0689431`] 親ディレクトリ探索・issues_dir 設定のテストを追加する
-
-### ⚙️ Miscellaneous Tasks
-
-- [`e0e6208`] .gitignore を追加して __pycache__ を除外する
-- [`a00fe63`] GitLab CI で pytest を実行する
-- [`96783fc`] カバレッジを GitLab に報告しバッジを README に追加する
-- [`1729425`] Rustfmt と clippy コンポーネントを CI に追加する
-- [`49a7f57`] Rust-toolchain.toml で 1.95.0 を固定し rustfmt・clippy を宣言する
-- [`2261ddf`] Build ジョブを全ブランチで実行するよう修正する
-- [`20db4ff`] Publish ジョブのエラー出力を有効化して原因を確認する
-- [`f2680ac`] Publish の curl に --insecure を追加して自己署名証明書に対応する
