@@ -37,6 +37,7 @@ renga の差別化ポイント「AI エージェントが直接操作できる�
 ## 注意点
 
 - `tokio`（非同期ランタイム）の依存が増える → バイナリサイズ増大
+- `rmcp` は tokio 必須。stdio transport が `tokio::io::stdin/stdout` に直結しており、async-std・smol・Embassy などの代替ランタイムは使用不可
 - 現在のスキルで機能的には十分。優先度は低め
 - ファイルベースであること自体が renga の価値であり、MCP 対応でその軽量さが薄れる可能性もある
 
