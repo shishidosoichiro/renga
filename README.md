@@ -22,6 +22,26 @@ renga create "My first task"
 
 That's it. Issue files appear in `issues/`.
 
+## Recommended workflow with AI agents
+
+```text
+1. Create an issue for the task
+   renga create "Add input validation" --area core
+
+2. Agent runs renga list before starting work
+
+3. Agent appends decisions and constraints to the issue body under ## Notes
+
+4. After implementation, run renga validate
+
+5. Close the issue alongside the fix commit
+   renga done 1
+   git add issues/ src/
+   git commit -m "feat: add input validation (#1)"
+```
+
+Issue files and code changes land in the same commit — the git history tells the full story.
+
 ## Claude Code integration
 
 Claude can create issues as it works, close them when done, and keep the list current — all without interrupting the coding flow.
@@ -76,7 +96,7 @@ If you need comments, assignments, notifications, or a web UI for non-engineers,
 
 ## Installation
 
-Download and run the install script. It fetches the pre-built binary for your platform from the package registry.
+Download and run the install script. It fetches the pre-built binary for your platform from GitHub Releases.
 
 ```sh
 bash <(curl -fsSL https://raw.githubusercontent.com/shishidosoichiro/renga/main/install.sh)

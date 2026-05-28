@@ -22,6 +22,26 @@ renga create "最初のタスク"
 
 以上。`issues/` ディレクトリにファイルが作られる。
 
+## AI エージェントとの推奨ワークフロー
+
+```text
+1. タスクの issue を作る
+   renga create "入力バリデーションを追加する" --area core
+
+2. エージェントが作業前に renga list で確認する
+
+3. 作業中に判断・制約を issue 本文の ## Notes に追記する
+
+4. 実装後に renga validate を実行する
+
+5. 修正コミットと一緒に issue を close する
+   renga done 1
+   git add issues/ src/
+   git commit -m "feat: 入力バリデーションを追加 (#1)"
+```
+
+issue ファイルとコードの変更が同じコミットに入る——git の履歴が全体像を語る。
+
 ## Claude Code integration
 
 Claude が作業しながら issue を作り、完了したら close する——コーディングのフローを止めずに issue 管理が回る。
@@ -76,7 +96,7 @@ curl -fsSL https://raw.githubusercontent.com/shishidosoichiro/renga/main/skills/
 
 ## インストール
 
-インストールスクリプトがプラットフォームに合ったバイナリをパッケージレジストリから取得してインストールする。
+インストールスクリプトがプラットフォームに合ったバイナリを GitHub Releases から取得してインストールする。
 
 ```sh
 bash <(curl -fsSL https://raw.githubusercontent.com/shishidosoichiro/renga/main/install.sh)
