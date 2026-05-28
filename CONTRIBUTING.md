@@ -53,7 +53,7 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/). The type is
 
 **Breaking changes** — add `!` after the type (`feat!:`) or add a `BREAKING CHANGE:` footer.
 
-Use Japanese for the description to match the existing history.
+Use English for the description.
 
 ## Branching
 
