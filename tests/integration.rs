@@ -28,6 +28,7 @@ fn create_writes_file() {
         .stdout(predicate::str::contains("1-my-issue.md"));
 
     let content = fs::read_to_string(dir.path().join("issues/1-my-issue.md")).unwrap();
+    assert!(content.contains("schema_version: 1"));
     assert!(content.contains("status: open"));
     assert!(content.contains("area: core"));
     assert!(content.contains("# My Issue"));

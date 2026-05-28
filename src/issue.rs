@@ -126,6 +126,7 @@ impl FromStr for Priority {
 
 #[derive(Deserialize)]
 struct FrontmatterRaw {
+    schema_version: Option<u32>,
     status: Option<Status>,
     priority: Option<Priority>,
     area: Option<String>,
@@ -137,6 +138,12 @@ struct FrontmatterRaw {
 /// A parsed issue file.
 #[derive(Debug)]
 pub struct Issue {
+    /// Schema version declared in frontmatter (`schema_version` field).
+    ///
+    /// `None` means the field is absent (file predates the field). `Some(1)`
+    /// is the current version. Files without this field are handled the same
+    /// as version 1.
+    pub schema_version: Option<u32>,
     /// Integer ID extracted from the filename prefix (e.g. `"42"`).
     ///
     /// The ID lives only in the filename — not in frontmatter or body.
@@ -173,6 +180,7 @@ impl Issue {
             .with_context(|| format!("invalid frontmatter in {}", path.display()))?;
 
         Ok(Issue {
+            schema_version: fm.schema_version,
             id: extract_id(path),
             path: path.to_path_buf(),
             status: fm.status.unwrap_or(Status::Open),
@@ -268,6 +276,7 @@ pub fn all_issues(
                     .map(|(_, b)| b)
                     .unwrap_or(&content);
                 Issue {
+                    schema_version: None,
                     id: extract_id(&path),
                     path: path.clone(),
                     status: Status::Unknown,
@@ -454,16 +463,30 @@ mod tests {
         let path = dir.path().join("00001-test-issue.md");
         std::fs::write(
             &path,
-            "---\nstatus: open\npriority: high\narea: core\nlabels: []\n---\n\n# Test Issue\n",
+            "---\nschema_version: 1\nstatus: open\npriority: high\narea: core\nlabels: []\n---\n\n# Test Issue\n",
         )
         .unwrap();
         let issue = Issue::load(&path).unwrap();
+        assert_eq!(issue.schema_version, Some(1));
         assert_eq!(issue.id, "00001");
         assert_eq!(issue.status, Status::Open);
         assert_eq!(issue.priority, Priority::High);
         assert_eq!(issue.area, "core");
         assert_eq!(issue.title, "Test Issue");
         assert!(issue.labels.is_empty());
+    }
+
+    #[test]
+    fn parse_issue_schema_version_absent_gives_none() {
+        let dir = TempDir::new().unwrap();
+        let path = dir.path().join("1-old.md");
+        std::fs::write(
+            &path,
+            "---\nstatus: open\npriority: medium\narea: core\nlabels: []\n---\n\n# Old Issue\n",
+        )
+        .unwrap();
+        let issue = Issue::load(&path).unwrap();
+        assert_eq!(issue.schema_version, None);
     }
 
     #[test]

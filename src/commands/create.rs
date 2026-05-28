@@ -55,7 +55,7 @@ pub fn run(args: CreateArgs, ctx: &Context) -> Result<()> {
     };
 
     let content = format!(
-        "---\nstatus: open\npriority: {}\narea: {}\nlabels: []\n{milestone_line}---\n\n# {}\n{}",
+        "---\nschema_version: 1\nstatus: open\npriority: {}\narea: {}\nlabels: []\n{milestone_line}---\n\n# {}\n{}",
         args.priority, args.area, title, body_section
     );
 

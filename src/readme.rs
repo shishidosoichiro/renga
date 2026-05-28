@@ -110,6 +110,7 @@ mod tests {
 
     fn make_issue(id: &str, area: &str, title: &str) -> Issue {
         Issue {
+            schema_version: None,
             id: id.to_string(),
             path: PathBuf::from(format!("issues/{id}-{}.md", title.to_lowercase())),
             status: Status::Open,

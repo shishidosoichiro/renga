@@ -31,6 +31,7 @@ N-short-name.md
 
 ```markdown
 ---
+schema_version: 1           # 省略可能（このフィールドが導入される前に作成したファイルには含まれない）
 status: open
 priority: high/medium/low   # 省略可能
 area: エリア名              # 省略可能（例: core, cli, docs）
@@ -40,6 +41,8 @@ milestone: v1.0             # 省略可能（例: v1.0, 2026-Q3, sprint-3）
 ```
 
 frontmatter は省略可能。省略した場合は `status: unknown`、`priority` は `-`（unknown）、`area` は空（グループなし）として扱う。
+
+`schema_version` は frontmatter のフォーマットバージョンを示す。新規作成ファイルには `schema_version: 1` が含まれる。このフィールドがない旧ファイルは内部的に `None`（不在）として保持され、ツールはバージョン 1 と同等に扱う。
 
 `area`・`priority`・`milestone` は frontmatter がある場合でも省略可能。`area` を省略すると issue はグループなし扱いになり、`issues/README.md` では見出しなしで表示される。`priority` を省略すると `medium` がデフォルトになる。`milestone` を省略するとどのマイルストーンにも属さない。
 
@@ -71,6 +74,7 @@ frontmatter は省略可能。省略した場合は `status: unknown`、`priorit
 
 ```markdown
 ---
+schema_version: 1
 status: open
 priority: medium
 area: エリア名

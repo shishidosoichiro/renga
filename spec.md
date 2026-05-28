@@ -31,6 +31,7 @@ N-short-name.md
 
 ```markdown
 ---
+schema_version: 1           # optional (absent in files created before this field was introduced)
 status: open
 priority: high|medium|low   # optional
 area: area-name             # optional (e.g. core, cli, docs)
@@ -40,6 +41,8 @@ milestone: v1.0             # optional (e.g. v1.0, 2026-Q3, sprint-3)
 ```
 
 Frontmatter is optional. When absent, `status` is `unknown`, `priority` is `-` (unknown), and `area` is empty (no group).
+
+`schema_version` identifies the frontmatter format version. New files include `schema_version: 1`. Files without this field (created before the field was introduced) are treated as absent (`None` internally); tools handle them the same as version 1.
 
 `area`, `priority`, and `milestone` fields are optional even when frontmatter is present. Omitting `area` places the issue in no group (shown without a heading in `issues/README.md`). Omitting `priority` defaults to `medium`. Omitting `milestone` means the issue belongs to no milestone.
 
@@ -71,6 +74,7 @@ Falls back to the file stem if no heading is found.
 
 ```markdown
 ---
+schema_version: 1
 status: open
 priority: medium
 area: area-name

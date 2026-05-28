@@ -21,7 +21,6 @@ Closed issues are moved to `done/`.
 | # | status | priority | title |
 |---|---|---|---|
 | [64](64-fbim-validate-status-id.md) | open | medium | fbim validate コマンドの追加 — フロントマターのスキーマ崩れ・status 不正値・ID 重複を検出する |
-| [65](65-schema-version.md) | open | medium | schema_version フィールドをフロントマターに追加する — 将来の仕様変更時に旧形式と判別できるようにする |
 
 ---
 
