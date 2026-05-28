@@ -29,7 +29,13 @@ Claude が作業しながら issue を作り、完了したら close する—�
 スキルをインストールすれば、Claude Code の中で `/renga` を使って issue を管理できる。
 
 ```sh
+# Node.js がある場合
 npx skills add shishidosoichiro/renga
+
+# Node.js がない場合
+mkdir -p ~/.claude/skills/renga
+curl -fsSL https://raw.githubusercontent.com/shishidosoichiro/renga/main/skills/renga/SKILL.md \
+  -o ~/.claude/skills/renga/SKILL.md
 ```
 
 あとは Claude Code セッションの中で直接使うだけ。
