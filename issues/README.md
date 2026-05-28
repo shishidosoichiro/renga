@@ -8,14 +8,6 @@ Closed issues are moved to `done/`.
 
 ---
 
-## agent
-
-| # | status | priority | title |
-|---|---|---|---|
-| [101](101-retro-release-renga-issue.md) | open | medium | retro: release スキルに renga を使った issue 管理の手順を追加する |
-
----
-
 ## cli
 
 | # | status | priority | title |
