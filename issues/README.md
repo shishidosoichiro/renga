@@ -8,6 +8,14 @@ Closed issues are moved to `done/`.
 
 ---
 
+## agent
+
+| # | status | priority | title |
+|---|---|---|---|
+| [85](85-retro-install-release-github-c.md) | open | medium | retro: install・release スキルを GitHub・crates.io 対応に更新する |
+
+---
+
 ## docs
 
 | # | status | priority | title |
