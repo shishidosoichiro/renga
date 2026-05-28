@@ -4,7 +4,7 @@ use anyhow::{Context as _, Result};
 
 use crate::{
     cli::ReopenArgs,
-    issue::{find_issue, set_frontmatter_field},
+    issue::{find_issue, set_frontmatter_field, Issue, Status},
     readme, Context, FbimError,
 };
 
@@ -20,7 +20,16 @@ pub fn run(args: ReopenArgs, ctx: &Context) -> Result<()> {
         .with_context(|| format!("invalid path: {}", path.display()))?;
     let dest = ctx.issues_dir.join(file_name);
 
-    if path != dest && dest.exists() {
+    if path == dest {
+        // File is in issues/ (not done/) — open or pending.
+        // Reject if already open.
+        let content = std::fs::read_to_string(&path)?;
+        if let Ok(issue) = Issue::parse(&path, &content) {
+            if issue.status == Status::Open {
+                anyhow::bail!("issue {} already exists as an open issue", args.id);
+            }
+        }
+    } else if dest.exists() {
         anyhow::bail!(
             "cannot reopen {}: {} already exists as an open issue",
             args.id,
