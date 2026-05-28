@@ -67,6 +67,8 @@ File-Based Issue Management。詳細仕様は `spec.ja.md` を参照。
 
 **変更の順序**: 新規追加を先にコミット・確認してから、削除や簡略化を行う（追加 → 確認 → 破壊）。
 
+**コミットメッセージの言語**: `type`・`scope`・`description` はすべて英語で書く（`Use English for the description` — CONTRIBUTING.md 参照）。issue ファイルのタイトル・本文、CLAUDE.md、`.claude/agents/` は日本語でよい。
+
 ## 判断方針
 
 - **ベストプラクティスを先に調べる**: 実装・設計の判断を述べる前に、WebSearch / WebFetch でベストプラクティスを調べる。知っているつもりで進めない。自分の推論だけに頼らず、実践の中で検証された方法（RFC・仕様書・設計パターン・公式ドキュメント等）を参照する。

@@ -8,14 +8,6 @@ Closed issues are moved to `done/`.
 
 ---
 
-## agent
-
-| # | status | priority | title |
-|---|---|---|---|
-| [104](104-retro-claude-md.md) | open | medium | retro: コミットメッセージは英語という規約を CLAUDE.md に追記する |
-
----
-
 ## cli
 
 | # | status | priority | title |
