@@ -8,6 +8,24 @@ Closed issues are moved to `done/`.
 
 ---
 
+## cli
+
+| # | status | priority | title |
+|---|---|---|---|
+| [86](86-renga-edit-n-editor-issue.md) | open | medium | renga edit <N> — $EDITOR で issue ファイルを直接開く |
+| [87](87-renga-next-priority-area-issue.md) | open | medium | renga next — priority・area から次に着手すべき issue を返す（AI のトークン節約） |
+| [88](88-renga-update-n-cli-ai.md) | open | medium | renga update <N> — CLI オプションでフィールドを更新する（AI からの構造化更新向け） |
+
+---
+
+## core
+
+| # | status | priority | title |
+|---|---|---|---|
+| [89](89-renga-done-ai-issue.md) | open | medium | renga done 実行時に AI の作業ログを issue ファイルに構造化して記録する |
+
+---
+
 ## docs
 
 | # | status | priority | title |
