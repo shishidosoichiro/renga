@@ -21,9 +21,8 @@ Closed issues are moved to `done/`.
 
 | # | status | priority | title |
 |---|---|---|---|
-| [57](57-crates-io-publish.md) | open | medium | crates.io への publish 対応 |
 | [58](58-zenn-reddit.md) | open | medium | メディア活動: Zenn / Reddit への投稿 |
-| [84](84-mcp-renga-mcp-server.md) | open | medium | MCP サーバーモード（renga mcp-server）の追加を検討する |
+| [84](84-mcp-renga-mcp-server.md) | open | low | MCP サーバーモード（renga mcp-server）の追加を検討する |
 
 ---
 

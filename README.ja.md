@@ -1,6 +1,7 @@
 # Renga — File-Based Issue Management
 
 [![CI](https://github.com/shishidosoichiro/renga/actions/workflows/ci.yml/badge.svg)](https://github.com/shishidosoichiro/renga/actions/workflows/ci.yml)
+[![Crates.io](https://img.shields.io/crates/v/renga.svg)](https://crates.io/crates/renga)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 renga は issue をファイルで管理する CLI ツールです。普通の Markdown なので、エディタ・grep・git・AI エージェントがそのまま読み書きできます。`renga create "タイトル"` で issue を作成し、`renga done 1` で閉じます。
@@ -105,7 +106,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/shishidosoichiro/renga/main/
 ソースからビルドする場合:
 
 ```sh
-cargo install --path /path/to/renga
+cargo install renga
 ```
 
 ## コマンド

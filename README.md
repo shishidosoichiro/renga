@@ -1,6 +1,7 @@
 # Renga — File-Based Issue Management
 
 [![CI](https://github.com/shishidosoichiro/renga/actions/workflows/ci.yml/badge.svg)](https://github.com/shishidosoichiro/renga/actions/workflows/ci.yml)
+[![Crates.io](https://img.shields.io/crates/v/renga.svg)](https://crates.io/crates/renga)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 renga is a CLI tool for managing issues as files. Plain Markdown, so your editor, grep, git, and AI agents can all read and write them. `renga create "title"` creates an issue; `renga done 1` closes it.
@@ -102,10 +103,10 @@ Download and run the install script. It fetches the pre-built binary for your pl
 bash <(curl -fsSL https://raw.githubusercontent.com/shishidosoichiro/renga/main/install.sh)
 ```
 
-Or build from source:
+Or install from [crates.io](https://crates.io/crates/renga):
 
 ```sh
-cargo install --path /path/to/renga
+cargo install renga
 ```
 
 ## Commands
