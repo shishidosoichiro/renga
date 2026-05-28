@@ -33,6 +33,8 @@ Closed issues are moved to `done/`.
 |---|---|---|---|
 | [12](12-changelog-md-unreleased-keep-a.md) | pending | low | CHANGELOG.md の [Unreleased] セクションと空行が抜けている（Keep a Changelog 形式） |
 | [14](14-changelog-keep-a-changelog.md) | pending | medium | CHANGELOG を Keep a Changelog 形式に移行するか検討する |
+| [102](102-code-of-conduct-md.md) | pending | medium | CODE_OF_CONDUCT.md を追加する |
+| [103](103-security-md.md) | pending | medium | SECURITY.md を追加する |
 
 ---
 
