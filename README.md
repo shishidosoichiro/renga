@@ -53,9 +53,9 @@ Then use it directly in any Claude Code session:
 
 FBIM is for **solo developers and small teams** who want to start tracking work immediately, without setting up an external service first.
 
-- Starting a new project and don't want to configure GitHub Issues yet
-- Working offline or on a private machine with no internet access
 - Using an AI coding tool (like Claude Code) and want issue management without leaving the terminal
+- Starting a project before setting up GitHub Issues
+- Working offline or on a private machine with no internet access
 - Want issues to live in the same git history as the code that fixes them
 
 If you need comments, assignments, notifications, or a web UI for non-engineers, reach for GitHub Issues or Linear instead. FBIM is intentionally minimal.

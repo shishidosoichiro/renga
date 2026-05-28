@@ -1,5 +1,5 @@
 ---
-status: open
+status: done
 priority: medium
 area: docs
 labels: []
@@ -27,3 +27,14 @@ fbim の最大の差別化は「AI エージェントが直接ファイルとし
 - 「solo developers and small teams」の表現はそのまま（冒頭を変えるのは #61 の範囲）
 - GitHub Issues を批判する表現は避ける。これは単なるトーンの問題ではなく、宍戸さんの方針として「他のツールを非難することはしない」という判断に基づいている。marketing-strategist が「Why not GitHub Issues?」というセクション名を提案したが、宍戸さんはこの書き方に抵抗感を示した。英語圏では比較表現として自然に受け取られることもあるが、それでもこの方針は維持する
 - 英語版・日本語版を同期する
+
+## 決定
+
+「Starting a new project and don't want to configure GitHub Issues yet」は「GitHub Issues が面倒」という批判的ニュアンスがある。以下の案の中から選定した：
+
+1. "Starting a project before setting up GitHub Issues" ← **採用**
+2. "Working on a project that isn't using GitHub Issues yet"
+3. "Want issue tracking before GitHub Issues is the right fit"
+4. "In early stages where GitHub Issues feels like overkill"
+
+1 が最もシンプルで中立。日本語版は「GitHub Issues を設定する前のプロジェクト」。
