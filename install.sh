@@ -21,7 +21,7 @@ ARCH=$(uname -m)
 case "${OS}-${ARCH}" in
   Linux-x86_64)   TARGET="x86_64-unknown-linux-gnu" ;;
   Darwin-arm64)   TARGET="aarch64-apple-darwin" ;;
-  Darwin-x86_64)  TARGET="aarch64-apple-darwin" ;;  # Rosetta
+  Darwin-x86_64)  TARGET="x86_64-apple-darwin" ;;
   *)
     echo "error: unsupported platform: ${OS}-${ARCH}" >&2
     exit 1
