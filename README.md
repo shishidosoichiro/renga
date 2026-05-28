@@ -119,7 +119,7 @@ cargo install renga
 | `renga pending <N>` | Put an issue on hold |
 | `renga reopen <N>` | Reopen a closed issue |
 | `renga list [--status open\|pending\|done\|unknown] [--area <area>] [--label <label>] [--milestone <milestone>] [--json]` | List issues |
-| `renga show <N>` | Show issue details |
+| `renga show <N>` | Show issue details |\n| `renga edit <N>` | Open issue in `$EDITOR` (human) |\n| `renga update <N> [--priority ...] [--area ...] [--status ...] [--milestone ...] [--label ...]... [--body <text\\|->]` | Update issue fields (AI/scripts) |
 | `renga validate` | Check all issues for schema errors and duplicate IDs |
 | `renga completions bash\|zsh\|fish` | Print shell completion script |
 | `renga help [command]` | Show help |

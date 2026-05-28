@@ -107,15 +107,31 @@ fn write_candidates(args: &[String], ctx: &Context) -> io::Result<()> {
     let prev = args.get(args.len() - 2).map(|s| s.as_str()).unwrap_or("");
 
     match subcmd {
-        "done" | "pending" => emit_open_issues(&mut out, ctx)?,
-        "show" => {
+        "done" | "pending" | "edit" => emit_open_issues(&mut out, ctx)?,
+        "show" | "reopen" => {
             emit_open_issues(&mut out, ctx)?;
             emit_done_issues(&mut out, ctx)?;
         }
-        "reopen" => {
-            emit_open_issues(&mut out, ctx)?;
-            emit_done_issues(&mut out, ctx)?;
-        }
+        "update" => match prev {
+            "--priority" => {
+                writeln!(out, "high")?;
+                writeln!(out, "medium")?;
+                writeln!(out, "low")?;
+            }
+            "--status" => {
+                writeln!(out, "open")?;
+                writeln!(out, "pending")?;
+            }
+            _ => {
+                emit_open_issues(&mut out, ctx)?;
+                writeln!(out, "--priority\tPriority level")?;
+                writeln!(out, "--area\tArea")?;
+                writeln!(out, "--status\tStatus")?;
+                writeln!(out, "--milestone\tMilestone")?;
+                writeln!(out, "--label\tLabel")?;
+                writeln!(out, "--body\tBody text")?;
+            }
+        },
         "completions" => {
             for shell in ["bash", "zsh", "fish", "powershell", "elvish"] {
                 writeln!(out, "{shell}")?;
@@ -164,6 +180,9 @@ fn emit_subcommands<W: Write>(out: &mut W) -> io::Result<()> {
     writeln!(out, "reopen\tReopen an issue")?;
     writeln!(out, "list\tList issues")?;
     writeln!(out, "show\tShow issue details")?;
+    writeln!(out, "edit\tOpen an issue in $EDITOR")?;
+    writeln!(out, "update\tUpdate issue fields")?;
+    writeln!(out, "validate\tValidate all issues")?;
     writeln!(out, "completions\tGenerate shell completions")?;
     writeln!(out, "help\tShow help")?;
     Ok(())

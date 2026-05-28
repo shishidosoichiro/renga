@@ -412,7 +412,7 @@ pub fn set_frontmatter_field(content: &str, field: &str, value: &str) -> String 
     result
 }
 
-fn split_frontmatter(content: &str) -> Option<(&str, &str)> {
+pub(crate) fn split_frontmatter(content: &str) -> Option<(&str, &str)> {
     let rest = content.strip_prefix("---\n")?;
     if let Some(pos) = rest.find("\n---\n") {
         Some((&rest[..pos], &rest[pos + 5..]))

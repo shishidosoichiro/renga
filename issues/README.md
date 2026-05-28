@@ -12,9 +12,7 @@ Closed issues are moved to `done/`.
 
 | # | status | priority | title |
 |---|---|---|---|
-| [86](86-renga-edit-n-editor-issue.md) | open | medium | renga edit <N> — $EDITOR で issue ファイルを直接開く |
 | [87](87-renga-next-priority-area-issue.md) | open | medium | renga next — priority・area から次に着手すべき issue を返す（AI のトークン節約） |
-| [88](88-renga-update-n-cli-ai.md) | open | medium | renga update <N> — CLI オプションでフィールドを更新する（AI からの構造化更新向け） |
 | [90](90-renga-create-label.md) | open | medium | renga create に --label オプションを追加する |
 | [91](91-renga-show-json.md) | open | medium | renga show に --json オプションを追加する |
 | [92](92-renga-create-update-json-json.md) | open | medium | renga create・update で JSON 標準入力を受け付ける（--json フラグ） |

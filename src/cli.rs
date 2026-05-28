@@ -33,6 +33,10 @@ pub enum Command {
     List(ListArgs),
     /// Show the full content of an issue.
     Show(ShowArgs),
+    /// Open an issue file in $EDITOR.
+    Edit(EditArgs),
+    /// Update fields of an issue.
+    Update(UpdateArgs),
     /// Validate all issue files for schema errors and duplicate IDs.
     Validate,
     /// Show help for a command.
@@ -141,4 +145,36 @@ pub struct ListArgs {
 pub struct ShowArgs {
     /// Issue ID (e.g. `00042` or `42`).
     pub id: String,
+}
+
+/// Arguments for `renga edit`.
+#[derive(Args)]
+pub struct EditArgs {
+    /// Issue ID (e.g. `00042` or `42`).
+    pub id: String,
+}
+
+/// Arguments for `renga update`.
+#[derive(Args)]
+pub struct UpdateArgs {
+    /// Issue ID (e.g. `00042` or `42`).
+    pub id: String,
+    /// New priority level.
+    #[arg(long, value_parser = ["high", "medium", "low"])]
+    pub priority: Option<String>,
+    /// New area.
+    #[arg(long)]
+    pub area: Option<String>,
+    /// New status.
+    #[arg(long, value_parser = ["open", "pending"])]
+    pub status: Option<String>,
+    /// New milestone.
+    #[arg(long)]
+    pub milestone: Option<String>,
+    /// Replace labels (repeatable). Use `--label foo --label bar`.
+    #[arg(long)]
+    pub label: Vec<String>,
+    /// Replace body text. Use `-` to read from stdin.
+    #[arg(long)]
+    pub body: Option<String>,
 }

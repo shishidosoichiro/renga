@@ -543,3 +543,120 @@ fn validate_without_issues_dir_fails() {
         .failure()
         .stderr(predicate::str::contains("issues directory not found"));
 }
+
+// ── update ────────────────────────────────────────────────────────────────────
+
+#[test]
+fn update_priority() {
+    let dir = setup();
+    renga(&dir).args(["create", "Task"]).assert().success();
+    renga(&dir)
+        .args(["update", "1", "--priority", "high"])
+        .assert()
+        .success();
+    let content = fs::read_to_string(dir.path().join("issues/1-task.md")).unwrap();
+    assert!(content.contains("priority: high"));
+}
+
+#[test]
+fn update_area() {
+    let dir = setup();
+    renga(&dir).args(["create", "Task"]).assert().success();
+    renga(&dir)
+        .args(["update", "1", "--area", "core"])
+        .assert()
+        .success();
+    let content = fs::read_to_string(dir.path().join("issues/1-task.md")).unwrap();
+    assert!(content.contains("area: core"));
+}
+
+#[test]
+fn update_labels() {
+    let dir = setup();
+    renga(&dir).args(["create", "Task"]).assert().success();
+    renga(&dir)
+        .args(["update", "1", "--label", "bug", "--label", "urgent"])
+        .assert()
+        .success();
+    let content = fs::read_to_string(dir.path().join("issues/1-task.md")).unwrap();
+    assert!(content.contains("bug"));
+    assert!(content.contains("urgent"));
+}
+
+#[test]
+fn update_body() {
+    let dir = setup();
+    renga(&dir).args(["create", "Task"]).assert().success();
+    renga(&dir)
+        .args(["update", "1", "--body", "new body text"])
+        .assert()
+        .success();
+    let content = fs::read_to_string(dir.path().join("issues/1-task.md")).unwrap();
+    assert!(content.contains("new body text"));
+}
+
+#[test]
+fn update_not_found() {
+    let dir = setup();
+    renga(&dir)
+        .args(["update", "99", "--priority", "high"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("99"));
+}
+
+#[test]
+fn update_body_preserves_frontmatter() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "Task", "--area", "core", "--priority", "high"])
+        .assert()
+        .success();
+    renga(&dir)
+        .args(["update", "1", "--body", "updated body"])
+        .assert()
+        .success();
+    let content = fs::read_to_string(dir.path().join("issues/1-task.md")).unwrap();
+    assert!(content.contains("area: core"));
+    assert!(content.contains("priority: high"));
+    assert!(content.contains("updated body"));
+    assert!(
+        !content.contains("area: core---"),
+        "frontmatter must not be corrupted"
+    );
+}
+
+#[test]
+fn update_body_from_stdin() {
+    let dir = setup();
+    renga(&dir).args(["create", "Task"]).assert().success();
+    renga(&dir)
+        .args(["update", "1", "--body", "-"])
+        .write_stdin("stdin body\n")
+        .assert()
+        .success();
+    let content = fs::read_to_string(dir.path().join("issues/1-task.md")).unwrap();
+    assert!(content.contains("stdin body"));
+}
+
+#[test]
+fn edit_not_found_fails() {
+    let dir = setup();
+    std::env::set_var("EDITOR", "true");
+    renga(&dir)
+        .args(["edit", "99"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("99"));
+}
+
+#[test]
+fn edit_opens_editor() {
+    let dir = setup();
+    renga(&dir).args(["create", "Task"]).assert().success();
+    renga(&dir)
+        .env("EDITOR", "true")
+        .args(["edit", "1"])
+        .assert()
+        .success();
+}
