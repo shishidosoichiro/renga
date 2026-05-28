@@ -29,7 +29,7 @@ Claude can create issues as it works, close them when done, and keep the list cu
 Install the skill to manage issues with `/renga` inside Claude Code:
 
 ```sh
-ln -sf /path/to/renga/skills/renga ~/.claude/skills/renga
+npx skills add shishidosoichiro/renga
 ```
 
 Then use it directly in any Claude Code session:

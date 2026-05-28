@@ -1,4 +1,6 @@
 ---
+name: renga
+description: File-Based Issue Management — track issues as plain Markdown files in your repo
 argument-hint: "[create] <title> | done <NNNNN> | pending <NNNNN> | reopen <NNNNN> | list | show <NNNNN> | help"
 ---
 

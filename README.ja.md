@@ -29,7 +29,7 @@ Claude が作業しながら issue を作り、完了したら close する—�
 スキルをインストールすれば、Claude Code の中で `/renga` を使って issue を管理できる。
 
 ```sh
-ln -sf /path/to/renga/skills/renga ~/.claude/skills/renga
+npx skills add shishidosoichiro/renga
 ```
 
 あとは Claude Code セッションの中で直接使うだけ。
