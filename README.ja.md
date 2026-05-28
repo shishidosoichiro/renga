@@ -49,7 +49,7 @@ ln -sf /path/to/fbim/skills/fbim ~/.claude/skills/fbim
 | `/fbim list` | open/pending の一覧を表示する |
 | `/fbim show <N>` | 詳細を表示する |
 
-## こんな人に向いている
+## GitHub Issues を使う前に
 
 **ソロ開発者・小規模チーム**で、外部サービスのセットアップなしにすぐ作業を始めたい人向け。
 

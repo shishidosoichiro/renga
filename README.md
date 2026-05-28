@@ -49,7 +49,7 @@ Then use it directly in any Claude Code session:
 | `/fbim list` | List open and pending issues |
 | `/fbim show <N>` | Show details |
 
-## Who is it for?
+## Before you reach for GitHub Issues
 
 FBIM is for **solo developers and small teams** who want to start tracking work immediately, without setting up an external service first.
 
