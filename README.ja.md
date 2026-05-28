@@ -1,7 +1,7 @@
 # FBIM — File-Based Issue Management
 
-[![pipeline status](https://gitlab.home/kiwi/ifbm/badges/main/pipeline.svg)](https://gitlab.home/kiwi/ifbm/-/pipelines)
-[![coverage](https://gitlab.home/kiwi/ifbm/badges/main/coverage.svg)](https://gitlab.home/kiwi/ifbm/-/pipelines)
+[![CI](https://github.com/shishidosoichiro/fbim/actions/workflows/ci.yml/badge.svg)](https://github.com/shishidosoichiro/fbim/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 issue をファイルで管理する CLI ツールです。`fbim create "タイトル"` で Markdown ファイルが作られて、`fbim done 1` で閉じられます。
 
@@ -11,7 +11,7 @@ issue をファイルで管理する CLI ツールです。`fbim create "タイ�
 
 ```sh
 # 1. インストール
-bash <(curl -fsSL https://gitlab.home/kiwi/ifbm/-/raw/main/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/shishidosoichiro/fbim/main/install.sh)
 
 # 2. 初期化（git リポジトリがなくても動く）
 fbim init
@@ -46,7 +46,7 @@ fbim create "最初のタスク"
 インストールスクリプトがプラットフォームに合ったバイナリをパッケージレジストリから取得してインストールする。
 
 ```sh
-bash <(curl -fsSL https://gitlab.home/kiwi/ifbm/-/raw/main/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/shishidosoichiro/fbim/main/install.sh)
 ```
 
 ソースからビルドする場合:

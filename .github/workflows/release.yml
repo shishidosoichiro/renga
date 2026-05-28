@@ -5,8 +5,13 @@ on:
     tags:
       - "v*"
 
+permissions:
+  contents: read
+
 jobs:
   build:
+    permissions:
+      contents: write  # required to upload release assets
     strategy:
       matrix:
         include:
@@ -21,8 +26,8 @@ jobs:
             archive: zip
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@master
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+      - uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9  # master
         with:
           toolchain: "1.95.0"
           targets: ${{ matrix.target }}
@@ -33,6 +38,6 @@ jobs:
       - name: Package (Windows)
         if: matrix.archive == 'zip'
         run: Compress-Archive target/${{ matrix.target }}/release/fbim.exe fbim-${{ matrix.target }}.zip
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65  # v2
         with:
           files: fbim-${{ matrix.target }}.${{ matrix.archive }}

@@ -8,14 +8,6 @@ Closed issues are moved to `done/`.
 
 ---
 
-## ci
-
-| # | status | priority | title |
-|---|---|---|---|
-| [56](56-github-install-sh-github-relea.md) | open | medium | GitHub 公開対応: install.sh を GitHub Releases 向けに書き直す・README バッジ修正・リポジトリ description 設定 |
-
----
-
 ## docs
 
 | # | status | priority | title |

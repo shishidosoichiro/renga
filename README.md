@@ -1,7 +1,7 @@
 # FBIM — File-Based Issue Management
 
-[![pipeline status](https://gitlab.home/kiwi/ifbm/badges/main/pipeline.svg)](https://gitlab.home/kiwi/ifbm/-/pipelines)
-[![coverage](https://gitlab.home/kiwi/ifbm/badges/main/coverage.svg)](https://gitlab.home/kiwi/ifbm/-/pipelines)
+[![CI](https://github.com/shishidosoichiro/fbim/actions/workflows/ci.yml/badge.svg)](https://github.com/shishidosoichiro/fbim/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 A CLI tool for managing issues as files. `fbim create "title"` creates a Markdown file, and `fbim done 1` closes it.
 
@@ -11,7 +11,7 @@ A CLI tool for managing issues as files. `fbim create "title"` creates a Markdow
 
 ```sh
 # 1. Install
-bash <(curl -fsSL https://gitlab.home/kiwi/ifbm/-/raw/main/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/shishidosoichiro/fbim/main/install.sh)
 
 # 2. Initialize (anywhere — no git repo required)
 fbim init
@@ -46,7 +46,7 @@ If you need comments, assignments, notifications, or a web UI for non-engineers,
 Download and run the install script. It fetches the pre-built binary for your platform from the package registry.
 
 ```sh
-bash <(curl -fsSL https://gitlab.home/kiwi/ifbm/-/raw/main/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/shishidosoichiro/fbim/main/install.sh)
 ```
 
 Or build from source:

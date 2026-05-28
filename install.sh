@@ -1,48 +1,41 @@
 #!/usr/bin/env bash
-# Install fbim from the GitLab Package Registry.
+# Install fbim from GitHub Releases.
 #
 # Usage:
-#   ./install.sh                        # install to /usr/local/bin (default)
-#   INSTALL_DIR=~/.local/bin ./install.sh
-#   VERSION=v0.2.0 ./install.sh         # install a specific version
-#
-# For private GitLab instances, set GITLAB_TOKEN:
-#   GITLAB_TOKEN=<pat> ./install.sh
+#   bash <(curl -fsSL https://raw.githubusercontent.com/shishidosoichiro/fbim/main/install.sh)
+#   INSTALL_DIR=~/.local/bin bash <(curl -fsSL ...)
+#   VERSION=v0.5.0 bash <(curl -fsSL ...)
 set -euo pipefail
 
-GITLAB_URL="${GITLAB_URL:-https://gitlab.home}"
-PROJECT_PATH="${PROJECT_PATH:-kiwi/ifbm}"
-VERSION="${VERSION:-main}"
+REPO="shishidosoichiro/fbim"
 INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
-GITLAB_TOKEN="${GITLAB_TOKEN:-$(glab config get token --host "${GITLAB_URL#https://}" 2>/dev/null || true)}"
-if [[ -z "${GITLAB_TOKEN:-}" ]]; then
-  echo "error: GITLAB_TOKEN is not set and glab is not authenticated to ${GITLAB_URL}" >&2
-  exit 1
+
+if [[ -z "${VERSION:-}" ]]; then
+  VERSION=$(curl -fsSL "https://api.github.com/repos/${REPO}/releases/latest" \
+    | grep '"tag_name"' \
+    | sed 's/.*"tag_name": *"\(.*\)".*/\1/')
 fi
 
 OS=$(uname -s)
 ARCH=$(uname -m)
 case "${OS}-${ARCH}" in
-  Linux-x86_64)   FILE="fbim-linux-x86_64" ;;
-  Darwin-arm64)   FILE="fbim-darwin-arm64" ;;
-  Darwin-x86_64)  FILE="fbim-darwin-arm64" ;;  # Rosetta
+  Linux-x86_64)   TARGET="x86_64-unknown-linux-gnu" ;;
+  Darwin-arm64)   TARGET="aarch64-apple-darwin" ;;
+  Darwin-x86_64)  TARGET="aarch64-apple-darwin" ;;  # Rosetta
   *)
     echo "error: unsupported platform: ${OS}-${ARCH}" >&2
     exit 1
     ;;
 esac
 
-ENCODED_PROJECT=$(python3 -c "import urllib.parse; print(urllib.parse.quote('${PROJECT_PATH}', safe=''))")
-ENCODED_VERSION=$(python3 -c "import urllib.parse; print(urllib.parse.quote('${VERSION}', safe=''))")
-DOWNLOAD_URL="${GITLAB_URL}/api/v4/projects/${ENCODED_PROJECT}/packages/generic/fbim/${ENCODED_VERSION}/${FILE}"
+FILE="fbim-${TARGET}.tar.gz"
+URL="https://github.com/${REPO}/releases/download/${VERSION}/${FILE}"
 
-CURL_ARGS=(-fsSL -H "PRIVATE-TOKEN: ${GITLAB_TOKEN}")
+TMP=$(mktemp -d)
+trap 'rm -rf "$TMP"' EXIT
 
-TMP=$(mktemp)
-trap 'rm -f "$TMP"' EXIT
+echo "Downloading fbim ${VERSION} (${TARGET})..."
+curl -fsSL "${URL}" | tar xz -C "$TMP"
 
-echo "Downloading fbim (${VERSION}, ${FILE})..."
-curl "${CURL_ARGS[@]}" "$DOWNLOAD_URL" -o "$TMP"
-
-install -m 0755 "$TMP" "${INSTALL_DIR}/fbim"
+install -m 0755 "$TMP/fbim" "${INSTALL_DIR}/fbim"
 echo "Installed: ${INSTALL_DIR}/fbim ($("${INSTALL_DIR}/fbim" --version))"
