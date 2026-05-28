@@ -16,14 +16,6 @@ Closed issues are moved to `done/`.
 
 ---
 
-## core
-
-| # | status | priority | title |
-|---|---|---|---|
-| [64](64-fbim-validate-status-id.md) | open | medium | fbim validate コマンドの追加 — フロントマターのスキーマ崩れ・status 不正値・ID 重複を検出する |
-
----
-
 ## docs
 
 | # | status | priority | title |

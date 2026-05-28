@@ -33,6 +33,8 @@ pub enum Command {
     List(ListArgs),
     /// Show the full content of an issue.
     Show(ShowArgs),
+    /// Validate all issue files for schema errors and duplicate IDs.
+    Validate,
     /// Show help for a command.
     Help {
         /// Command to show help for (omit for overall help).

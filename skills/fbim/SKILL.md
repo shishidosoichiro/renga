@@ -101,6 +101,18 @@ Display the output to the user.
 
 ---
 
+## validate
+
+```
+fbim validate
+```
+
+Run after making bulk changes to issue files. Display the output to the user.
+Exit code 1 means errors were found (unparseable frontmatter, invalid status,
+duplicate IDs). Warnings (missing schema_version) exit with code 0.
+
+---
+
 ## help
 
 ```

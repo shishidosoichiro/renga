@@ -96,6 +96,7 @@ fbim pending <N>
 fbim reopen <N>
 fbim list [--status open|pending|done|unknown] [--area <area>] [--label <label>] [--milestone <milestone>] [--json]
 fbim show <N>
+fbim validate
 fbim completions <bash|zsh|fish>
 fbim help [command]
 ```

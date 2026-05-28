@@ -66,6 +66,7 @@ cargo install --path /path/to/fbim
 | `fbim reopen <N>` | Reopen a closed issue |
 | `fbim list [--status open\|pending\|done\|unknown] [--area <area>] [--label <label>] [--milestone <milestone>] [--json]` | List issues |
 | `fbim show <N>` | Show issue details |
+| `fbim validate` | Check all issues for schema errors and duplicate IDs |
 | `fbim completions bash\|zsh\|fish` | Print shell completion script |
 | `fbim help [command]` | Show help |
 

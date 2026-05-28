@@ -75,6 +75,7 @@ pub fn run() -> Result<()> {
         cli::Command::Reopen(args) => commands::reopen::run(args, &ctx),
         cli::Command::List(args) => commands::list::run(args, &ctx),
         cli::Command::Show(args) => commands::show::run(args, &ctx),
+        cli::Command::Validate => commands::validate::run(&ctx),
         cli::Command::Help { command } => {
             let mut cmd = cli::Cli::command();
             match command.as_deref() {

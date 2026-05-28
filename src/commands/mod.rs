@@ -16,3 +16,5 @@ pub mod pending;
 pub mod reopen;
 /// `fbim show` handler.
 pub mod show;
+/// `fbim validate` handler.
+pub mod validate;

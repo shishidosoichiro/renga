@@ -454,3 +454,92 @@ fn create_with_id_non_numeric_fails() {
         .failure()
         .stderr(predicate::str::contains("positive integer"));
 }
+
+// ── validate ──────────────────────────────────────────────────────────────────
+
+#[test]
+fn validate_clean_issues_exits_ok() {
+    let dir = setup();
+    fbim(&dir).args(["create", "Task One"]).assert().success();
+    fbim(&dir).args(["create", "Task Two"]).assert().success();
+    fbim(&dir)
+        .args(["validate"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("ok"));
+}
+
+#[test]
+fn validate_detects_unparseable_frontmatter() {
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/1-bad.md"),
+        "---\nnot: valid: yaml: [\n---\n\n# Bad\n",
+    )
+    .unwrap();
+    fbim(&dir)
+        .args(["validate"])
+        .assert()
+        .failure()
+        .stdout(predicate::str::contains("unparseable frontmatter"));
+}
+
+#[test]
+fn validate_detects_duplicate_ids() {
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/1-first.md"),
+        "---\nschema_version: 1\nstatus: open\npriority: medium\narea: core\nlabels: []\n---\n\n# First\n",
+    )
+    .unwrap();
+    fs::write(
+        dir.path().join("issues/1-second.md"),
+        "---\nschema_version: 1\nstatus: open\npriority: medium\narea: core\nlabels: []\n---\n\n# Second\n",
+    )
+    .unwrap();
+    fbim(&dir)
+        .args(["validate"])
+        .assert()
+        .failure()
+        .stdout(predicate::str::contains("duplicate ID"));
+}
+
+#[test]
+fn validate_warns_on_missing_schema_version() {
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/1-old.md"),
+        "---\nstatus: open\npriority: medium\narea: core\nlabels: []\n---\n\n# Old\n",
+    )
+    .unwrap();
+    fbim(&dir)
+        .args(["validate"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("missing schema_version"));
+}
+
+#[test]
+fn validate_detects_invalid_status_value() {
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/1-bad-status.md"),
+        "---\nschema_version: 1\nstatus: garbage\npriority: medium\narea: core\nlabels: []\n---\n\n# Bad Status\n",
+    )
+    .unwrap();
+    fbim(&dir)
+        .args(["validate"])
+        .assert()
+        .failure()
+        .stdout(predicate::str::contains("invalid status value"));
+}
+
+#[test]
+fn validate_without_issues_dir_fails() {
+    let dir = TempDir::new().unwrap();
+    fbim(&dir)
+        .args(["validate"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("issues directory not found"));
+}

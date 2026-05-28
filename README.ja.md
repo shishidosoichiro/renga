@@ -66,6 +66,7 @@ cargo install --path /path/to/fbim
 | `fbim reopen <N>` | issue を再開する |
 | `fbim list [--status open\|pending\|done\|unknown] [--area <area>] [--label <label>] [--milestone <milestone>] [--json]` | issue 一覧を表示する |
 | `fbim show <N>` | issue の詳細を表示する |
+| `fbim validate` | 全 issue のスキーマエラー・ID 重複を検出する |
 | `fbim completions bash\|zsh\|fish` | シェル補完スクリプトを表示する |
 | `fbim help [コマンド]` | ヘルプを表示する |
 

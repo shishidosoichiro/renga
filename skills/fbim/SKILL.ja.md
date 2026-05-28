@@ -97,6 +97,18 @@ fbim show <NNNNN>
 
 ---
 
+## validate
+
+```
+fbim validate
+```
+
+issue ファイルをまとめて変更した後に実行する。出力をユーザーに表示する。
+exit code 1 はエラーがあることを意味する（フロントマターのパース失敗・不正な status・ID 重複）。
+警告（schema_version 欠落）は exit code 0 で終了する。
+
+---
+
 ## help
 
 ```
