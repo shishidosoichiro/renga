@@ -126,6 +126,30 @@ Display the output to the user.
 
 ---
 
+## edit
+
+```
+renga edit <NNNNN>
+```
+
+Opens the issue file in `$EDITOR`. For human use only — AI agents cannot interact with interactive editors.
+
+---
+
+## update
+
+```
+renga update <NNNNN> [--priority high|medium|low] [--area <area>] [--status open|pending] [--milestone <milestone>] [--label <label>]... [--body <text|->]
+```
+
+Updates issue fields without opening an editor. Designed for AI agents and scripts.
+
+- `--body -` reads the new body from stdin, allowing the agent to pipe modified content
+- `--label` is repeatable and replaces all existing labels
+- Multiple flags can be combined in one call
+
+---
+
 ## validate
 
 ```
