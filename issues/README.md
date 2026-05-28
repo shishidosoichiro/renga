@@ -8,6 +8,23 @@ Closed issues are moved to `done/`.
 
 ---
 
+## agent
+
+| # | status | priority | title |
+|---|---|---|---|
+| [66](66-retro-ai-status-validate-notes.md) | open | medium | retro: AI向け作業規約（status 遷移・validate 必須・notes 追記）をスキルファイルに追加する |
+
+---
+
+## core
+
+| # | status | priority | title |
+|---|---|---|---|
+| [64](64-fbim-validate-status-id.md) | open | medium | fbim validate コマンドの追加 — フロントマターのスキーマ崩れ・status 不正値・ID 重複を検出する |
+| [65](65-schema-version.md) | open | medium | schema_version フィールドをフロントマターに追加する — 将来の仕様変更時に旧形式と判別できるようにする |
+
+---
+
 ## docs
 
 | # | status | priority | title |
