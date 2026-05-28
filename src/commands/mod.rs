@@ -1,20 +1,20 @@
 //! Command handler modules.
 
-/// `fbim completions` and `fbim __complete` handlers.
+/// `renga completions` and `renga __complete` handlers.
 pub mod completions;
-/// `fbim create` handler.
+/// `renga create` handler.
 pub mod create;
-/// `fbim done` handler.
+/// `renga done` handler.
 pub mod done;
-/// `fbim init` handler.
+/// `renga init` handler.
 pub mod init;
-/// `fbim list` handler.
+/// `renga list` handler.
 pub mod list;
-/// `fbim pending` handler.
+/// `renga pending` handler.
 pub mod pending;
-/// `fbim reopen` handler.
+/// `renga reopen` handler.
 pub mod reopen;
-/// `fbim show` handler.
+/// `renga show` handler.
 pub mod show;
-/// `fbim validate` handler.
+/// `renga validate` handler.
 pub mod validate;

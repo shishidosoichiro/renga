@@ -1,4 +1,4 @@
-//! `fbim show` command handler.
+//! `renga show` command handler.
 
 use anyhow::Result;
 

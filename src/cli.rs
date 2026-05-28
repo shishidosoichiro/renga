@@ -5,7 +5,7 @@ use clap::{Args, Parser, Subcommand};
 /// FBIM — File-Based Issue Management.
 #[derive(Parser)]
 #[command(
-    name = "fbim",
+    name = "renga",
     about = "File-Based Issue Management",
     version,
     disable_help_subcommand = true
@@ -69,7 +69,7 @@ pub enum Command {
     },
 }
 
-/// Arguments for `fbim create`.
+/// Arguments for `renga create`.
 #[derive(Args)]
 pub struct CreateArgs {
     /// Issue title (multiple words, no quotes required).
@@ -95,28 +95,28 @@ pub struct CreateArgs {
     pub milestone: Option<String>,
 }
 
-/// Arguments for `fbim done`.
+/// Arguments for `renga done`.
 #[derive(Args)]
 pub struct DoneArgs {
     /// Issue ID (e.g. `00042` or `42`).
     pub id: String,
 }
 
-/// Arguments for `fbim pending`.
+/// Arguments for `renga pending`.
 #[derive(Args)]
 pub struct PendingArgs {
     /// Issue ID (e.g. `00042` or `42`).
     pub id: String,
 }
 
-/// Arguments for `fbim reopen`.
+/// Arguments for `renga reopen`.
 #[derive(Args)]
 pub struct ReopenArgs {
     /// Issue ID (e.g. `00042` or `42`).
     pub id: String,
 }
 
-/// Arguments for `fbim list`.
+/// Arguments for `renga list`.
 #[derive(Args)]
 pub struct ListArgs {
     /// Filter by status. Comma-separated: `open`, `pending`, `done`, `unknown`.
@@ -136,7 +136,7 @@ pub struct ListArgs {
     pub json: bool,
 }
 
-/// Arguments for `fbim show`.
+/// Arguments for `renga show`.
 #[derive(Args)]
 pub struct ShowArgs {
     /// Issue ID (e.g. `00042` or `42`).

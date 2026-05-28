@@ -1,4 +1,4 @@
-//! `fbim validate` command handler.
+//! `renga validate` command handler.
 
 use std::{collections::HashMap, sync::LazyLock};
 

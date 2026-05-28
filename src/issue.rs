@@ -27,7 +27,7 @@ static RE_LINENUM_PREFIX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^\d+:\
 /// # Examples
 ///
 /// ```
-/// use fbim::issue::Status;
+/// use renga::issue::Status;
 /// assert_eq!(Status::Open.to_string(), "open");
 /// assert_eq!("pending".parse::<Status>().unwrap(), Status::Pending);
 /// assert_eq!(Status::Unknown.to_string(), "unknown");
@@ -80,7 +80,7 @@ impl FromStr for Status {
 /// # Examples
 ///
 /// ```
-/// use fbim::issue::Priority;
+/// use renga::issue::Priority;
 /// assert_eq!(Priority::High.to_string(), "high");
 /// assert_eq!("low".parse::<Priority>().unwrap(), Priority::Low);
 /// assert_eq!(Priority::Unknown.to_string(), "-");
@@ -345,7 +345,7 @@ pub fn next_id(issues_dir: &Path) -> Result<String> {
 /// # Examples
 ///
 /// ```
-/// use fbim::issue::make_slug;
+/// use renga::issue::make_slug;
 /// assert_eq!(make_slug("Hello World"), "hello-world");
 /// assert_eq!(make_slug("Rust への書き直し"), "rust");
 /// assert_eq!(make_slug(""), "issue");
@@ -372,7 +372,7 @@ pub fn make_slug(title: &str) -> String {
 /// # Examples
 ///
 /// ```
-/// use fbim::issue::set_frontmatter_field;
+/// use renga::issue::set_frontmatter_field;
 /// let content = "---\nstatus: open\npriority: high\n---\n\n# Title\n";
 /// let updated = set_frontmatter_field(content, "status", "done");
 /// assert!(updated.contains("status: done"));

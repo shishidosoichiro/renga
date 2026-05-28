@@ -3,12 +3,12 @@ description: Create a new FBIM issue
 argument-hint: "<title> [--slug <slug>] [--priority high|medium|low] [--area <area>] [--body <text>]"
 ---
 
-# /fbim-create
+# /renga-create
 
 Create a new issue in `issues/`.
 
 ```
-fbim create "<title>" --slug <slug> --area <area>
+renga create "<title>" --slug <slug> --area <area>
 ```
 
 - `--slug`: Kebab-case English slug derived from the title (max 30 chars).

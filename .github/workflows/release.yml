@@ -34,10 +34,10 @@ jobs:
       - run: cargo build --release --target ${{ matrix.target }}
       - name: Package (Unix)
         if: matrix.archive == 'tar.gz'
-        run: tar czf fbim-${{ matrix.target }}.tar.gz -C target/${{ matrix.target }}/release fbim
+        run: tar czf renga-${{ matrix.target }}.tar.gz -C target/${{ matrix.target }}/release renga
       - name: Package (Windows)
         if: matrix.archive == 'zip'
-        run: Compress-Archive target/${{ matrix.target }}/release/fbim.exe fbim-${{ matrix.target }}.zip
+        run: Compress-Archive target/${{ matrix.target }}/release/renga.exe renga-${{ matrix.target }}.zip
       - uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65  # v2
         with:
-          files: fbim-${{ matrix.target }}.${{ matrix.archive }}
+          files: renga-${{ matrix.target }}.${{ matrix.archive }}

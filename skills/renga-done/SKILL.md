@@ -3,12 +3,12 @@ description: Close an FBIM issue
 argument-hint: "<NNNNN>"
 ---
 
-# /fbim-done
+# /renga-done
 
 Close an issue by moving it to `issues/done/`.
 
 ```
-fbim done <NNNNN>
+renga done <NNNNN>
 ```
 
 Report the destination file path to the user.

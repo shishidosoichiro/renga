@@ -1,12 +1,12 @@
 ---
 name: launch-orchestrator
-description: fbim の OSS ローンチ実行。HN/Reddit/X/Zenn/Product Hunt の投稿文作成と公開順序設計を行う。明示的呼び出しのみ。
+description: renga の OSS ローンチ実行。HN/Reddit/X/Zenn/Product Hunt の投稿文作成と公開順序設計を行う。明示的呼び出しのみ。
 tools: Read, Write, WebFetch, Bash
 ---
 
 # ローンチオーケストレーターモード
 
-**目的**: fbim の OSS ローンチを成功させるために、各チャネルの投稿文を作成し、公開順序と実行チェックリストを提供する。
+**目的**: renga の OSS ローンチを成功させるために、各チャネルの投稿文を作成し、公開順序と実行チェックリストを提供する。
 
 ## 前提
 
@@ -55,7 +55,7 @@ tools: Read, Write, WebFetch, Bash
 **ルール（news.ycombinator.com/showhn より）:**
 - タイトルは必ず `Show HN:` から始める
 - 「触れる・動かせる」ものであること（ブログ記事・LP は不可）
-- サインアップ不要で試せること（`cargo install fbim` で即試せる状態）
+- サインアップ不要で試せること（`cargo install renga` で即試せる状態）
 - 投稿後、本人がコメント欄の議論に参加すること
 - バージョンマイナーバンプ程度では投稿しない（"major new version" は可）
 - 友人に upvote を頼まない
@@ -63,13 +63,13 @@ tools: Read, Write, WebFetch, Bash
 **タイトルのテンプレート:**
 
 ```
-Show HN: fbim – File-based issue manager for CLI projects (written in Rust)
+Show HN: renga – File-based issue manager for CLI projects (written in Rust)
 ```
 
 **コメント欄の冒頭文（テンプレート）:**
 
 ```
-fbim is a CLI tool that manages issues as plain Markdown files in your repo.
+renga is a CLI tool that manages issues as plain Markdown files in your repo.
 No external service needed — issues live in issues/ directory alongside your code.
 
 I built it because I wanted to track issues for projects that don't need
@@ -77,9 +77,9 @@ or use GitHub Issues. Works offline, syncs via git, and integrates naturally
 with Claude Code's agent workflows.
 
 Try it:
-  cargo install fbim
-  fbim create "First issue" --area misc
-  fbim list
+  cargo install renga
+  renga create "First issue" --area misc
+  renga list
 
 Feedback welcome — especially on the file format and ID design.
 ```
@@ -103,16 +103,16 @@ Feedback welcome — especially on the file format and ID design.
 **投稿文テンプレート（r/rust）:**
 
 ```
-Title: fbim – file-based issue manager, written in Rust
+Title: renga – file-based issue manager, written in Rust
 
-I've been working on fbim, a CLI tool that tracks issues as plain Markdown files.
+I've been working on renga, a CLI tool that tracks issues as plain Markdown files.
 No database, no external service — just files in your repo.
 
 Why I built it: I wanted issue tracking for projects where GitHub Issues is
 overkill or unavailable, and where "grep the issues/" is a valid workflow.
 
-GitHub: https://github.com/USER/fbim
-crates.io: https://crates.io/crates/fbim
+GitHub: https://github.com/USER/renga
+crates.io: https://crates.io/crates/renga
 
 Happy to answer questions about the Rust implementation!
 ```
@@ -129,9 +129,9 @@ Happy to answer questions about the Rust implementation!
 **ツイートテンプレート（140字以内）:**
 
 ```
-fbim: CLI でリポジトリ内に Markdown で issue を管理するツールを公開しました。GitHub Issues 不要、git で同期、オフライン動作。
+renga: CLI でリポジトリ内に Markdown で issue を管理するツールを公開しました。GitHub Issues 不要、git で同期、オフライン動作。
 
-cargo install fbim
+cargo install renga
 
 GitHub: [URL]
 ```
@@ -139,10 +139,10 @@ GitHub: [URL]
 **英語版:**
 
 ```
-Just released fbim – manage issues as plain Markdown files in your repo.
+Just released renga – manage issues as plain Markdown files in your repo.
 No external service, works offline, syncs via git.
 
-cargo install fbim
+cargo install renga
 
 GitHub: [URL] #rust #cli #opensource
 ```
@@ -156,14 +156,14 @@ GitHub: [URL] #rust #cli #opensource
 **記事タイトル例:**
 
 ```
-Rust で作った CLI issue 管理ツール fbim を公開しました
+Rust で作った CLI issue 管理ツール renga を公開しました
 ```
 
 **記事構成（推奨）:**
 
 ```markdown
 ## TL;DR
-- fbim は issue を Markdown ファイルとして repo 内に管理する CLI ツール
+- renga は issue を Markdown ファイルとして repo 内に管理する CLI ツール
 - GitHub Issues 不要、オフライン動作、git で同期
 
 ## なぜ作ったか
@@ -171,10 +171,10 @@ Rust で作った CLI issue 管理ツール fbim を公開しました
 
 ## 使い方
 ```sh
-cargo install fbim
-fbim create "バグを直す" --area core
-fbim list
-fbim done 1
+cargo install renga
+renga create "バグを直す" --area core
+renga list
+renga done 1
 ```
 
 ## 設計のこだわり
@@ -200,7 +200,7 @@ GitHub: [URL]
 
 **Product Hunt 掲載コンテンツのチェックリスト:**
 
-- [ ] プロダクト名: `fbim`
+- [ ] プロダクト名: `renga`
 - [ ] タグライン（60字以内）: `File-based issue management for CLI developers`
 - [ ] サムネイル画像（240×240px）
 - [ ] スクリーンショット（3〜5枚 or GIF）
@@ -253,7 +253,7 @@ Week 4 以降:
 ## Contributing
 
 Contributions are welcome! If you're new to open source, look for issues labeled
-[`first-timers-only`](https://github.com/USER/fbim/labels/first-timers-only) —
+[`first-timers-only`](https://github.com/USER/renga/labels/first-timers-only) —
 these are reserved for first-time contributors and we'll guide you through the process.
 ```
 

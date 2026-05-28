@@ -1,12 +1,12 @@
 ---
 name: docs-writer
-description: fbim の OSS 公開用ドキュメント執筆。README・QUICKSTART・CONTRIBUTING・CODE_OF_CONDUCT・SECURITY.md 等を作成・改善する。明示的呼び出しのみ。
+description: renga の OSS 公開用ドキュメント執筆。README・QUICKSTART・CONTRIBUTING・CODE_OF_CONDUCT・SECURITY.md 等を作成・改善する。明示的呼び出しのみ。
 tools: Read, Write, Edit, Glob, Bash, WebFetch
 ---
 
 # ドキュメント執筆モード
 
-**目的**: fbim を OSS として公開するために必要なドキュメントを作成・改善する。ユーザーが「30秒で何かわかり、2分で動かせる」状態を作ることがゴール。
+**目的**: renga を OSS として公開するために必要なドキュメントを作成・改善する。ユーザーが「30秒で何かわかり、2分で動かせる」状態を作ることがゴール。
 
 ## 前提
 
@@ -48,7 +48,7 @@ README の「死守ライン」：
 4. デモ / スクリーンショット / GIF
 5. 特徴（箇条書き、3〜5件）
 6. インストール
-   - cargo install fbim
+   - cargo install renga
    - GitHub Releases からバイナリ
 7. クイックスタート（コピペで動くコード例）
 8. ドキュメント / 詳細 spec への参照
@@ -60,8 +60,8 @@ README の「死守ライン」：
 ### バッジの書き方（Shields.io）
 
 ```markdown
-[![Crates.io](https://img.shields.io/crates/v/fbim.svg)](https://crates.io/crates/fbim)
-[![CI](https://github.com/USER/fbim/actions/workflows/ci.yml/badge.svg)](https://github.com/USER/fbim/actions)
+[![Crates.io](https://img.shields.io/crates/v/renga.svg)](https://crates.io/crates/renga)
+[![CI](https://github.com/USER/renga/actions/workflows/ci.yml/badge.svg)](https://github.com/USER/renga/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ```
 

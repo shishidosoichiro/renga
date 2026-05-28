@@ -59,9 +59,9 @@ File-Based Issue Management。詳細仕様は `spec.ja.md` を参照。
 1. 実装 + テスト追加
 2. カバレッジ確認（`cargo llvm-cov --summary-only -- --test-threads=1`）
 3. `Agent(subagent_type="review")` でレビューを受ける（Claude Code のサブエージェント）。レビュー観点にはカバレッジ確認（`cargo llvm-cov --summary-only -- --test-threads=1`）を含める
-4. レビューで見つかった問題は `fbim create` で起票してから修正する
+4. レビューで見つかった問題は `renga create` で起票してから修正する
 5. 指摘を反映してからコミット
-6. issue を close する（`fbim done <N>`）
+6. issue を close する（`renga done <N>`）
 
 カバレッジは実装時とレビュー時の両方で確認する。
 
@@ -77,18 +77,18 @@ File-Based Issue Management。詳細仕様は `spec.ja.md` を参照。
 このリポジトリ自体の issue は FBIM で管理する（自己ホスト）。
 
 ```sh
-fbim create "タイトル" --area <area>
-fbim list
-fbim done <N>
+renga create "タイトル" --area <area>
+renga list
+renga done <N>
 ```
 
-`/fbim` スキルでも同じ操作ができる。
+`/renga` スキルでも同じ操作ができる。
 
 | area | 使うとき |
 |---|---|
 | `cli` | コマンドライン引数・ヘルプ表示 |
 | `core` | issue のパース・ファイル操作・プロジェクトルート探索 |
-| `config` | `.fbim.yml` の読み込み・設定 |
+| `config` | `.renga.yml` の読み込み・設定 |
 | `test` | テストの追加・修正 |
 | `docs` | ドキュメント・README・CONTRIBUTING |
 | `ci` | CI/CD パイプライン |

@@ -4,7 +4,7 @@ argument-hint: "<version>"
 
 # /release skill
 
-fbim の新バージョンをリリースする。`$ARGUMENTS` にバージョン番号（例: `0.4.0`）を指定する。
+renga の新バージョンをリリースする。`$ARGUMENTS` にバージョン番号（例: `0.4.0`）を指定する。
 
 ## Steps
 

@@ -11,50 +11,50 @@ use clap::CommandFactory;
 
 use crate::{cli::Cli, Context};
 
-// Thin wrapper scripts: all logic lives in `fbim __complete`.
+// Thin wrapper scripts: all logic lives in `renga __complete`.
 // Tab-separated `CANDIDATE\tDESCRIPTION` output is handled by each shell appropriately.
 
 // #compdef is only honoured when the file is autoloaded via $fpath.
-// compdef _fbim fbim is required when sourcing directly.
+// compdef _renga renga is required when sourcing directly.
 const ZSH_SCRIPT: &str = r#"#compdef fbim
 
-_fbim() {
+_renga() {
     local -a candidates
     local line
     while IFS= read -r line; do
         [[ -n "$line" ]] && candidates+=("${line/$'\t'/:}")
-    done < <(fbim __complete "${words[@]}" 2>/dev/null)
+    done < <(renga __complete "${words[@]}" 2>/dev/null)
     _describe 'candidates' candidates
 }
 
-compdef _fbim fbim
+compdef _renga renga
 "#;
 
-const BASH_SCRIPT: &str = r#"# bash completion for fbim
-_fbim_completion() {
+const BASH_SCRIPT: &str = r#"# bash completion for renga
+_renga_completion() {
     local cur="${COMP_WORDS[COMP_CWORD]}"
     local candidates
-    candidates=$(fbim __complete "${COMP_WORDS[@]}" 2>/dev/null | cut -f1)
+    candidates=$(renga __complete "${COMP_WORDS[@]}" 2>/dev/null | cut -f1)
     COMPREPLY=($(compgen -W "$candidates" -- "$cur"))
 }
-complete -F _fbim_completion fbim
+complete -F _renga_completion fbim
 "#;
 
 // Fish natively supports tab-separated `value\tdescription` output.
-const FISH_SCRIPT: &str = r#"# fish completion for fbim
+const FISH_SCRIPT: &str = r#"# fish completion for renga
 complete -c fbim -f
 complete -c fbim -f -a '(
     set -l tokens (commandline -opc) (commandline -ct)
-    fbim __complete $tokens 2>/dev/null
+    renga __complete $tokens 2>/dev/null
 )'
 "#;
 
-/// Run `fbim completions <shell>`: print the shell completion script.
+/// Run `renga completions <shell>`: print the shell completion script.
 pub fn run(shell: clap_complete::Shell) -> Result<()> {
     ignore_broken_pipe(write_script(shell))
 }
 
-/// Run `fbim __complete <shell words>`: print completion candidates.
+/// Run `renga __complete <shell words>`: print completion candidates.
 ///
 /// Called by the shell completion script at completion time. Receives the full
 /// command-line token list from the shell (`$words` in zsh, `${COMP_WORDS[@]}` in bash).

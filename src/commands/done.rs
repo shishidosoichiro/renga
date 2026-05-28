@@ -1,4 +1,4 @@
-//! `fbim done` command handler.
+//! `renga done` command handler.
 
 use anyhow::{Context as _, Result};
 

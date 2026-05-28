@@ -1,11 +1,11 @@
-//! Configuration loaded from `.fbim.yml`.
+//! Configuration loaded from `.renga.yml`.
 
 use std::{collections::HashMap, path::Path};
 
 use anyhow::{Context as _, Result};
 use serde::Deserialize;
 
-/// Project configuration from `.fbim.yml`.
+/// Project configuration from `.renga.yml`.
 #[derive(Debug, Deserialize)]
 pub struct Config {
     /// Path to the issues directory (relative to project root).
@@ -34,12 +34,12 @@ impl Default for Config {
 }
 
 impl Config {
-    /// Load configuration from `.fbim.yml` in the given directory.
+    /// Load configuration from `.renga.yml` in the given directory.
     ///
     /// Returns a default [`Config`] if the file does not exist.
     /// Unknown keys in the file are silently ignored.
     pub fn load(project_root: &Path) -> Result<Self> {
-        let path = project_root.join(".fbim.yml");
+        let path = project_root.join(".renga.yml");
         if !path.exists() {
             return Ok(Config::default());
         }
@@ -66,16 +66,16 @@ mod tests {
     #[test]
     fn invalid_yaml_returns_error() {
         let dir = TempDir::new().unwrap();
-        std::fs::write(dir.path().join(".fbim.yml"), "area_order: [\n").unwrap();
+        std::fs::write(dir.path().join(".renga.yml"), "area_order: [\n").unwrap();
         let err = Config::load(dir.path()).unwrap_err();
-        assert!(err.to_string().contains(".fbim.yml"), "{err}");
+        assert!(err.to_string().contains(".renga.yml"), "{err}");
     }
 
     #[test]
     fn loads_area_order_from_yml() {
         let dir = TempDir::new().unwrap();
         std::fs::write(
-            dir.path().join(".fbim.yml"),
+            dir.path().join(".renga.yml"),
             "area_order: [core, cli, docs]\n",
         )
         .unwrap();

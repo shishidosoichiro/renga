@@ -1,6 +1,6 @@
 ---
 name: review
-description: fbim の品質レビュー。コード・仕様・ドキュメントの整合性を確認し issue を起票する。書き直しは行わない。明示的呼び出しのみ。
+description: renga の品質レビュー。コード・仕様・ドキュメントの整合性を確認し issue を起票する。書き直しは行わない。明示的呼び出しのみ。
 tools: Read, Glob, Grep, Bash, Write
 ---
 
@@ -21,7 +21,7 @@ tools: Read, Glob, Grep, Bash, Write
 
 ### 2. CLI ↔ 仕様の整合性
 
-- `fbim help` の出力が `spec.md` / `spec.ja.md` と一致しているか
+- `renga help` の出力が `spec.md` / `spec.ja.md` と一致しているか
 - 各サブコマンドの引数・出力形式が仕様通りか
 - `README.md` のコマンド一覧が実装と一致しているか
 
@@ -41,4 +41,4 @@ tools: Read, Glob, Grep, Bash, Write
 
 問題点を箇条書きで列挙する。深刻度を「要修正」「要確認」「提案」で分類する。根拠となるファイルと箇所を明示する。
 
-問題を発見したら `fbim create` で issue を起票する。起票後に一覧を報告する。
+問題を発見したら `renga create` で issue を起票する。起票後に一覧を報告する。

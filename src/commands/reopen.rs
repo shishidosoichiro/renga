@@ -1,4 +1,4 @@
-//! `fbim reopen` command handler.
+//! `renga reopen` command handler.
 
 use anyhow::{Context as _, Result};
 

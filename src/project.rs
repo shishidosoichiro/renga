@@ -5,14 +5,14 @@ use std::path::{Path, PathBuf};
 /// Walk up from the current directory to find the project root and issues directory.
 ///
 /// Search priority:
-/// 1. `.fbim.yml` present → use its `issues_dir` key (default: `"issues"`)
+/// 1. `.renga.yml` present → use its `issues_dir` key (default: `"issues"`)
 /// 2. `issues/` directory present
 ///
 /// Falls back to `$CWD/issues` if nothing is found upstream.
 pub fn find_project_root() -> (PathBuf, PathBuf) {
     let cwd = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
     for dir in cwd.ancestors() {
-        let fbim_yml = dir.join(".fbim.yml");
+        let fbim_yml = dir.join(".renga.yml");
         if fbim_yml.exists() {
             let rel = read_issues_dir_from_yml(&fbim_yml);
             let issues_dir = PathBuf::from(&rel);
@@ -32,7 +32,7 @@ pub fn find_project_root() -> (PathBuf, PathBuf) {
     (cwd, issues)
 }
 
-/// Read the `issues_dir` value from a `.fbim.yml` file without a full YAML parse.
+/// Read the `issues_dir` value from a `.renga.yml` file without a full YAML parse.
 fn read_issues_dir_from_yml(path: &Path) -> String {
     let content = match std::fs::read_to_string(path) {
         Ok(c) => c,
@@ -76,9 +76,9 @@ mod tests {
     }
 
     #[test]
-    fn finds_root_by_fbim_yml() {
+    fn finds_root_by_renga_yml() {
         let dir = TempDir::new().unwrap();
-        fs::write(dir.path().join(".fbim.yml"), "issues_dir: my-issues\n").unwrap();
+        fs::write(dir.path().join(".renga.yml"), "issues_dir: my-issues\n").unwrap();
         let canonical = dir.path().canonicalize().unwrap();
 
         let original = std::env::current_dir().unwrap();

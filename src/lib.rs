@@ -6,7 +6,7 @@
 pub mod cli;
 /// Command handler modules.
 pub mod commands;
-/// Configuration loading from `.fbim.yml`.
+/// Configuration loading from `.renga.yml`.
 pub mod config;
 /// Issue file parsing and manipulation.
 pub mod issue;
@@ -33,7 +33,7 @@ pub enum FbimError {
 
 /// Runtime context shared across all command handlers.
 pub struct Context {
-    /// The project root directory (where `.fbim.yml` or `issues/` was found).
+    /// The project root directory (where `.renga.yml` or `issues/` was found).
     pub project_root: PathBuf,
     /// The issues directory.
     pub issues_dir: PathBuf,

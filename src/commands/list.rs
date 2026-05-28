@@ -1,4 +1,4 @@
-//! `fbim list` command handler.
+//! `renga list` command handler.
 
 use anyhow::{Context as _, Result};
 use serde::Serialize;

@@ -3,12 +3,12 @@ description: Show details of an FBIM issue
 argument-hint: "<NNNNN>"
 ---
 
-# /fbim-show
+# /renga-show
 
 Show the full content of an issue.
 
 ```
-fbim show <NNNNN>
+renga show <NNNNN>
 ```
 
 Display the output to the user.

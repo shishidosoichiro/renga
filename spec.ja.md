@@ -8,7 +8,7 @@ File-Based Issue Management の仕様。
 
 ```
 issues/
-  README.md           一覧（fbim list で自動生成）
+  README.md           一覧（renga list で自動生成）
   N-name.md           open または pending な issue
   done/
     N-name.md         完了した issue
@@ -20,7 +20,7 @@ issues/
 N-short-name.md
 ```
 
-- `N`: 正の整数（ゼロ埋めなし）。`fbim create` が既存ファイルの最大番号 + 1 を割り当てる
+- `N`: 正の整数（ゼロ埋めなし）。`renga create` が既存ファイルの最大番号 + 1 を割り当てる
 - `short-name`: ケバブケースの短い説明（英数字・ハイフンのみ、30文字以内）
 
 **ID はファイル名から取得する。** frontmatter や本文には ID を持たない。
@@ -53,7 +53,7 @@ frontmatter は省略可能。省略した場合は `status: unknown`、`priorit
 | `open` | 対応が必要。作業対象 |
 | `pending` | 決定待ち・確認待ち。作業保留 |
 | `done` | 完了（`done/` に移動済み） |
-| `unknown` | frontmatter がないか parse できない。fbim では書き込めない読み取り専用の状態 |
+| `unknown` | frontmatter がないか parse できない。renga では書き込めない読み取り専用の状態 |
 
 **priority の意味**
 
@@ -89,21 +89,21 @@ labels: []
 ## コマンド
 
 ```
-fbim init
-fbim create <title> [--id <N>] [--slug <slug>] [--priority high|medium|low] [--area <area>] [--body <text|-\>] [--milestone <milestone>]
-fbim done <N>
-fbim pending <N>
-fbim reopen <N>
-fbim list [--status open|pending|done|unknown] [--area <area>] [--label <label>] [--milestone <milestone>] [--json]
-fbim show <N>
-fbim validate
-fbim completions <bash|zsh|fish>
-fbim help [command]
+renga init
+renga create <title> [--id <N>] [--slug <slug>] [--priority high|medium|low] [--area <area>] [--body <text|-\>] [--milestone <milestone>]
+renga done <N>
+renga pending <N>
+renga reopen <N>
+renga list [--status open|pending|done|unknown] [--area <area>] [--label <label>] [--milestone <milestone>] [--json]
+renga show <N>
+renga validate
+renga completions <bash|zsh|fish>
+renga help [command]
 ```
 
 `N` はゼロ埋めなしの整数 ID（例: `42`）。レガシーのゼロ埋め ID（例: `00042`）も受け付ける。
 
-## `.fbim.yml` の仕様
+## `.renga.yml` の仕様
 
 プロジェクトルートに置く設定ファイル。省略可能。
 
@@ -123,9 +123,9 @@ area_labels:          # area の表示名（省略時は area 名をそのまま
 
 ## issues/ の探索
 
-`fbim` コマンドはカレントディレクトリから上位へ辿り、最初に次のいずれかに該当するディレクトリで止まる。
+`renga` コマンドはカレントディレクトリから上位へ辿り、最初に次のいずれかに該当するディレクトリで止まる。
 
-1. `.fbim.yml` が存在する — `issues_dir` の値を issues ディレクトリとして使う
+1. `.renga.yml` が存在する — `issues_dir` の値を issues ディレクトリとして使う
 2. `issues/` サブディレクトリが存在する
 
 何も見つからない場合はカレントディレクトリの `issues/` にフォールバックする。

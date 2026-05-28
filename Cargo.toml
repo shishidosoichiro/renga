@@ -1,10 +1,10 @@
 [package]
-name = "fbim"
+name = "renga"
 version = "0.5.0"
 edition = "2021"
 description = "File-Based Issue Management"
 license = "MIT"
-repository = "https://github.com/shishidosoichiro/fbim"
+repository = "https://github.com/shishidosoichiro/renga"
 keywords = ["issue-tracker", "cli", "markdown", "git"]
 categories = ["command-line-utilities", "development-tools"]
 exclude = [
@@ -20,7 +20,7 @@ exclude = [
 ]
 
 [[bin]]
-name = "fbim"
+name = "renga"
 path = "src/main.rs"
 
 [lib]

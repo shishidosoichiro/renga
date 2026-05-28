@@ -1,4 +1,4 @@
-//! `fbim init` handler.
+//! `renga init` handler.
 
 use std::fs;
 
@@ -6,7 +6,7 @@ use anyhow::Result;
 
 use crate::Context;
 
-/// Run `fbim init`: create the issues directory structure in the current project.
+/// Run `renga init`: create the issues directory structure in the current project.
 pub fn run(ctx: &Context) -> Result<()> {
     if ctx.done_dir.exists() {
         println!("{} already initialized", ctx.issues_dir.display());

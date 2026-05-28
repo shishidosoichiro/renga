@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Install fbim from GitHub Releases.
+# Install renga from GitHub Releases.
 #
 # Usage:
-#   bash <(curl -fsSL https://raw.githubusercontent.com/shishidosoichiro/fbim/main/install.sh)
+#   bash <(curl -fsSL https://raw.githubusercontent.com/shishidosoichiro/renga/main/install.sh)
 #   INSTALL_DIR=~/.local/bin bash <(curl -fsSL ...)
 #   VERSION=v0.5.0 bash <(curl -fsSL ...)
 set -euo pipefail
 
-REPO="shishidosoichiro/fbim"
+REPO="shishidosoichiro/renga"
 INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
 
 if [[ -z "${VERSION:-}" ]]; then
@@ -28,14 +28,14 @@ case "${OS}-${ARCH}" in
     ;;
 esac
 
-FILE="fbim-${TARGET}.tar.gz"
+FILE="renga-${TARGET}.tar.gz"
 URL="https://github.com/${REPO}/releases/download/${VERSION}/${FILE}"
 
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 
-echo "Downloading fbim ${VERSION} (${TARGET})..."
+echo "Downloading renga ${VERSION} (${TARGET})..."
 curl -fsSL "${URL}" | tar xz -C "$TMP"
 
-install -m 0755 "$TMP/fbim" "${INSTALL_DIR}/fbim"
-echo "Installed: ${INSTALL_DIR}/fbim ($("${INSTALL_DIR}/fbim" --version))"
+install -m 0755 "$TMP/renga" "${INSTALL_DIR}/renga"
+echo "Installed: ${INSTALL_DIR}/renga ($("${INSTALL_DIR}/renga" --version))"

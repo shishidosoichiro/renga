@@ -1,5 +1,5 @@
 ---
-status: open
+status: done
 priority: medium
 area: misc
 labels: []
@@ -34,6 +34,18 @@ jot / tick / koto / fude / leaf / twig / peg / tack / pin / dot / quill / tally 
 | `hikae` | 控え。控えを取る・記録する |
 | `satsu` | 冊。冊子・ノートのイメージ |
 | `tsumu` | 積む。タスクが積み上がるイメージ |
+| `renga` | 煉瓦/連歌。積み上げてものを作るイメージ |
+
+## 決定
+
+**`renga`** に決定。
+
+理由：
+- 発音できる（「レンガ」）
+- ポジティブなイメージ — 煉瓦を積み上げて何かを作る・構築する
+- done になった issue も消えるのではなく、プロジェクトの成果として積み上がっていくという設計思想と一致
+- 「連歌」（複数人で紡いでいく詩）としての意味も、複数のエージェント・人間が協力して issue を管理する使い方と重なる
+- crates.io で空き確認済み
 
 ## 変更した場合の影響範囲
 

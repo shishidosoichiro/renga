@@ -97,12 +97,12 @@ CI picks up the tag and publishes the binary automatically.
 This repository uses FBIM itself for issue tracking.
 
 ```sh
-fbim create "タイトル" --area <area>   # create an issue
-fbim list                              # list open/pending issues
-fbim done <N>                          # close an issue
+renga create "タイトル" --area <area>   # create an issue
+renga list                              # list open/pending issues
+renga done <N>                          # close an issue
 ```
 
-Or use the Claude Code skill: `/fbim`.
+Or use the Claude Code skill: `/renga`.
 
 ## Pull requests
 

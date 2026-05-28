@@ -1,4 +1,4 @@
-//! `fbim pending` command handler.
+//! `renga pending` command handler.
 
 use anyhow::Result;
 

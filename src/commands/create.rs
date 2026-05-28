@@ -1,4 +1,4 @@
-//! `fbim create` command handler.
+//! `renga create` command handler.
 
 use std::io::Read;
 
