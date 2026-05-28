@@ -1,5 +1,5 @@
 ---
-description: List FBIM issues
+description: List renga issues
 argument-hint: "[--status open|pending|done] [--area <area>] [--label <label>] [--json]"
 ---
 

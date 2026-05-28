@@ -1,4 +1,4 @@
-# FBIM — File-Based Issue Management
+# Renga — File-Based Issue Management
 
 [![CI](https://github.com/shishidosoichiro/renga/actions/workflows/ci.yml/badge.svg)](https://github.com/shishidosoichiro/renga/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -64,7 +64,7 @@ curl -fsSL https://raw.githubusercontent.com/shishidosoichiro/renga/main/skills/
 - ネットワークのない環境やプライベートなマシンで開発している
 - issue の変更履歴をコードと同じ git に残したい
 
-コメント・担当者・通知・Web UI が必要なら、GitHub Issues や Linear を使うほうがいい。FBIM は意図的にシンプルに絞っている。
+コメント・担当者・通知・Web UI が必要なら、GitHub Issues や Linear を使うほうがいい。Renga は意図的にシンプルに絞っている。
 
 ## 何が違うのか
 

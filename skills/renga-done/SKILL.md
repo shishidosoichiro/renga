@@ -1,5 +1,5 @@
 ---
-description: Close an FBIM issue
+description: Close a renga issue
 argument-hint: "<NNNNN>"
 ---
 

@@ -1,5 +1,5 @@
 ---
-description: Show details of an FBIM issue
+description: Show details of a renga issue
 argument-hint: "<NNNNN>"
 ---
 

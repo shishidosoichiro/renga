@@ -1,5 +1,5 @@
 ---
-description: Reopen a closed FBIM issue
+description: Reopen a closed renga issue
 argument-hint: "<NNNNN>"
 ---
 

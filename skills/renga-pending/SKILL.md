@@ -1,5 +1,5 @@
 ---
-description: Put an FBIM issue on hold
+description: Put a renga issue on hold
 argument-hint: "<NNNNN>"
 ---
 

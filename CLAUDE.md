@@ -1,6 +1,6 @@
 @CONTRIBUTING.md
 
-# FBIM — 実装ガイド
+# Renga — 実装ガイド
 
 ## エージェント活用方針
 
@@ -74,7 +74,7 @@ File-Based Issue Management。詳細仕様は `spec.ja.md` を参照。
 
 ## Issue 管理
 
-このリポジトリ自体の issue は FBIM で管理する（自己ホスト）。
+このリポジトリ自体の issue は Renga で管理する（自己ホスト）。
 
 ```sh
 renga create "タイトル" --area <area>

@@ -1,6 +1,6 @@
 #![deny(missing_docs)]
 
-//! FBIM — File-Based Issue Management.
+//! Renga — File-Based Issue Management.
 
 /// CLI argument definitions.
 pub mod cli;
@@ -20,7 +20,7 @@ use std::path::PathBuf;
 use anyhow::Result;
 use clap::{CommandFactory, Parser};
 
-/// Domain errors for FBIM operations.
+/// Domain errors for Renga operations.
 #[derive(Debug, thiserror::Error)]
 pub enum FbimError {
     /// No issue file found for the given ID.

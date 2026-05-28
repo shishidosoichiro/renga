@@ -1,4 +1,4 @@
-# FBIM 仕様
+# Renga 仕様
 
 File-Based Issue Management の仕様。
 

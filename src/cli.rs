@@ -2,7 +2,7 @@
 
 use clap::{Args, Parser, Subcommand};
 
-/// FBIM — File-Based Issue Management.
+/// Renga — File-Based Issue Management.
 #[derive(Parser)]
 #[command(
     name = "renga",

@@ -1,5 +1,5 @@
 ---
-description: Create a new FBIM issue
+description: Create a new renga issue
 argument-hint: "<title> [--slug <slug>] [--priority high|medium|low] [--area <area>] [--body <text>]"
 ---
 

@@ -6,7 +6,7 @@ argument-hint: "[create] <title> | done <NNNNN> | pending <NNNNN> | reopen <NNNN
 
 # /renga skill
 
-A Claude Code skill for File-Based Issue Management (FBIM).
+A Claude Code skill for File-Based Issue Management .
 All operations are performed by calling the `renga` binary.
 
 ## Usage
@@ -27,7 +27,7 @@ All operations are performed by calling the `renga` binary.
 
 ## Agent workflow conventions
 
-These rules apply whenever an AI agent works with FBIM issues.
+These rules apply whenever an AI agent works with renga issues.
 
 **Before starting work**
 - Run `renga list` to confirm which issues are open or pending.

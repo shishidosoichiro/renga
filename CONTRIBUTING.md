@@ -1,4 +1,4 @@
-# Contributing to FBIM
+# Contributing to Renga
 
 ## Development environment
 
@@ -63,7 +63,7 @@ Use Japanese for the description to match the existing history.
 
 ## Releasing
 
-Releases follow [Semantic Versioning](https://semver.org/). Because FBIM is pre-1.0:
+Releases follow [Semantic Versioning](https://semver.org/). Because Renga is pre-1.0:
 
 - `0.x.0` — new features or breaking changes
 - `0.x.y` — bug fixes only
@@ -94,7 +94,7 @@ CI picks up the tag and publishes the binary automatically.
 
 ## Issues
 
-This repository uses FBIM itself for issue tracking.
+This repository uses Renga itself for issue tracking.
 
 ```sh
 renga create "タイトル" --area <area>   # create an issue

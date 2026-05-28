@@ -1,4 +1,4 @@
-# FBIM Specification
+# Renga Specification
 
 > Japanese version: [spec.ja.md](spec.ja.md)
 
