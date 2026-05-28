@@ -23,6 +23,7 @@ Closed issues are moved to `done/`.
 |---|---|---|---|
 | [57](57-crates-io-publish.md) | open | medium | crates.io への publish 対応 |
 | [58](58-zenn-reddit.md) | open | medium | メディア活動: Zenn / Reddit への投稿 |
+| [83](83-fbim.md) | open | medium | ツール名の変更を検討する — fbim は発音しにくく略語として弱い |
 
 ---
 
