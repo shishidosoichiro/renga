@@ -8,14 +8,6 @@ Closed issues are moved to `done/`.
 
 ---
 
-## agent
-
-| # | status | priority | title |
-|---|---|---|---|
-| [59](59-retro-marketing-strategist-rea.md) | open | medium | retro: marketing-strategist に既存 README の診断・改善提案の観点を追加する |
-
----
-
 ## ci
 
 | # | status | priority | title |
