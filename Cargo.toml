@@ -7,6 +7,17 @@ license = "MIT"
 repository = "https://github.com/shishidosoichiro/fbim"
 keywords = ["issue-tracker", "cli", "markdown", "git"]
 categories = ["command-line-utilities", "development-tools"]
+exclude = [
+  "issues/",
+  ".claude/",
+  "skills/",
+  ".github/",
+  "CLAUDE.md",
+  ".coveragerc",
+  ".gitlab-ci.yml",
+  "upload-macos.sh",
+  "cliff.toml",
+]
 
 [[bin]]
 name = "fbim"
