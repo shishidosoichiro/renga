@@ -3,7 +3,7 @@
 [![CI](https://github.com/shishidosoichiro/fbim/actions/workflows/ci.yml/badge.svg)](https://github.com/shishidosoichiro/fbim/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-A CLI tool for managing issues as files. `fbim create "title"` creates a Markdown file, and `fbim done 1` closes it.
+fbim is a CLI tool for managing issues as files. Plain Markdown, so your editor, grep, git, and AI agents can all read and write them. `fbim create "title"` creates an issue; `fbim done 1` closes it.
 
 > Japanese version: [README.ja.md](README.ja.md)
 

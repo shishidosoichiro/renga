@@ -3,7 +3,7 @@
 [![CI](https://github.com/shishidosoichiro/fbim/actions/workflows/ci.yml/badge.svg)](https://github.com/shishidosoichiro/fbim/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-issue をファイルで管理する CLI ツールです。`fbim create "タイトル"` で Markdown ファイルが作られて、`fbim done 1` で閉じられます。
+fbim は issue をファイルで管理する CLI ツールです。普通の Markdown なので、エディタ・grep・git・AI エージェントがそのまま読み書きできます。`fbim create "タイトル"` で issue を作成し、`fbim done 1` で閉じます。
 
 > English version: [README.md](README.md)
 
