@@ -1,10 +1,11 @@
 [package]
 name = "renga"
-version = "0.5.0"
+version = "0.5.1"
 edition = "2021"
 description = "File-Based Issue Management"
 license = "MIT"
 repository = "https://github.com/shishidosoichiro/renga"
+readme = "README.md"
 keywords = ["issue-tracker", "cli", "markdown", "git"]
 categories = ["command-line-utilities", "development-tools"]
 exclude = [
