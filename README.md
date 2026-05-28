@@ -22,6 +22,33 @@ fbim create "My first task"
 
 That's it. Issue files appear in `issues/`.
 
+## Claude Code integration
+
+Claude can create issues as it works, close them when done, and keep the list current — all without interrupting the coding flow.
+
+Install the skill to manage issues with `/fbim` inside Claude Code:
+
+```sh
+ln -sf /path/to/fbim/skills/fbim ~/.claude/skills/fbim
+```
+
+Then use it directly in any Claude Code session:
+
+```
+/fbim create "Add input validation"
+/fbim list
+/fbim done 3
+```
+
+| Command | Description |
+|---|---|
+| `/fbim [create] <title>` | Create an issue |
+| `/fbim done <N>` | Mark as done |
+| `/fbim pending <N>` | Put on hold |
+| `/fbim reopen <N>` | Reopen |
+| `/fbim list` | List open and pending issues |
+| `/fbim show <N>` | Show details |
+
 ## Who is it for?
 
 FBIM is for **solo developers and small teams** who want to start tracking work immediately, without setting up an external service first.
@@ -33,13 +60,13 @@ FBIM is for **solo developers and small teams** who want to start tracking work 
 
 If you need comments, assignments, notifications, or a web UI for non-engineers, reach for GitHub Issues or Linear instead. FBIM is intentionally minimal.
 
-## Why file-based?
+## How it's different
 
-- **No setup**: `fbim init` is all there is. No account, no token, no config file.
-- **Plain Markdown**: Open issue files in any editor, search with grep, commit to git if you want — they're just files.
-- **Works offline**: No network connection needed.
-- **Works with AI tools**: Plain Markdown files are easy for LLMs to read and write. Pair with Claude Code to manage issues without leaving your editor.
-- **No export**: Data lives on your machine. If you switch tools later, the files are already readable.
+- **AI-native**: Issue files are plain Markdown, so LLMs can read and write them directly. An agent can open an issue, make a fix, and close it — all in one session.
+- **Works offline**: No network connection, no account, no API token. `fbim init` is all the setup there is.
+- **No config required**: Drop it into any directory. No project configuration or external service needed to get started.
+- **Lives with your code**: Issue files are just files — open them in any editor, search with grep, and commit them to git alongside the code that fixes them.
+- **Your data, your format**: Nothing to export. The files are readable plain text whether you keep using fbim or not.
 
 ## Installation
 
@@ -105,25 +132,6 @@ source <(fbim completions zsh)
 ```sh
 fbim completions fish > ~/.config/fish/completions/fbim.fish
 ```
-
-## Claude Code skill
-
-FBIM pairs especially well with Claude Code. Install the skill to create and manage issues with `/fbim` without leaving your coding session.
-
-```sh
-ln -sf /path/to/fbim/skills/fbim ~/.claude/skills/fbim
-```
-
-| Command | Description |
-|---|---|
-| `/fbim [create] <title>` | Create an issue |
-| `/fbim done <N>` | Mark as done |
-| `/fbim pending <N>` | Put on hold |
-| `/fbim reopen <N>` | Reopen |
-| `/fbim list` | List open and pending issues |
-| `/fbim show <N>` | Show details |
-
-Claude can create issues as it works, close them when done, and keep the list current — all without interrupting the coding flow.
 
 ## Customization
 

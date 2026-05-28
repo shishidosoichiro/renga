@@ -19,6 +19,29 @@ File-Based Issue Management (FBIM) の操作スキル。
 
 ---
 
+## エージェント作業規約
+
+AI エージェントが FBIM の issue を扱う際は、以下の規約に従う。
+
+**作業開始前**
+- `fbim list` を実行して open/pending の issue を確認する。
+- 対象 issue を `fbim show <N>` で読んでから作業を始める。
+
+**作業中**
+- issue タイトルから自明でない判断・制約を発見したら、issue 本文の `## Notes` セクションに追記する（`create` 時は `--body`、既存 issue はファイルを直接編集）。
+- issue ファイルを削除しない。status の変更は `fbim pending` または `fbim done` を使う。
+
+**判断不能・ブロックされた場合**
+- 作業を完了できない場合は `fbim pending <N>` を実行し、理由を issue 本文の `## Notes` に書く。
+- 完了できないまま issue を `open` のままにして作業を終えない。
+
+**作業完了後**
+- issue を close する前に `fbim validate` を実行する。exit code 1 はエラーがあることを意味するので、先に修正する。
+- `fbim done <N>` で issue を close する。ファイルを直接編集して `status: done` にすることは禁止。必ずコマンドを使う。
+- 作業完了後に `fbim done` を実行せず issue を `open` のまま放置しない。
+
+---
+
 ## ルール（全コマンド共通）
 
 - `$ARGUMENTS` が空の場合は `fbim help` を実行して表示する

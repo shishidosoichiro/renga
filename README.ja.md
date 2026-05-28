@@ -22,6 +22,33 @@ fbim create "最初のタスク"
 
 以上。`issues/` ディレクトリにファイルが作られる。
 
+## Claude Code integration
+
+Claude が作業しながら issue を作り、完了したら close する——コーディングのフローを止めずに issue 管理が回る。
+
+スキルをインストールすれば、Claude Code の中で `/fbim` を使って issue を管理できる。
+
+```sh
+ln -sf /path/to/fbim/skills/fbim ~/.claude/skills/fbim
+```
+
+あとは Claude Code セッションの中で直接使うだけ。
+
+```
+/fbim create "入力バリデーションを追加する"
+/fbim list
+/fbim done 3
+```
+
+| コマンド | 動作 |
+|---|---|
+| `/fbim [create] <タイトル>` | issue を作成する |
+| `/fbim done <N>` | 完了にする |
+| `/fbim pending <N>` | 保留にする |
+| `/fbim reopen <N>` | 再開する |
+| `/fbim list` | open/pending の一覧を表示する |
+| `/fbim show <N>` | 詳細を表示する |
+
 ## こんな人に向いている
 
 **ソロ開発者・小規模チーム**で、外部サービスのセットアップなしにすぐ作業を始めたい人向け。
@@ -33,13 +60,13 @@ fbim create "最初のタスク"
 
 コメント・担当者・通知・Web UI が必要なら、GitHub Issues や Linear を使うほうがいい。FBIM は意図的にシンプルに絞っている。
 
-## なぜファイルベースか
+## 何が違うのか
 
-- **セットアップ不要**: `fbim init` だけで始まる。アカウントもトークンも設定ファイルも要らない。
-- **普通の Markdown**: issue ファイルはエディタで直接開けるし、grep で検索できる。git を使っているなら、履歴も差分もそこに残る。
-- **オフラインで動く**: ネットワーク接続がなくても動く。
-- **AI ツールと組み合わせられる**: Markdown ファイルは LLM が読み書きしやすい。Claude Code と組み合わせると、エディタを離れずに issue 管理ができる。
-- **エクスポート不要**: データは手元のファイル。ツールを変えるときにエクスポートは要らない。
+- **AI ネイティブ**: issue ファイルは普通の Markdown なので、LLM がそのまま読み書きできる。エージェントが issue を開き、修正して、close する——一つのセッションで完結する。
+- **オフラインで動く**: ネットワーク接続もアカウントも API トークンも不要。`fbim init` だけで始められる。
+- **設定不要**: どのディレクトリにも置くだけで使える。プロジェクト設定も外部サービスも要らない。
+- **コードと一緒に暮らす**: issue ファイルはただのファイル。好きなエディタで開けて、grep で検索できて、修正コードと一緒に git にコミットできる。
+- **データは手元に**: エクスポートは要らない。fbim を使い続けても使わなくなっても、ファイルはそのまま読める。
 
 ## インストール
 
@@ -105,25 +132,6 @@ source <(fbim completions zsh)
 ```sh
 fbim completions fish > ~/.config/fish/completions/fbim.fish
 ```
-
-## Claude Code スキル
-
-Claude Code と組み合わせると特に便利。スキルをインストールすれば、コーディング中に `/fbim` で issue を作成・管理できる。
-
-```sh
-ln -sf /path/to/fbim/skills/fbim ~/.claude/skills/fbim
-```
-
-| コマンド | 動作 |
-|---|---|
-| `/fbim [create] <タイトル>` | issue を作成する |
-| `/fbim done <N>` | 完了にする |
-| `/fbim pending <N>` | 保留にする |
-| `/fbim reopen <N>` | 再開する |
-| `/fbim list` | open/pending の一覧を表示する |
-| `/fbim show <N>` | 詳細を表示する |
-
-Claude が作業しながら issue を作り、完了したら close する——コーディングのフローを止めずに issue 管理が回る。
 
 ## カスタマイズ
 

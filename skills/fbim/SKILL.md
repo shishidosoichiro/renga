@@ -23,6 +23,29 @@ All operations are performed by calling the `fbim` binary.
 
 ---
 
+## Agent workflow conventions
+
+These rules apply whenever an AI agent works with FBIM issues.
+
+**Before starting work**
+- Run `fbim list` to confirm which issues are open or pending.
+- Run `fbim show <N>` on the relevant issue before beginning work.
+
+**During work**
+- When you make a decision or discover a constraint that is not obvious from the issue title, append it to the issue body under a `## Notes` section using `--body` on create or by editing the file directly.
+- Do not delete issue files. Use `fbim pending` or `fbim done` instead.
+
+**When blocked**
+- If you cannot proceed, run `fbim pending <N>` and append the reason under `## Notes` in the issue body.
+- Do not leave the issue as `open` when you are unable to complete it.
+
+**After completing work**
+- Run `fbim validate` before closing any issue. Exit code 1 means errors exist; fix them first.
+- Close the issue with `fbim done <N>`. Do not change `status` to `done` by editing the file directly — always use the command.
+- Never skip `fbim done` and leave the issue as `open` after work is complete.
+
+---
+
 ## Rules (all commands)
 
 - If `$ARGUMENTS` is empty, run `fbim help` and display the output.
