@@ -21,13 +21,13 @@ if [[ -z "$GITLAB_TOKEN" ]]; then
 fi
 
 ENCODED_PROJECT=$(python3 -c "import urllib.parse; print(urllib.parse.quote('${PROJECT_PATH}', safe=''))")
-UPLOAD_URL="${GITLAB_URL}/api/v4/projects/${ENCODED_PROJECT}/packages/generic/fbim/${VERSION}/fbim-darwin-arm64"
+UPLOAD_URL="${GITLAB_URL}/api/v4/projects/${ENCODED_PROJECT}/packages/generic/renga/${VERSION}/renga-darwin-arm64"
 
 echo "Building macOS binary..."
 cargo build --release
 
 echo "Uploading to ${GITLAB_URL}/${PROJECT_PATH} (version: ${VERSION})..."
-curl --fail -s --upload-file target/release/fbim \
+curl --fail -s --upload-file target/release/renga \
   -H "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
   "$UPLOAD_URL"
-echo "Uploaded: fbim-darwin-arm64 → ${VERSION}"
+echo "Uploaded: renga-darwin-arm64 → ${VERSION}"

@@ -16,7 +16,7 @@ use crate::{cli::Cli, Context};
 
 // #compdef is only honoured when the file is autoloaded via $fpath.
 // compdef _renga renga is required when sourcing directly.
-const ZSH_SCRIPT: &str = r#"#compdef fbim
+const ZSH_SCRIPT: &str = r#"#compdef renga
 
 _renga() {
     local -a candidates
@@ -37,13 +37,13 @@ _renga_completion() {
     candidates=$(renga __complete "${COMP_WORDS[@]}" 2>/dev/null | cut -f1)
     COMPREPLY=($(compgen -W "$candidates" -- "$cur"))
 }
-complete -F _renga_completion fbim
+complete -F _renga_completion renga
 "#;
 
 // Fish natively supports tab-separated `value\tdescription` output.
 const FISH_SCRIPT: &str = r#"# fish completion for renga
-complete -c fbim -f
-complete -c fbim -f -a '(
+complete -c renga -f
+complete -c renga -f -a '(
     set -l tokens (commandline -opc) (commandline -ct)
     renga __complete $tokens 2>/dev/null
 )'
@@ -81,7 +81,7 @@ fn write_script(shell: clap_complete::Shell) -> io::Result<()> {
         clap_complete::Shell::Fish => FISH_SCRIPT,
         _ => {
             let mut cmd = Cli::command();
-            clap_complete::generate(shell, &mut cmd, "fbim", &mut io::stdout());
+            clap_complete::generate(shell, &mut cmd, "renga", &mut io::stdout());
             return Ok(());
         }
     };

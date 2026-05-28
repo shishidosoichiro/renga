@@ -22,7 +22,7 @@ static RE_LINENUM_PREFIX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^\d+:\
 /// Status of an issue.
 ///
 /// `Unknown` is assigned when a Markdown file cannot be parsed as an issue
-/// (e.g. frontmatter is absent). It is read-only: fbim never writes it to a file.
+/// (e.g. frontmatter is absent). It is read-only: renga never writes it to a file.
 ///
 /// # Examples
 ///

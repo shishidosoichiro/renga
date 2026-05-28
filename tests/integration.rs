@@ -10,8 +10,8 @@ fn setup() -> TempDir {
     dir
 }
 
-fn fbim(dir: &TempDir) -> Command {
-    let mut cmd = Command::cargo_bin("fbim").unwrap();
+fn renga(dir: &TempDir) -> Command {
+    let mut cmd = Command::cargo_bin("renga").unwrap();
     cmd.current_dir(dir.path());
     cmd
 }
@@ -21,7 +21,7 @@ fn fbim(dir: &TempDir) -> Command {
 #[test]
 fn create_writes_file() {
     let dir = setup();
-    fbim(&dir)
+    renga(&dir)
         .args(["create", "My Issue", "--area", "core"])
         .assert()
         .success()
@@ -37,7 +37,7 @@ fn create_writes_file() {
 #[test]
 fn create_with_priority_and_body() {
     let dir = setup();
-    fbim(&dir)
+    renga(&dir)
         .args([
             "create",
             "Bug",
@@ -57,7 +57,7 @@ fn create_with_priority_and_body() {
 #[test]
 fn create_with_explicit_slug() {
     let dir = setup();
-    fbim(&dir)
+    renga(&dir)
         .args(["create", "My Issue", "--slug", "custom-slug"])
         .assert()
         .success()
@@ -67,8 +67,8 @@ fn create_with_explicit_slug() {
 #[test]
 fn create_sequential_ids() {
     let dir = setup();
-    fbim(&dir).args(["create", "First"]).assert().success();
-    fbim(&dir)
+    renga(&dir).args(["create", "First"]).assert().success();
+    renga(&dir)
         .args(["create", "Second"])
         .assert()
         .success()
@@ -78,7 +78,7 @@ fn create_sequential_ids() {
 #[test]
 fn create_without_issues_dir_fails() {
     let dir = TempDir::new().unwrap();
-    fbim(&dir)
+    renga(&dir)
         .args(["create", "Issue"])
         .assert()
         .failure()
@@ -90,10 +90,10 @@ fn create_without_issues_dir_fails() {
 #[test]
 fn list_shows_open_issues() {
     let dir = setup();
-    fbim(&dir).args(["create", "Alpha"]).assert().success();
-    fbim(&dir).args(["create", "Beta"]).assert().success();
+    renga(&dir).args(["create", "Alpha"]).assert().success();
+    renga(&dir).args(["create", "Beta"]).assert().success();
 
-    fbim(&dir)
+    renga(&dir)
         .arg("list")
         .assert()
         .success()
@@ -104,12 +104,12 @@ fn list_shows_open_issues() {
 #[test]
 fn list_json_output() {
     let dir = setup();
-    fbim(&dir)
+    renga(&dir)
         .args(["create", "Issue", "--area", "core"])
         .assert()
         .success();
 
-    fbim(&dir)
+    renga(&dir)
         .args(["list", "--json"])
         .assert()
         .success()
@@ -120,16 +120,16 @@ fn list_json_output() {
 #[test]
 fn list_filters_by_area() {
     let dir = setup();
-    fbim(&dir)
+    renga(&dir)
         .args(["create", "Core Issue", "--area", "core"])
         .assert()
         .success();
-    fbim(&dir)
+    renga(&dir)
         .args(["create", "CLI Issue", "--area", "cli"])
         .assert()
         .success();
 
-    fbim(&dir)
+    renga(&dir)
         .args(["list", "--area", "core"])
         .assert()
         .success()
@@ -140,11 +140,11 @@ fn list_filters_by_area() {
 #[test]
 fn list_filters_by_status() {
     let dir = setup();
-    fbim(&dir).args(["create", "Open"]).assert().success();
-    fbim(&dir).args(["create", "Will Pend"]).assert().success();
-    fbim(&dir).args(["pending", "2"]).assert().success();
+    renga(&dir).args(["create", "Open"]).assert().success();
+    renga(&dir).args(["create", "Will Pend"]).assert().success();
+    renga(&dir).args(["pending", "2"]).assert().success();
 
-    fbim(&dir)
+    renga(&dir)
         .args(["list", "--status", "pending"])
         .assert()
         .success()
@@ -157,8 +157,8 @@ fn list_filters_by_status() {
 #[test]
 fn done_moves_file_to_done_dir() {
     let dir = setup();
-    fbim(&dir).args(["create", "Todo"]).assert().success();
-    fbim(&dir)
+    renga(&dir).args(["create", "Todo"]).assert().success();
+    renga(&dir)
         .args(["done", "1"])
         .assert()
         .success()
@@ -174,7 +174,7 @@ fn done_moves_file_to_done_dir() {
 #[test]
 fn done_not_found() {
     let dir = setup();
-    fbim(&dir)
+    renga(&dir)
         .args(["done", "99"])
         .assert()
         .failure()
@@ -186,8 +186,8 @@ fn done_not_found() {
 #[test]
 fn pending_sets_status() {
     let dir = setup();
-    fbim(&dir).args(["create", "Work"]).assert().success();
-    fbim(&dir).args(["pending", "1"]).assert().success();
+    renga(&dir).args(["create", "Work"]).assert().success();
+    renga(&dir).args(["pending", "1"]).assert().success();
 
     let content = fs::read_to_string(dir.path().join("issues/1-work.md")).unwrap();
     assert!(content.contains("status: pending"));
@@ -196,7 +196,7 @@ fn pending_sets_status() {
 #[test]
 fn pending_not_found() {
     let dir = setup();
-    fbim(&dir)
+    renga(&dir)
         .args(["pending", "99"])
         .assert()
         .failure()
@@ -208,9 +208,9 @@ fn pending_not_found() {
 #[test]
 fn reopen_moves_from_done() {
     let dir = setup();
-    fbim(&dir).args(["create", "Old"]).assert().success();
-    fbim(&dir).args(["done", "1"]).assert().success();
-    fbim(&dir)
+    renga(&dir).args(["create", "Old"]).assert().success();
+    renga(&dir).args(["done", "1"]).assert().success();
+    renga(&dir)
         .args(["reopen", "1"])
         .assert()
         .success()
@@ -226,9 +226,9 @@ fn reopen_moves_from_done() {
 #[test]
 fn reopen_pending_issue() {
     let dir = setup();
-    fbim(&dir).args(["create", "Blocked"]).assert().success();
-    fbim(&dir).args(["pending", "1"]).assert().success();
-    fbim(&dir).args(["reopen", "1"]).assert().success();
+    renga(&dir).args(["create", "Blocked"]).assert().success();
+    renga(&dir).args(["pending", "1"]).assert().success();
+    renga(&dir).args(["reopen", "1"]).assert().success();
 
     let content = fs::read_to_string(dir.path().join("issues/1-blocked.md")).unwrap();
     assert!(content.contains("status: open"));
@@ -239,8 +239,8 @@ fn reopen_pending_issue() {
 #[test]
 fn show_prints_content() {
     let dir = setup();
-    fbim(&dir).args(["create", "My Issue"]).assert().success();
-    fbim(&dir)
+    renga(&dir).args(["create", "My Issue"]).assert().success();
+    renga(&dir)
         .args(["show", "1"])
         .assert()
         .success()
@@ -251,7 +251,7 @@ fn show_prints_content() {
 #[test]
 fn show_not_found() {
     let dir = setup();
-    fbim(&dir)
+    renga(&dir)
         .args(["show", "99"])
         .assert()
         .failure()
@@ -263,23 +263,23 @@ fn show_not_found() {
 #[test]
 fn completions_bash() {
     let dir = setup();
-    fbim(&dir)
+    renga(&dir)
         .args(["completions", "bash"])
         .assert()
         .success()
         .stdout(predicate::str::contains("__complete"))
-        .stdout(predicate::str::contains("fbim"));
+        .stdout(predicate::str::contains("renga"));
 }
 
 #[test]
 fn completions_zsh() {
     let dir = setup();
-    fbim(&dir)
+    renga(&dir)
         .args(["completions", "zsh"])
         .assert()
         .success()
         .stdout(predicate::str::contains("__complete"))
-        .stdout(predicate::str::contains("fbim"));
+        .stdout(predicate::str::contains("renga"));
 }
 
 // ── __complete ────────────────────────────────────────────────────────────────
@@ -287,8 +287,8 @@ fn completions_zsh() {
 #[test]
 fn complete_lists_subcommands() {
     let dir = setup();
-    fbim(&dir)
-        .args(["__complete", "fbim", ""])
+    renga(&dir)
+        .args(["__complete", "renga", ""])
         .assert()
         .success()
         .stdout(predicate::str::contains("create"))
@@ -299,10 +299,10 @@ fn complete_lists_subcommands() {
 #[test]
 fn complete_done_shows_open_issues() {
     let dir = setup();
-    fbim(&dir).args(["create", "My Task"]).assert().success();
+    renga(&dir).args(["create", "My Task"]).assert().success();
 
-    fbim(&dir)
-        .args(["__complete", "fbim", "done", ""])
+    renga(&dir)
+        .args(["__complete", "renga", "done", ""])
         .assert()
         .success()
         .stdout(predicate::str::contains("1\t"))
@@ -312,11 +312,11 @@ fn complete_done_shows_open_issues() {
 #[test]
 fn complete_reopen_shows_done_issues() {
     let dir = setup();
-    fbim(&dir).args(["create", "Old Task"]).assert().success();
-    fbim(&dir).args(["done", "1"]).assert().success();
+    renga(&dir).args(["create", "Old Task"]).assert().success();
+    renga(&dir).args(["done", "1"]).assert().success();
 
-    fbim(&dir)
-        .args(["__complete", "fbim", "reopen", ""])
+    renga(&dir)
+        .args(["__complete", "renga", "reopen", ""])
         .assert()
         .success()
         .stdout(predicate::str::contains("1\t"))
@@ -326,8 +326,8 @@ fn complete_reopen_shows_done_issues() {
 #[test]
 fn complete_list_status_values() {
     let dir = setup();
-    fbim(&dir)
-        .args(["__complete", "fbim", "list", "--status", ""])
+    renga(&dir)
+        .args(["__complete", "renga", "list", "--status", ""])
         .assert()
         .success()
         .stdout(predicate::str::contains("open"))
@@ -338,15 +338,15 @@ fn complete_list_status_values() {
 #[test]
 fn reopen_fails_when_open_issue_with_same_name_exists() {
     let dir = setup();
-    fbim(&dir).args(["create", "Foo"]).assert().success();
-    fbim(&dir).args(["done", "1"]).assert().success();
+    renga(&dir).args(["create", "Foo"]).assert().success();
+    renga(&dir).args(["done", "1"]).assert().success();
     // manually place a file with the same name in issues/
     fs::write(
         dir.path().join("issues/1-foo.md"),
         "---\nstatus: open\n---\n\n# Foo\n",
     )
     .unwrap();
-    fbim(&dir)
+    renga(&dir)
         .args(["reopen", "1"])
         .assert()
         .failure()
@@ -356,7 +356,7 @@ fn reopen_fails_when_open_issue_with_same_name_exists() {
 #[test]
 fn create_with_milestone() {
     let dir = setup();
-    fbim(&dir)
+    renga(&dir)
         .args(["create", "Task", "--milestone", "v1.0"])
         .assert()
         .success();
@@ -370,7 +370,7 @@ fn create_with_milestone() {
 #[test]
 fn init_creates_issues_and_done_dirs() {
     let dir = TempDir::new().unwrap();
-    fbim(&dir)
+    renga(&dir)
         .args(["init"])
         .assert()
         .success()
@@ -383,8 +383,8 @@ fn init_creates_issues_and_done_dirs() {
 #[test]
 fn init_is_idempotent() {
     let dir = TempDir::new().unwrap();
-    fbim(&dir).args(["init"]).assert().success();
-    fbim(&dir)
+    renga(&dir).args(["init"]).assert().success();
+    renga(&dir)
         .args(["init"])
         .assert()
         .success()
@@ -397,7 +397,7 @@ fn init_is_idempotent() {
 #[test]
 fn create_body_from_stdin() {
     let dir = setup();
-    fbim(&dir)
+    renga(&dir)
         .args(["create", "My Issue", "--body", "-"])
         .write_stdin("body from stdin\n")
         .assert()
@@ -412,7 +412,7 @@ fn create_body_from_stdin() {
 #[test]
 fn create_with_custom_id() {
     let dir = setup();
-    fbim(&dir)
+    renga(&dir)
         .args(["create", "My Issue", "--id", "99"])
         .assert()
         .success()
@@ -424,11 +424,11 @@ fn create_with_custom_id() {
 #[test]
 fn create_with_custom_id_collision() {
     let dir = setup();
-    fbim(&dir)
+    renga(&dir)
         .args(["create", "First", "--id", "5"])
         .assert()
         .success();
-    fbim(&dir)
+    renga(&dir)
         .args(["create", "Second", "--id", "5", "--slug", "second"])
         .assert()
         .failure()
@@ -438,7 +438,7 @@ fn create_with_custom_id_collision() {
 #[test]
 fn create_with_id_zero_fails() {
     let dir = setup();
-    fbim(&dir)
+    renga(&dir)
         .args(["create", "Task", "--id", "0"])
         .assert()
         .failure()
@@ -448,7 +448,7 @@ fn create_with_id_zero_fails() {
 #[test]
 fn create_with_id_non_numeric_fails() {
     let dir = setup();
-    fbim(&dir)
+    renga(&dir)
         .args(["create", "Task", "--id", "abc"])
         .assert()
         .failure()
@@ -460,9 +460,9 @@ fn create_with_id_non_numeric_fails() {
 #[test]
 fn validate_clean_issues_exits_ok() {
     let dir = setup();
-    fbim(&dir).args(["create", "Task One"]).assert().success();
-    fbim(&dir).args(["create", "Task Two"]).assert().success();
-    fbim(&dir)
+    renga(&dir).args(["create", "Task One"]).assert().success();
+    renga(&dir).args(["create", "Task Two"]).assert().success();
+    renga(&dir)
         .args(["validate"])
         .assert()
         .success()
@@ -477,7 +477,7 @@ fn validate_detects_unparseable_frontmatter() {
         "---\nnot: valid: yaml: [\n---\n\n# Bad\n",
     )
     .unwrap();
-    fbim(&dir)
+    renga(&dir)
         .args(["validate"])
         .assert()
         .failure()
@@ -497,7 +497,7 @@ fn validate_detects_duplicate_ids() {
         "---\nschema_version: 1\nstatus: open\npriority: medium\narea: core\nlabels: []\n---\n\n# Second\n",
     )
     .unwrap();
-    fbim(&dir)
+    renga(&dir)
         .args(["validate"])
         .assert()
         .failure()
@@ -512,7 +512,7 @@ fn validate_warns_on_missing_schema_version() {
         "---\nstatus: open\npriority: medium\narea: core\nlabels: []\n---\n\n# Old\n",
     )
     .unwrap();
-    fbim(&dir)
+    renga(&dir)
         .args(["validate"])
         .assert()
         .success()
@@ -527,7 +527,7 @@ fn validate_detects_invalid_status_value() {
         "---\nschema_version: 1\nstatus: garbage\npriority: medium\narea: core\nlabels: []\n---\n\n# Bad Status\n",
     )
     .unwrap();
-    fbim(&dir)
+    renga(&dir)
         .args(["validate"])
         .assert()
         .failure()
@@ -537,7 +537,7 @@ fn validate_detects_invalid_status_value() {
 #[test]
 fn validate_without_issues_dir_fails() {
     let dir = TempDir::new().unwrap();
-    fbim(&dir)
+    renga(&dir)
         .args(["validate"])
         .assert()
         .failure()

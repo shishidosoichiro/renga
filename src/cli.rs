@@ -47,15 +47,15 @@ pub enum Command {
     ///
     /// bash — add to ~/.bashrc:
     ///
-    ///   eval "$(fbim completions bash)"
+    ///   eval "$(renga completions bash)"
     ///
     /// zsh — add to ~/.zshrc:
     ///
-    ///   source <(fbim completions zsh)
+    ///   source <(renga completions zsh)
     ///
     /// fish — install once:
     ///
-    ///   fbim completions fish > ~/.config/fish/completions/fbim.fish
+    ///   renga completions fish > ~/.config/fish/completions/renga.fish
     Completions {
         /// Shell to generate completions for.
         shell: clap_complete::Shell,

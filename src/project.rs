@@ -12,9 +12,9 @@ use std::path::{Path, PathBuf};
 pub fn find_project_root() -> (PathBuf, PathBuf) {
     let cwd = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
     for dir in cwd.ancestors() {
-        let fbim_yml = dir.join(".renga.yml");
-        if fbim_yml.exists() {
-            let rel = read_issues_dir_from_yml(&fbim_yml);
+        let renga_yml = dir.join(".renga.yml");
+        if renga_yml.exists() {
+            let rel = read_issues_dir_from_yml(&renga_yml);
             let issues_dir = PathBuf::from(&rel);
             let issues_dir = if issues_dir.is_absolute() {
                 issues_dir
