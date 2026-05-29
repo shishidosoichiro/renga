@@ -13,8 +13,6 @@ Closed issues are moved to `done/`.
 | # | status | priority | title |
 |---|---|---|---|
 | [87](87-renga-next-priority-area-issue.md) | open | medium | renga next — priority・area から次に着手すべき issue を返す（AI のトークン節約） |
-| [90](90-renga-create-label.md) | open | medium | renga create に --label オプションを追加する |
-| [91](91-renga-show-json.md) | open | medium | renga show に --json オプションを追加する |
 | [92](92-renga-create-update-json-json.md) | open | medium | renga create・update で JSON 標準入力を受け付ける（--json フラグ） |
 
 ---

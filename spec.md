@@ -90,12 +90,12 @@ Brief description of what needs to be done.
 
 ```
 renga init
-renga create <title> [--id <N>] [--slug <slug>] [--priority high|medium|low] [--area <area>] [--body <text|-\>] [--milestone <milestone>]
+renga create <title> [--id <N>] [--slug <slug>] [--priority high|medium|low] [--area <area>] [--body <text|-\>] [--milestone <milestone>] [--label <label>]...
 renga done <N>
 renga pending <N>
 renga reopen <N>
 renga list [--status open|pending|done|unknown] [--area <area>] [--label <label>] [--milestone <milestone>] [--json]
-renga show <N>
+renga show <N> [--json]
 renga edit <N>
 renga update <N> [--priority high|medium|low] [--area <area>] [--status open|pending] [--milestone <milestone>] [--label <label>]... [--body <text|->]
 renga validate

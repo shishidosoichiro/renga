@@ -114,12 +114,12 @@ cargo install renga
 | コマンド | 動作 |
 |---|---|
 | `renga init` | issues ディレクトリを初期化する |
-| `renga create <タイトル> [--id <N>] [--slug <slug>] [--priority high\|medium\|low] [--area <area>] [--body <テキスト\|-\>] [--milestone <milestone>]` | issue を作成する（`--body -` で標準入力から本文を読む） |
+| `renga create <タイトル> [--id <N>] [--slug <slug>] [--priority high\|medium\|low] [--area <area>] [--body <テキスト\|-\>] [--milestone <milestone>] [--label <label>]...` | issue を作成する（`--body -` で標準入力から本文を読む） |
 | `renga done <N>` | issue を完了にする |
 | `renga pending <N>` | issue を保留にする |
 | `renga reopen <N>` | issue を再開する |
 | `renga list [--status open\|pending\|done\|unknown] [--area <area>] [--label <label>] [--milestone <milestone>] [--json]` | issue 一覧を表示する |
-| `renga show <N>` | issue の詳細を表示する |\n| `renga edit <N>` | `$EDITOR` で issue を開く（人間向け） |\n| `renga update <N> [--priority ...] [--area ...] [--status ...] [--milestone ...] [--label ...]... [--body <テキスト\\|->]` | issue のフィールドを更新する（AI・スクリプト向け） |
+| `renga show <N> [--json]` | issue の詳細を表示する |\n| `renga edit <N>` | `$EDITOR` で issue を開く（人間向け） |\n| `renga update <N> [--priority ...] [--area ...] [--status ...] [--milestone ...] [--label ...]... [--body <テキスト\\|->]` | issue のフィールドを更新する（AI・スクリプト向け） |
 | `renga validate` | 全 issue のスキーマエラー・ID 重複を検出する |
 | `renga completions bash\|zsh\|fish` | シェル補完スクリプトを表示する |
 | `renga help [コマンド]` | ヘルプを表示する |

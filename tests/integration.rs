@@ -249,6 +249,38 @@ fn show_prints_content() {
 }
 
 #[test]
+fn show_json_output() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "My Issue", "--area", "core", "--label", "bug"])
+        .assert()
+        .success();
+
+    renga(&dir)
+        .args(["show", "1", "--json"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("\"id\": \"1\""))
+        .stdout(predicate::str::contains("\"area\": \"core\""))
+        .stdout(predicate::str::contains("\"status\": \"open\""))
+        .stdout(predicate::str::contains("\"bug\""))
+        .stdout(predicate::str::contains("\"title\": \"My Issue\""));
+}
+
+#[test]
+fn show_json_done_issue() {
+    let dir = setup();
+    renga(&dir).args(["create", "Done Task"]).assert().success();
+    renga(&dir).args(["done", "1"]).assert().success();
+
+    renga(&dir)
+        .args(["show", "1", "--json"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("\"status\": \"done\""));
+}
+
+#[test]
 fn show_not_found() {
     let dir = setup();
     renga(&dir)
@@ -351,6 +383,28 @@ fn reopen_fails_when_open_issue_with_same_name_exists() {
         .assert()
         .failure()
         .stderr(predicate::str::contains("already exists"));
+}
+
+#[test]
+fn create_with_labels() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "Task", "--label", "bug", "--label", "urgent"])
+        .assert()
+        .success();
+
+    let content = fs::read_to_string(dir.path().join("issues/1-task.md")).unwrap();
+    assert!(content.contains("labels: [bug, urgent]"));
+}
+
+#[test]
+fn create_label_with_comma_fails() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "Task", "--label", "bug, urgent"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("invalid character"));
 }
 
 #[test]

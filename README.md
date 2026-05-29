@@ -114,12 +114,12 @@ cargo install renga
 | Command | Description |
 |---|---|
 | `renga init` | Initialize the issues directory |
-| `renga create <title> [--id <N>] [--slug <slug>] [--priority high\|medium\|low] [--area <area>] [--body <text\|-\>] [--milestone <milestone>]` | Create an issue (`--body -` reads from stdin) |
+| `renga create <title> [--id <N>] [--slug <slug>] [--priority high\|medium\|low] [--area <area>] [--body <text\|-\>] [--milestone <milestone>] [--label <label>]...` | Create an issue (`--body -` reads from stdin) |
 | `renga done <N>` | Mark an issue as done |
 | `renga pending <N>` | Put an issue on hold |
 | `renga reopen <N>` | Reopen a closed issue |
 | `renga list [--status open\|pending\|done\|unknown] [--area <area>] [--label <label>] [--milestone <milestone>] [--json]` | List issues |
-| `renga show <N>` | Show issue details |\n| `renga edit <N>` | Open issue in `$EDITOR` (human) |\n| `renga update <N> [--priority ...] [--area ...] [--status ...] [--milestone ...] [--label ...]... [--body <text\\|->]` | Update issue fields (AI/scripts) |
+| `renga show <N> [--json]` | Show issue details |\n| `renga edit <N>` | Open issue in `$EDITOR` (human) |\n| `renga update <N> [--priority ...] [--area ...] [--status ...] [--milestone ...] [--label ...]... [--body <text\\|->]` | Update issue fields (AI/scripts) |
 | `renga validate` | Check all issues for schema errors and duplicate IDs |
 | `renga completions bash\|zsh\|fish` | Print shell completion script |
 | `renga help [command]` | Show help |

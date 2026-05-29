@@ -6,7 +6,7 @@ use anyhow::{Context as _, Result};
 
 use crate::{
     cli::CreateArgs,
-    issue::{find_issue, make_slug, next_id},
+    issue::{find_issue, make_slug, next_id, validate_label},
     readme, Context,
 };
 
@@ -54,8 +54,17 @@ pub fn run(args: CreateArgs, ctx: &Context) -> Result<()> {
         None => String::new(),
     };
 
+    for l in &args.label {
+        validate_label(l)?;
+    }
+    let labels_yaml = if args.label.is_empty() {
+        "[]".to_string()
+    } else {
+        format!("[{}]", args.label.join(", "))
+    };
+
     let content = format!(
-        "---\nschema_version: 1\nstatus: open\npriority: {}\narea: {}\nlabels: []\n{milestone_line}---\n\n# {}\n{}",
+        "---\nschema_version: 1\nstatus: open\npriority: {}\narea: {}\nlabels: {labels_yaml}\n{milestone_line}---\n\n# {}\n{}",
         args.priority, args.area, title, body_section
     );
 

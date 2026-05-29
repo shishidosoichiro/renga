@@ -97,6 +97,9 @@ pub struct CreateArgs {
     /// Milestone to assign (e.g. `v1.0`, `2026-Q3`).
     #[arg(long)]
     pub milestone: Option<String>,
+    /// Labels to attach (repeatable: `--label bug --label urgent`).
+    #[arg(long)]
+    pub label: Vec<String>,
 }
 
 /// Arguments for `renga done`.
@@ -145,6 +148,9 @@ pub struct ListArgs {
 pub struct ShowArgs {
     /// Issue ID (e.g. `00042` or `42`).
     pub id: String,
+    /// Output as JSON.
+    #[arg(long)]
+    pub json: bool,
 }
 
 /// Arguments for `renga edit`.

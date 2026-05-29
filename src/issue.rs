@@ -364,6 +364,38 @@ pub fn make_slug(title: &str) -> String {
     }
 }
 
+/// Validate a label string for use in YAML flow sequences.
+///
+/// Labels are stored as unquoted scalars inside a YAML inline sequence
+/// (`labels: [bug, urgent]`). Characters that act as YAML flow-sequence
+/// delimiters (`,`, `[`, `]`, `{`, `}`) would silently corrupt the sequence
+/// if left unquoted, so they are rejected here.
+///
+/// # Errors
+///
+/// Returns an error when `label` contains `,`, `[`, `]`, `{`, or `}`.
+///
+/// # Examples
+///
+/// ```
+/// use renga::issue::validate_label;
+/// assert!(validate_label("bug").is_ok());
+/// assert!(validate_label("bug, urgent").is_err());
+/// assert!(validate_label("[invalid]").is_err());
+/// ```
+pub fn validate_label(label: &str) -> Result<()> {
+    for ch in [',', '[', ']', '{', '}'] {
+        if label.contains(ch) {
+            anyhow::bail!(
+                "label '{}' contains invalid character '{}'; use a separate --label flag for each label",
+                label,
+                ch
+            );
+        }
+    }
+    Ok(())
+}
+
 /// Update a single frontmatter field in raw file content without re-serialising.
 ///
 /// Leaves all other lines unchanged. If the field is not found, returns the

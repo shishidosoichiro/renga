@@ -6,7 +6,7 @@ use anyhow::{Context as _, Result};
 
 use crate::{
     cli::UpdateArgs,
-    issue::{find_issue, set_frontmatter_field, split_frontmatter},
+    issue::{find_issue, set_frontmatter_field, split_frontmatter, validate_label},
     readme, Context, FbimError,
 };
 
@@ -32,6 +32,9 @@ pub fn run(args: UpdateArgs, ctx: &Context) -> Result<()> {
         content = set_frontmatter_field(&content, "milestone", milestone);
     }
     if !args.label.is_empty() {
+        for l in &args.label {
+            validate_label(l)?;
+        }
         let labels_yaml = format!(
             "[{}]",
             args.label
