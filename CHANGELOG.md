@@ -1,6 +1,11 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [0.7.0] - 2026-05-31
+
+### 🚀 Features
+
+- [`e0cee31`] *(cli)* Add --label to create and --json to show
 ## [0.6.0] - 2026-05-28
 
 ### 🚀 Features
