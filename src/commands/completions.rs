@@ -175,6 +175,7 @@ fn write_candidates(args: &[String], ctx: &Context) -> io::Result<()> {
 }
 
 fn emit_subcommands<W: Write>(out: &mut W) -> io::Result<()> {
+    writeln!(out, "info\tShow project and configuration info")?;
     writeln!(out, "init\tInitialize the issues directory")?;
     writeln!(out, "create\tCreate a new issue")?;
     writeln!(out, "done\tMark an issue as done")?;

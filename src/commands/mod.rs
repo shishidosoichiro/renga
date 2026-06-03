@@ -10,6 +10,8 @@ pub mod done;
 pub mod edit;
 /// `renga in-progress` handler.
 pub mod in_progress;
+/// `renga info` handler.
+pub mod info;
 /// `renga init` handler.
 pub mod init;
 /// `renga list` handler.

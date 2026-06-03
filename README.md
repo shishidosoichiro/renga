@@ -122,6 +122,7 @@ cargo install renga
 | `renga reopen <N>` | Reopen a closed issue |
 | `renga list [--status open\|pending\|in-progress\|done\|unknown] [--area <area>] [--label <label>] [--milestone <milestone>] [--json]` | List issues |
 | `renga show <N> [--json]` | Show issue details |\n| `renga edit <N>` | Open issue in `$EDITOR` (human) |\n| `renga update <N> [--priority ...] [--area ...] [--status ...] [--milestone ...] [--label ...]... [--body <text\\|->]` | Update issue fields (AI/scripts) |
+| `renga info` | Show project root, issues directory, config location, and current settings |
 | `renga validate` | Check all issues for schema errors and duplicate IDs |
 | `renga completions bash\|zsh\|fish` | Print shell completion script |
 | `renga help [command]` | Show help |

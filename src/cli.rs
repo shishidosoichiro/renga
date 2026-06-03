@@ -42,6 +42,8 @@ pub enum Command {
     Update(UpdateArgs),
     /// Validate all issue files for schema errors and duplicate IDs.
     Validate,
+    /// Show project root, issues directory, config file location, and current settings.
+    Info,
     /// Show help for a command.
     Help {
         /// Command to show help for (omit for overall help).

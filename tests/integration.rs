@@ -452,6 +452,36 @@ fn create_with_milestone() {
     assert!(content.contains("milestone: v1.0"));
 }
 
+// ── info ──────────────────────────────────────────────────────────────────────
+
+#[test]
+fn info_shows_paths_and_defaults() {
+    let dir = setup();
+    let output = renga(&dir).args(["info"]).assert().success();
+    let stdout = String::from_utf8(output.get_output().stdout.clone()).unwrap();
+    assert!(stdout.contains("project root:"));
+    assert!(stdout.contains("issues dir:"));
+    assert!(stdout.contains("not found — using defaults"));
+    assert!(stdout.contains("issues_dir"));
+    assert!(stdout.contains("area_order"));
+    assert!(stdout.contains("area_labels"));
+}
+
+#[test]
+fn info_shows_config_when_present() {
+    let dir = setup();
+    fs::write(
+        dir.path().join(".renga.yml"),
+        "area_order: [core, cli]\narea_labels:\n  core: \"Core\"\n",
+    )
+    .unwrap();
+    let output = renga(&dir).args(["info"]).assert().success();
+    let stdout = String::from_utf8(output.get_output().stdout.clone()).unwrap();
+    assert!(!stdout.contains("not found"));
+    assert!(stdout.contains("core, cli"));
+    assert!(stdout.contains("core → \"Core\""));
+}
+
 // ── init ──────────────────────────────────────────────────────────────────────
 
 #[test]
