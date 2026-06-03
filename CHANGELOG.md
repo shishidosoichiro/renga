@@ -1,6 +1,12 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [0.8.0] - 2026-06-03
+
+### 🚀 Features
+
+- [`8c68e44`] *(core)* Add in-progress status
+- [`c38380e`] *(cli)* Add renga info command
 ## [0.7.0] - 2026-05-31
 
 ### 🚀 Features
