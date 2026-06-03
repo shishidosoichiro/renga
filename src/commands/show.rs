@@ -43,6 +43,7 @@ pub fn run(args: ShowArgs, ctx: &Context) -> Result<()> {
             status: match issue.status {
                 Status::Open => "open",
                 Status::Pending => "pending",
+                Status::InProgress => "in-progress",
                 Status::Done => "done",
                 Status::Unknown => "unknown",
             },

@@ -30,6 +30,8 @@ static RE_LINENUM_PREFIX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^\d+:\
 /// use renga::issue::Status;
 /// assert_eq!(Status::Open.to_string(), "open");
 /// assert_eq!("pending".parse::<Status>().unwrap(), Status::Pending);
+/// assert_eq!("in-progress".parse::<Status>().unwrap(), Status::InProgress);
+/// assert_eq!(Status::InProgress.to_string(), "in-progress");
 /// assert_eq!(Status::Unknown.to_string(), "unknown");
 /// assert_eq!("unknown".parse::<Status>().unwrap(), Status::Unknown);
 /// ```
@@ -40,6 +42,9 @@ pub enum Status {
     Open,
     /// The issue is blocked or deferred.
     Pending,
+    /// The issue is actively being worked on.
+    #[serde(rename = "in-progress")]
+    InProgress,
     /// The issue is complete.
     Done,
     /// The status could not be determined (e.g. frontmatter is missing).
@@ -52,6 +57,7 @@ impl fmt::Display for Status {
         match self {
             Status::Open => write!(f, "open"),
             Status::Pending => write!(f, "pending"),
+            Status::InProgress => write!(f, "in-progress"),
             Status::Done => write!(f, "done"),
             Status::Unknown => write!(f, "unknown"),
         }
@@ -65,6 +71,7 @@ impl FromStr for Status {
         match s {
             "open" => Ok(Status::Open),
             "pending" => Ok(Status::Pending),
+            "in-progress" => Ok(Status::InProgress),
             "done" => Ok(Status::Done),
             "unknown" => Ok(Status::Unknown),
             other => Err(anyhow::anyhow!("unknown status: {other}")),

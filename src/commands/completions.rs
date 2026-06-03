@@ -107,7 +107,7 @@ fn write_candidates(args: &[String], ctx: &Context) -> io::Result<()> {
     let prev = args.get(args.len() - 2).map(|s| s.as_str()).unwrap_or("");
 
     match subcmd {
-        "done" | "pending" | "edit" => emit_open_issues(&mut out, ctx)?,
+        "done" | "pending" | "in-progress" | "edit" => emit_open_issues(&mut out, ctx)?,
         "show" | "reopen" => {
             emit_open_issues(&mut out, ctx)?;
             emit_done_issues(&mut out, ctx)?;
@@ -121,6 +121,7 @@ fn write_candidates(args: &[String], ctx: &Context) -> io::Result<()> {
             "--status" => {
                 writeln!(out, "open")?;
                 writeln!(out, "pending")?;
+                writeln!(out, "in-progress")?;
             }
             _ => {
                 emit_open_issues(&mut out, ctx)?;
@@ -141,6 +142,7 @@ fn write_candidates(args: &[String], ctx: &Context) -> io::Result<()> {
             "--status" => {
                 writeln!(out, "open")?;
                 writeln!(out, "pending")?;
+                writeln!(out, "in-progress")?;
                 writeln!(out, "done")?;
                 writeln!(out, "unknown")?;
             }
@@ -177,6 +179,7 @@ fn emit_subcommands<W: Write>(out: &mut W) -> io::Result<()> {
     writeln!(out, "create\tCreate a new issue")?;
     writeln!(out, "done\tMark an issue as done")?;
     writeln!(out, "pending\tMark an issue as pending")?;
+    writeln!(out, "in-progress\tMark an issue as in-progress")?;
     writeln!(out, "reopen\tReopen an issue")?;
     writeln!(out, "list\tList issues")?;
     writeln!(out, "show\tShow issue details")?;

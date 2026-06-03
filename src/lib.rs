@@ -72,6 +72,7 @@ pub fn run() -> Result<()> {
         cli::Command::Create(args) => commands::create::run(args, &ctx),
         cli::Command::Done(args) => commands::done::run(args, &ctx),
         cli::Command::Pending(args) => commands::pending::run(args, &ctx),
+        cli::Command::InProgress(args) => commands::in_progress::run(args, &ctx),
         cli::Command::Reopen(args) => commands::reopen::run(args, &ctx),
         cli::Command::List(args) => commands::list::run(args, &ctx),
         cli::Command::Show(args) => commands::show::run(args, &ctx),

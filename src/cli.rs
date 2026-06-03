@@ -27,9 +27,12 @@ pub enum Command {
     Done(DoneArgs),
     /// Mark an issue as pending (blocked or deferred).
     Pending(PendingArgs),
+    /// Mark an issue as in-progress (actively being worked on).
+    #[command(name = "in-progress")]
+    InProgress(InProgressArgs),
     /// Reopen a done or pending issue.
     Reopen(ReopenArgs),
-    /// List issues (default: open and pending).
+    /// List issues (default: open, pending, and in-progress).
     List(ListArgs),
     /// Show the full content of an issue.
     Show(ShowArgs),
@@ -116,6 +119,13 @@ pub struct PendingArgs {
     pub id: String,
 }
 
+/// Arguments for `renga in-progress`.
+#[derive(Args)]
+pub struct InProgressArgs {
+    /// Issue ID (e.g. `00042` or `42`).
+    pub id: String,
+}
+
 /// Arguments for `renga reopen`.
 #[derive(Args)]
 pub struct ReopenArgs {
@@ -126,7 +136,7 @@ pub struct ReopenArgs {
 /// Arguments for `renga list`.
 #[derive(Args)]
 pub struct ListArgs {
-    /// Filter by status. Comma-separated: `open`, `pending`, `done`, `unknown`.
+    /// Filter by status. Comma-separated: `open`, `pending`, `in-progress`, `done`, `unknown`.
     #[arg(long)]
     pub status: Option<String>,
     /// Filter by area.
@@ -172,7 +182,7 @@ pub struct UpdateArgs {
     #[arg(long)]
     pub area: Option<String>,
     /// New status.
-    #[arg(long, value_parser = ["open", "pending"])]
+    #[arg(long, value_parser = ["open", "pending", "in-progress"])]
     pub status: Option<String>,
     /// New milestone.
     #[arg(long)]

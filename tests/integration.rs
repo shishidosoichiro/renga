@@ -203,6 +203,28 @@ fn pending_not_found() {
         .stderr(predicate::str::contains("not found"));
 }
 
+// ── in-progress ───────────────────────────────────────────────────────────────
+
+#[test]
+fn in_progress_sets_status() {
+    let dir = setup();
+    renga(&dir).args(["create", "Work"]).assert().success();
+    renga(&dir).args(["in-progress", "1"]).assert().success();
+
+    let content = fs::read_to_string(dir.path().join("issues/1-work.md")).unwrap();
+    assert!(content.contains("status: in-progress"));
+}
+
+#[test]
+fn in_progress_not_found() {
+    let dir = setup();
+    renga(&dir)
+        .args(["in-progress", "99"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("not found"));
+}
+
 // ── reopen ────────────────────────────────────────────────────────────────────
 
 #[test]
@@ -231,6 +253,17 @@ fn reopen_pending_issue() {
     renga(&dir).args(["reopen", "1"]).assert().success();
 
     let content = fs::read_to_string(dir.path().join("issues/1-blocked.md")).unwrap();
+    assert!(content.contains("status: open"));
+}
+
+#[test]
+fn reopen_in_progress_issue() {
+    let dir = setup();
+    renga(&dir).args(["create", "Active"]).assert().success();
+    renga(&dir).args(["in-progress", "1"]).assert().success();
+    renga(&dir).args(["reopen", "1"]).assert().success();
+
+    let content = fs::read_to_string(dir.path().join("issues/1-active.md")).unwrap();
     assert!(content.contains("status: open"));
 }
 

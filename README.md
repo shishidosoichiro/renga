@@ -72,6 +72,7 @@ Then use it directly in any Claude Code session:
 | `/renga [create] <title>` | Create an issue |
 | `/renga done <N>` | Mark as done |
 | `/renga pending <N>` | Put on hold |
+| `/renga in-progress <N>` | Mark as in-progress |
 | `/renga reopen <N>` | Reopen |
 | `/renga list` | List open and pending issues |
 | `/renga show <N>` | Show details |
@@ -117,8 +118,9 @@ cargo install renga
 | `renga create <title> [--id <N>] [--slug <slug>] [--priority high\|medium\|low] [--area <area>] [--body <text\|-\>] [--milestone <milestone>] [--label <label>]...` | Create an issue (`--body -` reads from stdin) |
 | `renga done <N>` | Mark an issue as done |
 | `renga pending <N>` | Put an issue on hold |
+| `renga in-progress <N>` | Mark an issue as in-progress |
 | `renga reopen <N>` | Reopen a closed issue |
-| `renga list [--status open\|pending\|done\|unknown] [--area <area>] [--label <label>] [--milestone <milestone>] [--json]` | List issues |
+| `renga list [--status open\|pending\|in-progress\|done\|unknown] [--area <area>] [--label <label>] [--milestone <milestone>] [--json]` | List issues |
 | `renga show <N> [--json]` | Show issue details |\n| `renga edit <N>` | Open issue in `$EDITOR` (human) |\n| `renga update <N> [--priority ...] [--area ...] [--status ...] [--milestone ...] [--label ...]... [--body <text\\|->]` | Update issue fields (AI/scripts) |
 | `renga validate` | Check all issues for schema errors and duplicate IDs |
 | `renga completions bash\|zsh\|fish` | Print shell completion script |

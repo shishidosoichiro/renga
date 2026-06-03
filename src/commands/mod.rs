@@ -8,6 +8,8 @@ pub mod create;
 pub mod done;
 /// `renga edit` handler.
 pub mod edit;
+/// `renga in-progress` handler.
+pub mod in_progress;
 /// `renga init` handler.
 pub mod init;
 /// `renga list` handler.

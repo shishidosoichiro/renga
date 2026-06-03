@@ -9,7 +9,7 @@ File-Based Issue Management の仕様。
 ```
 issues/
   README.md           一覧（renga list で自動生成）
-  N-name.md           open または pending な issue
+  N-name.md           open・pending・in-progress な issue
   done/
     N-name.md         完了した issue
 ```
@@ -52,6 +52,7 @@ frontmatter は省略可能。省略した場合は `status: unknown`、`priorit
 |---|---|
 | `open` | 対応が必要。作業対象 |
 | `pending` | 決定待ち・確認待ち。作業保留 |
+| `in-progress` | 現在作業中 |
 | `done` | 完了（`done/` に移動済み） |
 | `unknown` | frontmatter がないか parse できない。renga では書き込めない読み取り専用の状態 |
 
@@ -93,11 +94,12 @@ renga init
 renga create <title> [--id <N>] [--slug <slug>] [--priority high|medium|low] [--area <area>] [--body <text|-\>] [--milestone <milestone>] [--label <label>]...
 renga done <N>
 renga pending <N>
+renga in-progress <N>
 renga reopen <N>
-renga list [--status open|pending|done|unknown] [--area <area>] [--label <label>] [--milestone <milestone>] [--json]
+renga list [--status open|pending|in-progress|done|unknown] [--area <area>] [--label <label>] [--milestone <milestone>] [--json]
 renga show <N> [--json]
 renga edit <N>
-renga update <N> [--priority high|medium|low] [--area <area>] [--status open|pending] [--milestone <milestone>] [--label <label>]... [--body <text|->]
+renga update <N> [--priority high|medium|low] [--area <area>] [--status open|pending|in-progress] [--milestone <milestone>] [--label <label>]... [--body <text|->]
 renga validate
 renga completions <bash|zsh|fish>
 renga help [command]

@@ -22,7 +22,7 @@ pub fn run(args: ListArgs, ctx: &Context) -> Result<()> {
                     .with_context(|| format!("unknown status: '{}'", p.trim()))
             })
             .collect::<Result<Vec<_>>>()?,
-        None => vec![Status::Open, Status::Pending],
+        None => vec![Status::Open, Status::Pending, Status::InProgress],
     };
 
     let issues = all_issues(
@@ -60,6 +60,7 @@ pub fn run(args: ListArgs, ctx: &Context) -> Result<()> {
                 status: match i.status {
                     Status::Open => "open",
                     Status::Pending => "pending",
+                    Status::InProgress => "in-progress",
                     Status::Done => "done",
                     Status::Unknown => "unknown",
                 },
