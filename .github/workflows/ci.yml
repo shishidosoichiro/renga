@@ -17,8 +17,16 @@ jobs:
       - uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9  # master
         with:
           toolchain: "1.95.0"
-          components: rustfmt, clippy
+          components: rustfmt, clippy, llvm-tools-preview
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-llvm-cov
       - run: cargo fmt --check
       - run: cargo clippy -- -D warnings
-      - run: cargo test -- --test-threads=1
+      - run: cargo llvm-cov --lcov --output-path lcov.info -- --test-threads=1
+      - uses: codecov/codecov-action@v4
+        with:
+          files: lcov.info
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
       - run: cargo doc --no-deps

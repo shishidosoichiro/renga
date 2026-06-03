@@ -1,6 +1,7 @@
 # Renga — File-Based Issue Management
 
 [![CI](https://github.com/shishidosoichiro/renga/actions/workflows/ci.yml/badge.svg)](https://github.com/shishidosoichiro/renga/actions/workflows/ci.yml)
+[![Coverage](https://codecov.io/gh/shishidosoichiro/renga/branch/main/graph/badge.svg)](https://codecov.io/gh/shishidosoichiro/renga)
 [![Crates.io](https://img.shields.io/crates/v/renga.svg)](https://crates.io/crates/renga)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
