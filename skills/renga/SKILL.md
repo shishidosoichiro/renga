@@ -16,7 +16,7 @@ All operations are performed by calling the `renga` binary.
 /renga done <NNNNN>         Close an issue
 /renga pending <NNNNN>      Put an issue on hold
 /renga reopen <NNNNN>       Reopen a closed issue
-/renga list                 List open and pending issues
+/renga list                 List open, pending, and in-progress issues
 /renga show <NNNNN>         Show issue details
 /renga help [command]       Show help
 ```
@@ -102,27 +102,27 @@ Report the destination file path to the user.
 
 ## list
 
+Use `--json` when processing the result programmatically. Use plain output only when displaying directly to the user with no further processing.
+
 ```
-renga list
+renga list --json
 ```
 
 With filters:
 
 ```
-renga list --area <area>
+renga list --json --area <area>
 ```
-
-Display the output to the user.
 
 ---
 
 ## show
 
-```
-renga show <NNNNN>
-```
+Use `--json` when accessing structured fields programmatically. Use plain output only when displaying directly to the user.
 
-Display the output to the user.
+```
+renga show <NNNNN> --json
+```
 
 ---
 
@@ -139,7 +139,7 @@ Opens the issue file in `$EDITOR`. For human use only — AI agents cannot inter
 ## update
 
 ```
-renga update <NNNNN> [--priority high|medium|low] [--area <area>] [--status open|pending] [--milestone <milestone>] [--label <label>]... [--body <text|->]
+renga update <NNNNN> [--priority high|medium|low] [--area <area>] [--status open|pending|in-progress] [--milestone <milestone>] [--label <label>]... [--body <text|->]
 ```
 
 Updates issue fields without opening an editor. Designed for AI agents and scripts.

@@ -7,8 +7,8 @@ argument-hint: "<NNNNN>"
 
 Show the full content of an issue.
 
-```
-renga show <NNNNN>
-```
+Use `--json` when accessing structured fields (status, area, labels, etc.) programmatically. Use plain output only when displaying directly to the user.
 
-Display the output to the user.
+```
+renga show <NNNNN> --json
+```
