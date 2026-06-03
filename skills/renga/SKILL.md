@@ -60,12 +60,12 @@ These rules apply whenever an AI agent works with renga issues.
 If `$ARGUMENTS` starts with `create`, strip it and use the rest as the title. Otherwise use `$ARGUMENTS` as-is.
 
 ```
-renga create "<title>" --slug <slug> --area <area>
+renga create "<title>" --slug <slug> --area <area> --body "<description>"
 ```
 
 - `--slug`: Kebab-case English slug derived from the title (max 30 chars). Auto-generated from title if omitted.
 - `--area`: Infer from context. Use `misc` if unclear.
-- `--body`: Include if there is additional context to add.
+- `--body`: **Always include.** Write a brief description of what needs to be done and why. The title alone is not sufficient.
 - Report the created file path to the user.
 
 ---
