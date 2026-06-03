@@ -34,19 +34,47 @@ renga の差別化ポイント「AI エージェントが直接操作できる�
 }
 ```
 
+## rmcp の現状（2026-06-04 調査）
+
+- v0.16.x、470 万 DL。十分に成熟しており安定性の懸念は解消
+- 1.x へのマイグレーションが進行中（breaking changes あり）。0.16.x で実装して 1.x 対応は後追いにするか、1.x リリースを待つか判断が必要
+- 既存の `renga::issue`・`renga::config` ライブラリコードはそのまま使える（シェルアウト不要）
+
+## プロジェクトルート問題
+
+CLI は起動時にディレクトリを遡って自動検出するが、MCP サーバーは**一度起動したら複数のツール呼び出しを処理し続ける**ため、どのプロジェクトを操作するかを明示する必要がある。
+
+推奨：起動時に `--root` を渡す方式（sqlite MCP と同じパターン）
+
+```json
+{
+  "mcpServers": {
+    "renga": {
+      "command": "renga",
+      "args": ["mcp-server", "--root", "/path/to/project"]
+    }
+  }
+}
+```
+
+プロジェクトごとに設定が必要になるが、ファイルベースツールの標準的な解決策。
+
 ## 注意点
 
 - `tokio`（非同期ランタイム）の依存が増える → バイナリサイズ増大
 - `rmcp` は tokio 必須。stdio transport が `tokio::io::stdin/stdout` に直結しており、他のランタイムへの差し替えは不可
-- Embassy（embassy-executor）は std 環境でも使えるが、tokio に依存する rmcp とは組み合わせられない。Embassy を使うなら MCP プロトコルを自前実装する必要があり工数が大幅に増える
-- tokio のバイナリサイズ影響を抑えたいなら `features = ["io-std", "rt"]` など最小構成にする方が現実的
-- 現在のスキルで機能的には十分。優先度は低め
-- ファイルベースであること自体が renga の価値であり、MCP 対応でその軽量さが薄れる可能性もある
+- tokio のバイナリサイズ影響を抑えたいなら feature flags で最小構成にする（`server` + `transport-io` のみ）
+- 現在のスキルで機能的には十分。既存スキルは引き続き動くので MCP は追加オプションとして実装すれば既存ユーザーへの影響なし
 
 ## 提供すべきツール
 
-- `renga_create(title, area, priority)` 
-- `renga_list(status, area)`
-- `renga_done(id)`
-- `renga_show(id)`
-- `renga_validate()`
+| ツール | 対応コマンド |
+|---|---|
+| `list_issues(status, area, label)` | `renga list` |
+| `show_issue(id)` | `renga show` |
+| `create_issue(title, area, priority, body)` | `renga create` |
+| `done(id)` | `renga done` |
+| `pending(id)` | `renga pending` |
+| `in_progress(id)` | `renga in-progress` |
+| `update_issue(id, ...)` | `renga update` |
+| `validate()` | `renga validate` |
