@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or discussion
+    url: https://github.com/shishidosoichiro/renga/discussions
+    about: For questions, usage help, and open-ended discussion, please use Discussions rather than opening an issue.
