@@ -88,4 +88,3 @@ https://code.claude.com/docs/en/sub-agents.md
 
 - retro issue にも git log にも登場しないパターンの追加
 - 「こうすればよくなりそう」という推測での変更
-- CONTRIBUTING.md など人間向けドキュメントの変更
