@@ -139,13 +139,17 @@ Opens the issue file in `$EDITOR`. For human use only — AI agents cannot inter
 ## update
 
 ```
-renga update <NNNNN> [--priority high|medium|low] [--area <area>] [--status open|pending|in-progress] [--milestone <milestone>] [--label <label>]... [--body <text|->]
+renga update <NNNNN> [<title>] [--priority high|medium|low] [--area <area>] [--status open|pending|in-progress] [--milestone <milestone>] [--label <label>]... [--add-label <label>]... [--remove-label <label>]... [--body <text|->]
 ```
 
 Updates issue fields without opening an editor. Designed for AI agents and scripts.
 
+- `<title>`: Optional positional argument. Updates the `# Heading` line in the body.
+- `--body`: Replaces the body. If the new body has no `# Heading`, the existing title is automatically preserved.
 - `--body -` reads the new body from stdin, allowing the agent to pipe modified content
-- `--label` is repeatable and replaces all existing labels
+- `--label` is repeatable and **replaces** all existing labels
+- `--add-label` adds a label without removing others (repeatable, deduplicates automatically)
+- `--remove-label` removes a specific label (repeatable)
 - Multiple flags can be combined in one call
 
 ---

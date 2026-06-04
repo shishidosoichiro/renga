@@ -403,6 +403,37 @@ pub fn validate_label(label: &str) -> Result<()> {
     Ok(())
 }
 
+/// Replace the first `# Heading` line in `body` with `# {title}`.
+///
+/// If no heading exists, prepends `# {title}\n\n` to the body.
+///
+/// # Examples
+///
+/// ```
+/// use renga::issue::replace_or_prepend_heading;
+/// assert_eq!(replace_or_prepend_heading("# Old\n\nbody\n", "New"), "# New\n\nbody\n");
+/// assert_eq!(replace_or_prepend_heading("no heading\n", "Title"), "# Title\n\nno heading\n");
+/// ```
+pub fn replace_or_prepend_heading(body: &str, title: &str) -> String {
+    let heading = format!("# {title}");
+    let mut replaced = false;
+    let mut out = String::with_capacity(body.len() + heading.len());
+    for line in body.lines() {
+        if !replaced && line.starts_with("# ") {
+            out.push_str(&heading);
+            replaced = true;
+        } else {
+            out.push_str(line);
+        }
+        out.push('\n');
+    }
+    if !replaced {
+        format!("{heading}\n\n{body}")
+    } else {
+        out
+    }
+}
+
 /// Update a single frontmatter field in raw file content without re-serialising.
 ///
 /// Leaves all other lines unchanged. If the field is not found, returns the

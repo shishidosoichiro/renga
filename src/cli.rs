@@ -177,6 +177,9 @@ pub struct EditArgs {
 pub struct UpdateArgs {
     /// Issue ID (e.g. `00042` or `42`).
     pub id: String,
+    /// New title (positional, multi-word). Updates the `# Heading` line in the body.
+    #[arg(num_args(0..))]
+    pub title: Vec<String>,
     /// New priority level.
     #[arg(long, value_parser = ["high", "medium", "low"])]
     pub priority: Option<String>,
@@ -192,6 +195,12 @@ pub struct UpdateArgs {
     /// Replace labels (repeatable). Use `--label foo --label bar`.
     #[arg(long)]
     pub label: Vec<String>,
+    /// Add a label without removing others (repeatable).
+    #[arg(long)]
+    pub add_label: Vec<String>,
+    /// Remove a label (repeatable).
+    #[arg(long)]
+    pub remove_label: Vec<String>,
     /// Replace body text. Use `-` to read from stdin.
     #[arg(long)]
     pub body: Option<String>,

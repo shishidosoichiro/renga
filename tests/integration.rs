@@ -713,6 +713,105 @@ fn update_body() {
 }
 
 #[test]
+fn update_title_positional() {
+    let dir = setup();
+    renga(&dir).args(["create", "Old Title"]).assert().success();
+    renga(&dir)
+        .args(["update", "1", "New Title"])
+        .assert()
+        .success();
+    let content = fs::read_to_string(dir.path().join("issues/1-old-title.md")).unwrap();
+    assert!(content.contains("# New Title"));
+    assert!(!content.contains("# Old Title"));
+}
+
+#[test]
+fn update_body_preserves_existing_title() {
+    let dir = setup();
+    renga(&dir).args(["create", "My Issue"]).assert().success();
+    renga(&dir)
+        .args(["update", "1", "--body", "description without heading"])
+        .assert()
+        .success();
+    let content = fs::read_to_string(dir.path().join("issues/1-my-issue.md")).unwrap();
+    assert!(content.contains("# My Issue"));
+    assert!(content.contains("description without heading"));
+}
+
+#[test]
+fn update_title_and_body_together() {
+    let dir = setup();
+    renga(&dir).args(["create", "Original"]).assert().success();
+    renga(&dir)
+        .args(["update", "1", "Updated Title", "--body", "new body text"])
+        .assert()
+        .success();
+    let content = fs::read_to_string(dir.path().join("issues/1-original.md")).unwrap();
+    assert!(content.contains("# Updated Title"));
+    assert!(content.contains("new body text"));
+}
+
+#[test]
+fn update_body_with_heading_uses_provided_heading() {
+    let dir = setup();
+    renga(&dir).args(["create", "My Issue"]).assert().success();
+    renga(&dir)
+        .args(["update", "1", "--body", "# New Heading\n\nbody text"])
+        .assert()
+        .success();
+    let content = fs::read_to_string(dir.path().join("issues/1-my-issue.md")).unwrap();
+    assert!(content.contains("# New Heading"));
+    assert!(!content.contains("# My Issue"));
+}
+
+#[test]
+fn update_add_label() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "Task", "--label", "bug"])
+        .assert()
+        .success();
+    renga(&dir)
+        .args(["update", "1", "--add-label", "urgent"])
+        .assert()
+        .success();
+    let content = fs::read_to_string(dir.path().join("issues/1-task.md")).unwrap();
+    assert!(content.contains("bug"));
+    assert!(content.contains("urgent"));
+}
+
+#[test]
+fn update_remove_label() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "Task", "--label", "bug", "--label", "urgent"])
+        .assert()
+        .success();
+    renga(&dir)
+        .args(["update", "1", "--remove-label", "urgent"])
+        .assert()
+        .success();
+    let content = fs::read_to_string(dir.path().join("issues/1-task.md")).unwrap();
+    assert!(content.contains("bug"));
+    assert!(!content.contains("urgent"));
+}
+
+#[test]
+fn update_add_label_no_duplicates() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "Task", "--label", "bug"])
+        .assert()
+        .success();
+    renga(&dir)
+        .args(["update", "1", "--add-label", "bug"])
+        .assert()
+        .success();
+    let content = fs::read_to_string(dir.path().join("issues/1-task.md")).unwrap();
+    assert_eq!(content.matches("bug").count(), 1);
+}
+
+#[test]
 fn update_not_found() {
     let dir = setup();
     renga(&dir)

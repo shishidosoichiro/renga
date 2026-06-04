@@ -99,7 +99,7 @@ renga reopen <N>
 renga list [--status open|pending|in-progress|done|unknown] [--area <area>] [--label <label>] [--milestone <milestone>] [--json]
 renga show <N> [--json]
 renga edit <N>
-renga update <N> [--priority high|medium|low] [--area <area>] [--status open|pending|in-progress] [--milestone <milestone>] [--label <label>]... [--body <text|->]
+renga update <N> [<title>] [--priority high|medium|low] [--area <area>] [--status open|pending|in-progress] [--milestone <milestone>] [--label <label>]... [--add-label <label>]... [--remove-label <label>]... [--body <text|->]
 renga info
 renga validate
 renga completions <bash|zsh|fish>

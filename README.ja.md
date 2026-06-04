@@ -122,7 +122,9 @@ cargo install renga
 | `renga in-progress <N>` | issue を作業中にする |
 | `renga reopen <N>` | issue を再開する |
 | `renga list [--status open\|pending\|in-progress\|done\|unknown] [--area <area>] [--label <label>] [--milestone <milestone>] [--json]` | issue 一覧を表示する |
-| `renga show <N> [--json]` | issue の詳細を表示する |\n| `renga edit <N>` | `$EDITOR` で issue を開く（人間向け） |\n| `renga update <N> [--priority ...] [--area ...] [--status ...] [--milestone ...] [--label ...]... [--body <テキスト\\|->]` | issue のフィールドを更新する（AI・スクリプト向け） |
+| `renga show <N> [--json]` | issue の詳細を表示する |
+| `renga edit <N>` | `$EDITOR` で issue を開く（人間向け） |
+| `renga update <N> [<タイトル>] [--priority ...] [--area ...] [--status ...] [--milestone ...] [--label ...]... [--add-label ...]... [--remove-label ...]... [--body <テキスト\|->]` | issue のフィールドを更新する（AI・スクリプト向け） |
 | `renga info` | プロジェクトルート・issues ディレクトリ・設定ファイルの場所と現在の設定を表示する |
 | `renga validate` | 全 issue のスキーマエラー・ID 重複を検出する |
 | `renga completions bash\|zsh\|fish` | シェル補完スクリプトを表示する |
