@@ -9,7 +9,7 @@ use walkdir::WalkDir;
 use anyhow::Result;
 use clap::CommandFactory;
 
-use crate::{cli::Cli, Context};
+use crate::{cli::Cli, issue::{Priority, Status}, Context};
 
 // Thin wrapper scripts: all logic lives in `renga __complete`.
 // Tab-separated `CANDIDATE\tDESCRIPTION` output is handled by each shell appropriately.
@@ -114,14 +114,14 @@ fn write_candidates(args: &[String], ctx: &Context) -> io::Result<()> {
         }
         "update" => match prev {
             "--priority" => {
-                writeln!(out, "high")?;
-                writeln!(out, "medium")?;
-                writeln!(out, "low")?;
+                for p in Priority::user_values() {
+                    writeln!(out, "{p}")?;
+                }
             }
             "--status" => {
-                writeln!(out, "open")?;
-                writeln!(out, "pending")?;
-                writeln!(out, "in-progress")?;
+                for s in Status::settable() {
+                    writeln!(out, "{s}")?;
+                }
             }
             _ => {
                 emit_open_issues(&mut out, ctx)?;
@@ -142,11 +142,9 @@ fn write_candidates(args: &[String], ctx: &Context) -> io::Result<()> {
         }
         "list" => match prev {
             "--status" => {
-                writeln!(out, "open")?;
-                writeln!(out, "pending")?;
-                writeln!(out, "in-progress")?;
-                writeln!(out, "done")?;
-                writeln!(out, "unknown")?;
+                for s in Status::all_values() {
+                    writeln!(out, "{s}")?;
+                }
             }
             _ => {
                 writeln!(out, "--status\tFilter by status")?;
@@ -158,9 +156,9 @@ fn write_candidates(args: &[String], ctx: &Context) -> io::Result<()> {
         },
         "create" => match prev {
             "--priority" => {
-                writeln!(out, "high")?;
-                writeln!(out, "medium")?;
-                writeln!(out, "low")?;
+                for p in Priority::user_values() {
+                    writeln!(out, "{p}")?;
+                }
             }
             _ => {
                 writeln!(out, "--slug\tCustom filename slug")?;
