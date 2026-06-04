@@ -69,6 +69,13 @@ File-Based Issue Management。詳細仕様は `spec.ja.md` を参照。
 
 **コミットメッセージの言語**: `type`・`scope`・`description` はすべて英語で書く（`Use English for the description` — CONTRIBUTING.md 参照）。issue ファイルのタイトル・本文、CLAUDE.md、`.claude/agents/` は日本語でよい。
 
+**コミット粒度の規律**（retro #134）:
+
+- `feat:` と `fix:` を同一コミットに混ぜない
+- レビューで指摘された修正は、feat コミットには含めず必ず別の `fix:` コミットにする
+- 「ついでに修正」禁止: 本来のタスクと無関係な変更が見つかったら `renga create` で別 issue を起票し、別コミットで対処する
+- 複数の breaking change は別々のコミットに分ける
+
 ## 判断方針
 
 - **ベストプラクティスを先に調べる**: 実装・設計の判断を述べる前に、WebSearch / WebFetch でベストプラクティスを調べる。知っているつもりで進めない。自分の推論だけに頼らず、実践の中で検証された方法（RFC・仕様書・設計パターン・公式ドキュメント等）を参照する。
