@@ -1,6 +1,16 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [0.9.1] - 2026-06-04
+
+### 🐛 Bug Fixes
+
+- [`72438ea`] *(cli)* Add --add-label, --remove-label to update completion and --milestone to list completion
+
+### 🚜 Refactor
+
+- [`8f999fe`] *(cli)* Derive completion values from Status and Priority enums
+- [`8ab5a1e`] *(cli)* Derive completion flags and values from Cli::command()
 ## [0.9.0] - 2026-06-04
 
 ### 🚀 Features
