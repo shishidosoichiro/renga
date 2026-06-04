@@ -61,11 +61,13 @@ These rules apply whenever an AI agent works with renga issues.
 If `$ARGUMENTS` starts with `create`, strip it and use the rest as the title. Otherwise use `$ARGUMENTS` as-is.
 
 ```
-renga create "<title>" --slug <slug> --area <area> --body "<description>"
+renga create "<title>" [--id <id>] [--slug <slug>] [--priority high|medium|low] [--area <area>] [--milestone <milestone>] [--label <label>]... [--body <text|->]
 ```
 
 - `--slug`: Kebab-case English slug derived from the title (max 30 chars). Auto-generated from title if omitted.
 - `--area`: Infer from context. Use `misc` if unclear.
+- `--priority`: Default is `medium`. Use `high` for correctness issues, `low` for suggestions.
+- `--label`: Labels to attach (repeatable: `--label bug --label urgent`).
 - `--body`: **Always include.** Write a brief description of what needs to be done and why. The title alone is not sufficient.
 - Report the created file path to the user.
 
@@ -124,14 +126,13 @@ Report the destination file path to the user.
 Use `--json` when processing the result programmatically. Use plain output only when displaying directly to the user with no further processing.
 
 ```
-renga list --json
+renga list [--status open|pending|in-progress|done|unknown] [--area <area>] [--label <label>] [--milestone <milestone>] [--json]
 ```
 
-With filters:
-
-```
-renga list --json --area <area>
-```
+- `--status`: Comma-separated. Default shows open, pending, and in-progress.
+- `--label`: Filter by label.
+- `--milestone`: Filter by milestone.
+- `--json`: Output as JSON for programmatic processing.
 
 ---
 
