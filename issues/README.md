@@ -8,6 +8,14 @@ Closed issues are moved to `done/`.
 
 ---
 
+## agent
+
+| # | status | priority | title |
+|---|---|---|---|
+| [147](147-update-add-label-completion.md) | open | medium | update に --add-label を追加したとき completion を更新し忘れた |
+
+---
+
 ## cli
 
 | # | status | priority | title |
@@ -33,9 +41,6 @@ Closed issues are moved to `done/`.
 | [14](14-changelog-keep-a-changelog.md) | pending | medium | CHANGELOG を Keep a Changelog 形式に移行するか検討する |
 | [102](102-code-of-conduct-md.md) | pending | medium | CODE_OF_CONDUCT.md を追加する |
 | [103](103-security-md.md) | pending | medium | SECURITY.md を追加する |
-| [133](133-changelog-md-v0-8-0-migrate.md) | open | medium | CHANGELOG.md に v0.8.0 の migrate コマンド追加が記載されていない |
-| [137](137-changelog-md-v0-8-0.md) | open | medium | CHANGELOG.md が v0.8.0 以降のコミットを反映していない |
-| [139](139-renga-help-migrate.md) | open | medium | renga help migrate が失敗する（インストール済みバイナリが古い） |
 
 ---
 

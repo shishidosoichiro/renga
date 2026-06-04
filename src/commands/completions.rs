@@ -129,7 +129,9 @@ fn write_candidates(args: &[String], ctx: &Context) -> io::Result<()> {
                 writeln!(out, "--area\tArea")?;
                 writeln!(out, "--status\tStatus")?;
                 writeln!(out, "--milestone\tMilestone")?;
-                writeln!(out, "--label\tLabel")?;
+                writeln!(out, "--label\tReplace labels")?;
+                writeln!(out, "--add-label\tAdd a label")?;
+                writeln!(out, "--remove-label\tRemove a label")?;
                 writeln!(out, "--body\tBody text")?;
             }
         },
@@ -150,6 +152,7 @@ fn write_candidates(args: &[String], ctx: &Context) -> io::Result<()> {
                 writeln!(out, "--status\tFilter by status")?;
                 writeln!(out, "--area\tFilter by area")?;
                 writeln!(out, "--label\tFilter by label")?;
+                writeln!(out, "--milestone\tFilter by milestone")?;
                 writeln!(out, "--json\tOutput as JSON")?;
             }
         },
