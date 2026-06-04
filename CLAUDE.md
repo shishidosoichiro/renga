@@ -67,10 +67,14 @@ File-Based Issue Management。詳細仕様は `spec.ja.md` を参照。
 
 1. 実装 + テスト追加
 2. カバレッジ確認（`cargo llvm-cov --summary-only -- --test-threads=1`）
-3. `Agent(subagent_type="review")` でレビューを受ける（Claude Code のサブエージェント）。レビュー観点にはカバレッジ確認（`cargo llvm-cov --summary-only -- --test-threads=1`）を含める
-4. レビューで見つかった問題は `renga create` で起票してから修正する
-5. 指摘を反映してからコミット
-6. issue を close する（`renga done <N>`）
+3. **コミット前に** `Agent(subagent_type="review")` でレビューを受ける（Claude Code のサブエージェント）。レビュー観点にはカバレッジ確認（`cargo llvm-cov --summary-only -- --test-threads=1`）を含める
+4. レビュー指摘を分類する（判定基準: 「このバグは今回変更したコードに由来するか？」）
+   - **今回の実装で入ったバグ**（新規追加ファイルや今回変更した箇所に起因）→ コミット前に修正し feature コミットに含める。issue 化する場合は `found_in_impl` ラベルを付ける
+   - **以前のバージョンから存在していたバグ** → コミット後に別の `fix:` コミットで修正する。issue 化する場合は `found_at:X.Y.Z`（バグが混入したバージョン）ラベルを付け、修正時に `fixed_at:X.Y.Z` ラベルを付けてクローズする
+5. 今回の実装で入ったバグを修正する
+6. コミット（feature + 同一実装内バグ修正をまとめて）
+7. 以前からあったバグがあれば `renga create` で起票してから別の `fix:` コミットで修正する
+8. issue を close する（`renga done <N>`）
 
 カバレッジは実装時とレビュー時の両方で確認する。
 
@@ -115,3 +119,11 @@ renga done <N>
 | `ci` | CI/CD パイプライン |
 | `agent` | CLAUDE.md・`.claude/agents/` の変更・retro issue |
 | `misc` | 上記に当てはまらないもの |
+
+**バグ issue のラベル規約**（retro #145）: レビューで見つかったバグを issue 化するときは必ず以下のラベルを付ける。
+
+| ラベル | 意味 | コミット戦略 |
+|---|---|---|
+| `found_in_impl` | 今の実装サイクルで入ったバグ | コミット前に修正し feature コミットに含める |
+| `found_at:X.Y.Z` | 指定バージョンから存在していたバグ | コミット後に別の `fix:` コミットで修正する |
+| `fixed_at:X.Y.Z` | 修正されたバージョン | クローズ時に付ける |
