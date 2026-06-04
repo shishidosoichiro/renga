@@ -71,12 +71,12 @@ Then use it directly in any Claude Code session:
 | Command | Description |
 |---|---|
 | `/renga [create] <title>` | Create an issue |
-| `/renga done <N>` | Mark as done |
-| `/renga pending <N>` | Put on hold |
-| `/renga in-progress <N>` | Mark as in-progress |
-| `/renga reopen <N>` | Reopen |
+| `/renga done <ID>` | Mark as done |
+| `/renga pending <ID>` | Put on hold |
+| `/renga in-progress <ID>` | Mark as in-progress |
+| `/renga reopen <ID>` | Reopen |
 | `/renga list` | List open and pending issues |
-| `/renga show <N>` | Show details |
+| `/renga show <ID>` | Show details |
 
 ## Before you reach for GitHub Issues
 
@@ -117,14 +117,14 @@ cargo install renga
 |---|---|
 | `renga init` | Initialize the issues directory |
 | `renga create <title> [--id <N>] [--slug <slug>] [--priority high\|medium\|low] [--area <area>] [--body <text\|-\>] [--milestone <milestone>] [--label <label>]...` | Create an issue (`--body -` reads from stdin) |
-| `renga done <N>` | Mark an issue as done |
-| `renga pending <N>` | Put an issue on hold |
-| `renga in-progress <N>` | Mark an issue as in-progress |
-| `renga reopen <N>` | Reopen a closed issue |
+| `renga done <ID>` | Mark an issue as done |
+| `renga pending <ID>` | Put an issue on hold |
+| `renga in-progress <ID>` | Mark an issue as in-progress |
+| `renga reopen <ID>` | Reopen a closed issue |
 | `renga list [--status open\|pending\|in-progress\|done\|unknown] [--area <area>] [--label <label>] [--milestone <milestone>] [--json]` | List issues |
-| `renga show <N> [--json]` | Show issue details |
-| `renga edit <N>` | Open issue in `$EDITOR` (human) |
-| `renga update <N> [<title>] [--priority ...] [--area ...] [--status ...] [--milestone ...] [--label ...]... [--add-label ...]... [--remove-label ...]... [--body <text\|->]` | Update issue fields (AI/scripts) |
+| `renga show <ID> [--json]` | Show issue details |
+| `renga edit <ID>` | Open issue in `$EDITOR` (human) |
+| `renga update <ID> [<title>] [--priority ...] [--area ...] [--status ...] [--milestone ...] [--label ...]... [--add-label ...]... [--remove-label ...]... [--body <text\|->]` | Update issue fields (AI/scripts) |
 | `renga info` | Show project root, issues directory, config location, and current settings |
 | `renga validate` | Check all issues for schema errors and duplicate IDs |
 | `renga completions bash\|zsh\|fish` | Print shell completion script |

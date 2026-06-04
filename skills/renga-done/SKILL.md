@@ -1,6 +1,6 @@
 ---
 description: Close a renga issue
-argument-hint: "<NNNNN>"
+argument-hint: "<ID>"
 ---
 
 # /renga-done
@@ -8,7 +8,7 @@ argument-hint: "<NNNNN>"
 Close an issue by moving it to `issues/done/`.
 
 ```
-renga done <NNNNN>
+renga done <ID>
 ```
 
 Report the destination file path to the user.

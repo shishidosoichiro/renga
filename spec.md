@@ -92,14 +92,14 @@ Brief description of what needs to be done.
 ```
 renga init
 renga create <title> [--id <N>] [--slug <slug>] [--priority high|medium|low] [--area <area>] [--body <text|-\>] [--milestone <milestone>] [--label <label>]...
-renga done <N>
-renga pending <N>
-renga in-progress <N>
-renga reopen <N>
+renga done <ID>
+renga pending <ID>
+renga in-progress <ID>
+renga reopen <ID>
 renga list [--status open|pending|in-progress|done|unknown] [--area <area>] [--label <label>] [--milestone <milestone>] [--json]
-renga show <N> [--json]
-renga edit <N>
-renga update <N> [<title>] [--priority high|medium|low] [--area <area>] [--status open|pending|in-progress] [--milestone <milestone>] [--label <label>]... [--add-label <label>]... [--remove-label <label>]... [--body <text|->]
+renga show <ID> [--json]
+renga edit <ID>
+renga update <ID> [<title>] [--priority high|medium|low] [--area <area>] [--status open|pending|in-progress] [--milestone <milestone>] [--label <label>]... [--add-label <label>]... [--remove-label <label>]... [--body <text|->]
 renga info
 renga validate
 renga completions <bash|zsh|fish>

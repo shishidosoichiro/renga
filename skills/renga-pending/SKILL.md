@@ -1,6 +1,6 @@
 ---
 description: Put a renga issue on hold
-argument-hint: "<NNNNN>"
+argument-hint: "<ID>"
 ---
 
 # /renga-pending
@@ -8,7 +8,7 @@ argument-hint: "<NNNNN>"
 Set an issue's status to `pending` (blocked or deferred).
 
 ```
-renga pending <NNNNN>
+renga pending <ID>
 ```
 
 Report the updated file path to the user.

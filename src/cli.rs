@@ -110,28 +110,28 @@ pub struct CreateArgs {
 /// Arguments for `renga done`.
 #[derive(Args)]
 pub struct DoneArgs {
-    /// Issue ID (e.g. `00042` or `42`).
+    /// Issue ID (e.g. `42`).
     pub id: String,
 }
 
 /// Arguments for `renga pending`.
 #[derive(Args)]
 pub struct PendingArgs {
-    /// Issue ID (e.g. `00042` or `42`).
+    /// Issue ID (e.g. `42`).
     pub id: String,
 }
 
 /// Arguments for `renga in-progress`.
 #[derive(Args)]
 pub struct InProgressArgs {
-    /// Issue ID (e.g. `00042` or `42`).
+    /// Issue ID (e.g. `42`).
     pub id: String,
 }
 
 /// Arguments for `renga reopen`.
 #[derive(Args)]
 pub struct ReopenArgs {
-    /// Issue ID (e.g. `00042` or `42`).
+    /// Issue ID (e.g. `42`).
     pub id: String,
 }
 
@@ -158,7 +158,7 @@ pub struct ListArgs {
 /// Arguments for `renga show`.
 #[derive(Args)]
 pub struct ShowArgs {
-    /// Issue ID (e.g. `00042` or `42`).
+    /// Issue ID (e.g. `42`).
     pub id: String,
     /// Output as JSON.
     #[arg(long)]
@@ -168,14 +168,14 @@ pub struct ShowArgs {
 /// Arguments for `renga edit`.
 #[derive(Args)]
 pub struct EditArgs {
-    /// Issue ID (e.g. `00042` or `42`).
+    /// Issue ID (e.g. `42`).
     pub id: String,
 }
 
 /// Arguments for `renga update`.
 #[derive(Args)]
 pub struct UpdateArgs {
-    /// Issue ID (e.g. `00042` or `42`).
+    /// Issue ID (e.g. `42`).
     pub id: String,
     /// New title (positional, multi-word). Updates the `# Heading` line in the body.
     #[arg(num_args(0..))]

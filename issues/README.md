@@ -22,6 +22,7 @@ Closed issues are moved to `done/`.
 | # | status | priority | title |
 |---|---|---|---|
 | [89](89-renga-done-ai-issue.md) | open | medium | renga done 実行時に AI の作業ログを issue ファイルに構造化して記録する |
+| [126](126-reorganize-issues-into-per-sta.md) | open | medium | Reorganize issues into per-status directories (open/, pending/, in-progress/, done/, unknown/) |
 
 ---
 
@@ -33,6 +34,7 @@ Closed issues are moved to `done/`.
 | [14](14-changelog-keep-a-changelog.md) | pending | medium | CHANGELOG を Keep a Changelog 形式に移行するか検討する |
 | [102](102-code-of-conduct-md.md) | pending | medium | CODE_OF_CONDUCT.md を追加する |
 | [103](103-security-md.md) | pending | medium | SECURITY.md を追加する |
+| [127](127-standardize-issue-id-placehold.md) | open | medium | Standardize issue ID placeholder to <N> across docs, skills, and help text |
 
 ---
 

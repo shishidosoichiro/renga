@@ -1,6 +1,6 @@
 ---
 description: Reopen a closed renga issue
-argument-hint: "<NNNNN>"
+argument-hint: "<ID>"
 ---
 
 # /renga-reopen
@@ -8,7 +8,7 @@ argument-hint: "<NNNNN>"
 Reopen a closed issue by moving it back from `issues/done/`.
 
 ```
-renga reopen <NNNNN>
+renga reopen <ID>
 ```
 
 Report the destination file path to the user.
