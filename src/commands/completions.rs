@@ -186,10 +186,16 @@ fn emit_flag_values<W: Write>(out: &mut W, subcmd: &str, flag: &str) -> io::Resu
         return Ok(false);
     };
     let values = arg.get_possible_values();
-    for val in values {
-        writeln!(out, "{}", val.get_name())?;
+    for val in &values {
+        let name = val.get_name();
+        let help = val.get_help().map(|h| h.to_string()).unwrap_or_default();
+        if help.is_empty() {
+            writeln!(out, "{name}")?;
+        } else {
+            writeln!(out, "{name}\t{help}")?;
+        }
     }
-    Ok(!arg.get_possible_values().is_empty())
+    Ok(!values.is_empty())
 }
 
 fn emit_subcommands<W: Write>(out: &mut W) -> io::Result<()> {

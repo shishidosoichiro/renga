@@ -403,6 +403,42 @@ fn complete_list_status_values() {
 }
 
 #[test]
+fn complete_create_priority_values_with_descriptions() {
+    let dir = setup();
+    renga(&dir)
+        .args(["__complete", "renga", "create", "--priority", ""])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("high\tHigh priority"))
+        .stdout(predicate::str::contains("medium\tMedium priority"))
+        .stdout(predicate::str::contains("low\tLow priority"));
+}
+
+#[test]
+fn complete_update_priority_values_with_descriptions() {
+    let dir = setup();
+    renga(&dir)
+        .args(["__complete", "renga", "update", "--priority", ""])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("high\tHigh priority"))
+        .stdout(predicate::str::contains("medium\tMedium priority"))
+        .stdout(predicate::str::contains("low\tLow priority"));
+}
+
+#[test]
+fn complete_update_status_values_with_descriptions() {
+    let dir = setup();
+    renga(&dir)
+        .args(["__complete", "renga", "update", "--status", ""])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("open\tActive issue"))
+        .stdout(predicate::str::contains("pending\tBlocked or deferred"))
+        .stdout(predicate::str::contains("in-progress\tActively being worked on"));
+}
+
+#[test]
 fn reopen_fails_when_open_issue_with_same_name_exists() {
     let dir = setup();
     renga(&dir).args(["create", "Foo"]).assert().success();

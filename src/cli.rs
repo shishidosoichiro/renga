@@ -1,6 +1,6 @@
 //! CLI argument definitions using clap derive.
 
-use clap::{Args, Parser, Subcommand};
+use clap::{builder::PossibleValue, Args, Parser, Subcommand};
 
 /// Renga — File-Based Issue Management.
 #[derive(Parser)]
@@ -93,7 +93,11 @@ pub struct CreateArgs {
     #[arg(long)]
     pub slug: Option<String>,
     /// Priority level.
-    #[arg(long, default_value = "medium", value_parser = ["high", "medium", "low"])]
+    #[arg(long, default_value = "medium", value_parser = [
+        PossibleValue::new("high").help("High priority"),
+        PossibleValue::new("medium").help("Medium priority"),
+        PossibleValue::new("low").help("Low priority"),
+    ])]
     pub priority: String,
     /// Area for categorization (e.g. `core`, `cli`, `docs`).
     #[arg(long, default_value = "")]
@@ -183,13 +187,21 @@ pub struct UpdateArgs {
     #[arg(num_args(0..))]
     pub title: Vec<String>,
     /// New priority level.
-    #[arg(long, value_parser = ["high", "medium", "low"])]
+    #[arg(long, value_parser = [
+        PossibleValue::new("high").help("High priority"),
+        PossibleValue::new("medium").help("Medium priority"),
+        PossibleValue::new("low").help("Low priority"),
+    ])]
     pub priority: Option<String>,
     /// New area.
     #[arg(long)]
     pub area: Option<String>,
     /// New status.
-    #[arg(long, value_parser = ["open", "pending", "in-progress"])]
+    #[arg(long, value_parser = [
+        PossibleValue::new("open").help("Active issue"),
+        PossibleValue::new("pending").help("Blocked or deferred"),
+        PossibleValue::new("in-progress").help("Actively being worked on"),
+    ])]
     pub status: Option<String>,
     /// New milestone.
     #[arg(long)]
