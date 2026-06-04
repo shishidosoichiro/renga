@@ -53,22 +53,6 @@ pub enum Status {
 }
 
 impl Status {
-    /// Returns the status values accepted by `update --status`.
-    ///
-    /// Excludes [`Status::Done`] (use `renga done`) and [`Status::Unknown`]
-    /// (read-only sentinel).
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use renga::issue::Status;
-    /// assert!(Status::settable().contains(&Status::Open));
-    /// assert!(!Status::settable().contains(&Status::Done));
-    /// ```
-    pub fn settable() -> &'static [Status] {
-        &[Status::Open, Status::Pending, Status::InProgress]
-    }
-
     /// Returns all status values accepted by `list --status`.
     ///
     /// # Examples
@@ -143,22 +127,6 @@ pub enum Priority {
     Unknown,
 }
 
-impl Priority {
-    /// Returns the priority values accepted by `create --priority` and `update --priority`.
-    ///
-    /// Excludes [`Priority::Unknown`] (read-only sentinel for missing field).
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use renga::issue::Priority;
-    /// assert!(Priority::user_values().contains(&Priority::High));
-    /// assert!(!Priority::user_values().contains(&Priority::Unknown));
-    /// ```
-    pub fn user_values() -> &'static [Priority] {
-        &[Priority::High, Priority::Medium, Priority::Low]
-    }
-}
 
 impl fmt::Display for Priority {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

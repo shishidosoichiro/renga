@@ -9,7 +9,7 @@ use walkdir::WalkDir;
 use anyhow::Result;
 use clap::CommandFactory;
 
-use crate::{cli::Cli, issue::{Priority, Status}, Context};
+use crate::{cli::Cli, issue::Status, Context};
 
 // Thin wrapper scripts: all logic lives in `renga __complete`.
 // Tab-separated `CANDIDATE\tDESCRIPTION` output is handled by each shell appropriately.
@@ -112,67 +112,84 @@ fn write_candidates(args: &[String], ctx: &Context) -> io::Result<()> {
             emit_open_issues(&mut out, ctx)?;
             emit_done_issues(&mut out, ctx)?;
         }
-        "update" => match prev {
-            "--priority" => {
-                for p in Priority::user_values() {
-                    writeln!(out, "{p}")?;
-                }
-            }
-            "--status" => {
-                for s in Status::settable() {
-                    writeln!(out, "{s}")?;
-                }
-            }
-            _ => {
+        "update" => {
+            let emitted = prev
+                .strip_prefix("--")
+                .map(|flag| emit_flag_values(&mut out, "update", flag))
+                .transpose()?
+                .unwrap_or(false);
+            if !emitted {
                 emit_open_issues(&mut out, ctx)?;
-                writeln!(out, "--priority\tPriority level")?;
-                writeln!(out, "--area\tArea")?;
-                writeln!(out, "--status\tStatus")?;
-                writeln!(out, "--milestone\tMilestone")?;
-                writeln!(out, "--label\tReplace labels")?;
-                writeln!(out, "--add-label\tAdd a label")?;
-                writeln!(out, "--remove-label\tRemove a label")?;
-                writeln!(out, "--body\tBody text")?;
+                emit_subcmd_flags(&mut out, "update")?;
             }
-        },
+        }
         "completions" => {
             for shell in ["bash", "zsh", "fish", "powershell", "elvish"] {
                 writeln!(out, "{shell}")?;
             }
         }
-        "list" => match prev {
-            "--status" => {
+        "list" => {
+            if prev == "--status" {
                 for s in Status::all_values() {
                     writeln!(out, "{s}")?;
                 }
+            } else {
+                emit_subcmd_flags(&mut out, "list")?;
             }
-            _ => {
-                writeln!(out, "--status\tFilter by status")?;
-                writeln!(out, "--area\tFilter by area")?;
-                writeln!(out, "--label\tFilter by label")?;
-                writeln!(out, "--milestone\tFilter by milestone")?;
-                writeln!(out, "--json\tOutput as JSON")?;
+        }
+        "create" => {
+            let emitted = prev
+                .strip_prefix("--")
+                .map(|flag| emit_flag_values(&mut out, "create", flag))
+                .transpose()?
+                .unwrap_or(false);
+            if !emitted {
+                emit_subcmd_flags(&mut out, "create")?;
             }
-        },
-        "create" => match prev {
-            "--priority" => {
-                for p in Priority::user_values() {
-                    writeln!(out, "{p}")?;
-                }
-            }
-            _ => {
-                writeln!(out, "--slug\tCustom filename slug")?;
-                writeln!(out, "--priority\tPriority level")?;
-                writeln!(out, "--area\tArea")?;
-                writeln!(out, "--label\tLabel")?;
-                writeln!(out, "--milestone\tMilestone")?;
-                writeln!(out, "--body\tBody text")?;
-            }
-        },
+        }
         _ => emit_subcommands(&mut out)?,
     }
 
     Ok(())
+}
+
+/// Emit `--flag\tHelp text` for all long flags of the given subcommand.
+fn emit_subcmd_flags<W: Write>(out: &mut W, subcmd: &str) -> io::Result<()> {
+    let cmd = Cli::command();
+    let Some(sub) = cmd.get_subcommands().find(|s| s.get_name() == subcmd) else {
+        return Ok(());
+    };
+    for arg in sub.get_arguments() {
+        let Some(long) = arg.get_long() else { continue };
+        if long == "help" {
+            continue;
+        }
+        let help = arg.get_help().map(|h| h.to_string()).unwrap_or_default();
+        if help.is_empty() {
+            writeln!(out, "--{long}")?;
+        } else {
+            writeln!(out, "--{long}\t{help}")?;
+        }
+    }
+    Ok(())
+}
+
+/// Emit the `value_parser` candidates for `--flag` in the given subcommand.
+/// Returns `true` if any values were emitted, `false` if the flag has no
+/// defined possible values (e.g. free-text flags like `--area`).
+fn emit_flag_values<W: Write>(out: &mut W, subcmd: &str, flag: &str) -> io::Result<bool> {
+    let cmd = Cli::command();
+    let Some(sub) = cmd.get_subcommands().find(|s| s.get_name() == subcmd) else {
+        return Ok(false);
+    };
+    let Some(arg) = sub.get_arguments().find(|a| a.get_long() == Some(flag)) else {
+        return Ok(false);
+    };
+    let values = arg.get_possible_values();
+    for val in values {
+        writeln!(out, "{}", val.get_name())?;
+    }
+    Ok(!arg.get_possible_values().is_empty())
 }
 
 fn emit_subcommands<W: Write>(out: &mut W) -> io::Result<()> {
