@@ -109,21 +109,4 @@ renga done <N>
 
 `/renga` スキルでも同じ操作ができる。
 
-| area | 使うとき |
-|---|---|
-| `cli` | コマンドライン引数・ヘルプ表示 |
-| `core` | issue のパース・ファイル操作・プロジェクトルート探索 |
-| `config` | `.renga.yml` の読み込み・設定 |
-| `test` | テストの追加・修正 |
-| `docs` | ドキュメント・README・CONTRIBUTING |
-| `ci` | CI/CD パイプライン |
-| `agent` | CLAUDE.md・`.claude/agents/` の変更・retro issue |
-| `misc` | 上記に当てはまらないもの |
-
-**バグ issue のラベル規約**（retro #145）: レビューで見つかったバグを issue 化するときは必ず以下のラベルを付ける。
-
-| ラベル | 意味 | コミット戦略 |
-|---|---|---|
-| `found_in_impl` | 今の実装サイクルで入ったバグ | コミット前に修正し feature コミットに含める |
-| `found_at:X.Y.Z` | 指定バージョンから存在していたバグ | コミット後に別の `fix:` コミットで修正する |
-| `fixed_at:X.Y.Z` | 修正されたバージョン | クローズ時に付ける |
+area テーブル・バグラベル規約・retro issue 起票ルールの詳細は、issue ファイルを開いたときに自動的に読み込まれる（`.claude/rules/issue-management.md`）。
