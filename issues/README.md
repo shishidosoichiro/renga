@@ -14,7 +14,6 @@ Closed issues are moved to `done/`.
 |---|---|---|---|
 | [87](87-renga-next-priority-area-issue.md) | open | medium | renga next — priority・area から次に着手すべき issue を返す（AI のトークン節約） |
 | [92](92-renga-create-update-json-json.md) | open | medium | renga create・update で JSON 標準入力を受け付ける（--json フラグ） |
-| [149](149-cargo-fmt-check-issue-rs.md) | open | medium | cargo fmt --check が通らない: issue.rs の空行 |
 | [150](150-completions-emit-flag-values.md) | open | medium | completions: emit_flag_values の説明付き出力に統合テストがない |
 | [151](151-completions-fish-completion-sc.md) | open | medium | completions: fish シェルの completion script が統合テスト未カバー |
 | [152](152-completions-write-candidates-c.md) | open | medium | completions: write_candidates の未カバーパスが多い（グローバルフラグ・completions サブコマンド・create|update の emit_subcmd_flags・update + issue ID） |
