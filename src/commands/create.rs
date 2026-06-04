@@ -31,7 +31,9 @@ pub fn run(args: CreateArgs, ctx: &Context) -> Result<()> {
         }
         None => next_id(&ctx.issues_dir)?,
     };
-    let path = ctx.issues_dir.join(format!("{id}-{slug}.md"));
+    let open_dir = ctx.status_dir("open");
+    std::fs::create_dir_all(&open_dir)?;
+    let path = open_dir.join(format!("{id}-{slug}.md"));
 
     let body_text = match args.body.as_deref() {
         Some("-") => {

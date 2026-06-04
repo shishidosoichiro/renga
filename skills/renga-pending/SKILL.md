@@ -5,7 +5,7 @@ argument-hint: "<ID>"
 
 # /renga-pending
 
-Set an issue's status to `pending` (blocked or deferred).
+Move an issue to `issues/pending/` and set `status: pending` (blocked or deferred).
 
 ```
 renga pending <ID>

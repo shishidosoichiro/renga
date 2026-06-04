@@ -126,6 +126,7 @@ cargo install renga
 | `renga edit <ID>` | `$EDITOR` で issue を開く（人間向け） |
 | `renga update <ID> [<タイトル>] [--priority ...] [--area ...] [--status ...] [--milestone ...] [--label ...]... [--add-label ...]... [--remove-label ...]... [--body <テキスト\|->]` | issue のフィールドを更新する（AI・スクリプト向け） |
 | `renga info` | プロジェクトルート・issues ディレクトリ・設定ファイルの場所と現在の設定を表示する |
+| `renga migrate` | フラット構造のイシューをステータス別ディレクトリに移動する |
 | `renga validate` | 全 issue のスキーマエラー・ID 重複を検出する |
 | `renga completions bash\|zsh\|fish` | シェル補完スクリプトを表示する |
 | `renga help [コマンド]` | ヘルプを表示する |

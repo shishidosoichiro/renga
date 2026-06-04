@@ -15,15 +15,18 @@ pub fn run(args: ReopenArgs, ctx: &Context) -> Result<()> {
     let path = find_issue(&ctx.issues_dir, &args.id, true)?
         .ok_or_else(|| FbimError::IssueNotFound(args.id.clone()))?;
 
+    let open_dir = ctx.status_dir("open");
+    std::fs::create_dir_all(&open_dir)?;
+
     let file_name = path
         .file_name()
         .with_context(|| format!("invalid path: {}", path.display()))?;
-    let dest = ctx.issues_dir.join(file_name);
+    let dest = open_dir.join(file_name);
+
+    let content = std::fs::read_to_string(&path)?;
 
     if path == dest {
-        // File is in issues/ (not done/) — open or pending.
-        // Reject if already open.
-        let content = std::fs::read_to_string(&path)?;
+        // Already in open/ — reject if already open.
         if let Ok(issue) = Issue::parse(&path, &content) {
             if issue.status == Status::Open {
                 anyhow::bail!("issue {} already exists as an open issue", args.id);
@@ -37,7 +40,6 @@ pub fn run(args: ReopenArgs, ctx: &Context) -> Result<()> {
         );
     }
 
-    let content = std::fs::read_to_string(&path)?;
     let updated = set_frontmatter_field(&content, "status", "open");
 
     if path != dest {

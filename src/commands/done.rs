@@ -15,12 +15,13 @@ pub fn run(args: DoneArgs, ctx: &Context) -> Result<()> {
     let path = find_issue(&ctx.issues_dir, &args.id, false)?
         .ok_or_else(|| FbimError::IssueNotFound(args.id.clone()))?;
 
-    std::fs::create_dir_all(&ctx.done_dir)?;
+    let done_dir = ctx.status_dir("done");
+    std::fs::create_dir_all(&done_dir)?;
 
     let file_name = path
         .file_name()
         .with_context(|| format!("invalid path: {}", path.display()))?;
-    let dest = ctx.done_dir.join(file_name);
+    let dest = done_dir.join(file_name);
 
     let content = std::fs::read_to_string(&path)?;
     let updated = set_frontmatter_field(&content, "status", "done");

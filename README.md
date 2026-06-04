@@ -126,6 +126,7 @@ cargo install renga
 | `renga edit <ID>` | Open issue in `$EDITOR` (human) |
 | `renga update <ID> [<title>] [--priority ...] [--area ...] [--status ...] [--milestone ...] [--label ...]... [--add-label ...]... [--remove-label ...]... [--body <text\|->]` | Update issue fields (AI/scripts) |
 | `renga info` | Show project root, issues directory, config location, and current settings |
+| `renga migrate` | Move issues from flat layout to per-status directories |
 | `renga validate` | Check all issues for schema errors and duplicate IDs |
 | `renga completions bash\|zsh\|fish` | Print shell completion script |
 | `renga help [command]` | Show help |

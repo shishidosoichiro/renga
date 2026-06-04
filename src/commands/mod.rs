@@ -16,6 +16,8 @@ pub mod info;
 pub mod init;
 /// `renga list` handler.
 pub mod list;
+/// `renga migrate` handler.
+pub mod migrate;
 /// `renga pending` handler.
 pub mod pending;
 /// `renga reopen` handler.

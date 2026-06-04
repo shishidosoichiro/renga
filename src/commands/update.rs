@@ -108,9 +108,32 @@ pub fn run(args: UpdateArgs, ctx: &Context) -> Result<()> {
         content = format!("---\n{fm_str}\n---\n\n{body_with_title}\n");
     }
 
-    std::fs::write(&path, &content)?;
+    // If --status was given, move the file to the matching status directory.
+    let dest = if let Some(new_status) = &args.status {
+        let dest_dir = ctx.status_dir(new_status);
+        std::fs::create_dir_all(&dest_dir)?;
+        let file_name = path
+            .file_name()
+            .with_context(|| format!("invalid path: {}", path.display()))?;
+        dest_dir.join(file_name)
+    } else {
+        path.clone()
+    };
+
+    if dest != path {
+        let tmp = dest.with_extension("tmp");
+        std::fs::write(&tmp, &content)?;
+        if let Err(e) = std::fs::rename(&tmp, &dest) {
+            let _ = std::fs::remove_file(&tmp);
+            return Err(e.into());
+        }
+        std::fs::remove_file(&path)?;
+    } else {
+        std::fs::write(&dest, &content)?;
+    }
+
     readme::write_readme(&ctx.issues_dir, &ctx.config)?;
-    println!("{}", path.display());
+    println!("{}", dest.display());
 
     Ok(())
 }

@@ -27,7 +27,7 @@ pub enum FbimError {
     #[error("issue {0} not found")]
     IssueNotFound(String),
     /// The issues directory could not be found.
-    #[error("issues directory not found (run 'mkdir -p issues/done')")]
+    #[error("issues directory not found (run 'renga init')")]
     IssuesDirNotFound,
 }
 
@@ -37,8 +37,6 @@ pub struct Context {
     pub project_root: PathBuf,
     /// The issues directory.
     pub issues_dir: PathBuf,
-    /// The `done/` subdirectory inside the issues directory.
-    pub done_dir: PathBuf,
     /// The project configuration.
     pub config: config::Config,
 }
@@ -51,25 +49,29 @@ impl Context {
         }
         Ok(())
     }
+
+    /// Return the subdirectory for a given status name (e.g. `"open"`, `"done"`).
+    pub fn status_dir(&self, status: &str) -> PathBuf {
+        self.issues_dir.join(status)
+    }
 }
 
 /// Parse CLI arguments and dispatch to the appropriate command handler.
 pub fn run() -> Result<()> {
     let cli = cli::Cli::parse();
     let (project_root, issues_dir) = project::find_project_root();
-    let done_dir = issues_dir.join("done");
     let config = config::Config::load(&project_root)?;
 
     let ctx = Context {
         project_root,
         issues_dir,
-        done_dir,
         config,
     };
 
     match cli.command {
         cli::Command::Info => commands::info::run(&ctx),
         cli::Command::Init => commands::init::run(&ctx),
+        cli::Command::Migrate => commands::migrate::run(&ctx),
         cli::Command::Create(args) => commands::create::run(args, &ctx),
         cli::Command::Done(args) => commands::done::run(args, &ctx),
         cli::Command::Pending(args) => commands::pending::run(args, &ctx),

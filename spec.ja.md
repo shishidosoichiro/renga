@@ -9,9 +9,16 @@ File-Based Issue Management の仕様。
 ```
 issues/
   README.md           一覧（renga list で自動生成）
-  N-name.md           open・pending・in-progress な issue
+  open/
+    N-name.md         open な issue
+  in-progress/
+    N-name.md         作業中の issue
+  pending/
+    N-name.md         保留中の issue
   done/
     N-name.md         完了した issue
+  unknown/
+    N-name.md         frontmatter がないか parse できない issue
 ```
 
 ## ファイル命名規則
@@ -101,6 +108,7 @@ renga show <ID> [--json]
 renga edit <ID>
 renga update <ID> [<title>] [--priority high|medium|low] [--area <area>] [--status open|pending|in-progress] [--milestone <milestone>] [--label <label>]... [--add-label <label>]... [--remove-label <label>]... [--body <text|->]
 renga info
+renga migrate
 renga validate
 renga completions <bash|zsh|fish>
 renga help [command]

@@ -6,7 +6,9 @@ use tempfile::TempDir;
 
 fn setup() -> TempDir {
     let dir = TempDir::new().unwrap();
-    fs::create_dir_all(dir.path().join("issues/done")).unwrap();
+    for status in ["open", "pending", "in-progress", "done", "unknown"] {
+        fs::create_dir_all(dir.path().join(format!("issues/{status}"))).unwrap();
+    }
     dir
 }
 
@@ -27,7 +29,7 @@ fn create_writes_file() {
         .success()
         .stdout(predicate::str::contains("1-my-issue.md"));
 
-    let content = fs::read_to_string(dir.path().join("issues/1-my-issue.md")).unwrap();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-my-issue.md")).unwrap();
     assert!(content.contains("schema_version: 1"));
     assert!(content.contains("status: open"));
     assert!(content.contains("area: core"));
@@ -49,7 +51,7 @@ fn create_with_priority_and_body() {
         .assert()
         .success();
 
-    let content = fs::read_to_string(dir.path().join("issues/1-bug.md")).unwrap();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-bug.md")).unwrap();
     assert!(content.contains("priority: high"));
     assert!(content.contains("details here"));
 }
@@ -164,7 +166,7 @@ fn done_moves_file_to_done_dir() {
         .success()
         .stdout(predicate::str::contains("done/1-todo.md"));
 
-    assert!(!dir.path().join("issues/1-todo.md").exists());
+    assert!(!dir.path().join("issues/open/1-todo.md").exists());
     assert!(dir.path().join("issues/done/1-todo.md").exists());
 
     let content = fs::read_to_string(dir.path().join("issues/done/1-todo.md")).unwrap();
@@ -189,7 +191,7 @@ fn pending_sets_status() {
     renga(&dir).args(["create", "Work"]).assert().success();
     renga(&dir).args(["pending", "1"]).assert().success();
 
-    let content = fs::read_to_string(dir.path().join("issues/1-work.md")).unwrap();
+    let content = fs::read_to_string(dir.path().join("issues/pending/1-work.md")).unwrap();
     assert!(content.contains("status: pending"));
 }
 
@@ -211,7 +213,7 @@ fn in_progress_sets_status() {
     renga(&dir).args(["create", "Work"]).assert().success();
     renga(&dir).args(["in-progress", "1"]).assert().success();
 
-    let content = fs::read_to_string(dir.path().join("issues/1-work.md")).unwrap();
+    let content = fs::read_to_string(dir.path().join("issues/in-progress/1-work.md")).unwrap();
     assert!(content.contains("status: in-progress"));
 }
 
@@ -236,12 +238,12 @@ fn reopen_moves_from_done() {
         .args(["reopen", "1"])
         .assert()
         .success()
-        .stdout(predicate::str::contains("issues/1-old.md"));
+        .stdout(predicate::str::contains("issues/open/1-old.md"));
 
-    assert!(dir.path().join("issues/1-old.md").exists());
+    assert!(dir.path().join("issues/open/1-old.md").exists());
     assert!(!dir.path().join("issues/done/1-old.md").exists());
 
-    let content = fs::read_to_string(dir.path().join("issues/1-old.md")).unwrap();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-old.md")).unwrap();
     assert!(content.contains("status: open"));
 }
 
@@ -252,7 +254,7 @@ fn reopen_pending_issue() {
     renga(&dir).args(["pending", "1"]).assert().success();
     renga(&dir).args(["reopen", "1"]).assert().success();
 
-    let content = fs::read_to_string(dir.path().join("issues/1-blocked.md")).unwrap();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-blocked.md")).unwrap();
     assert!(content.contains("status: open"));
 }
 
@@ -263,7 +265,7 @@ fn reopen_in_progress_issue() {
     renga(&dir).args(["in-progress", "1"]).assert().success();
     renga(&dir).args(["reopen", "1"]).assert().success();
 
-    let content = fs::read_to_string(dir.path().join("issues/1-active.md")).unwrap();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-active.md")).unwrap();
     assert!(content.contains("status: open"));
 }
 
@@ -407,7 +409,7 @@ fn reopen_fails_when_open_issue_with_same_name_exists() {
     renga(&dir).args(["done", "1"]).assert().success();
     // manually place a file with the same name in issues/
     fs::write(
-        dir.path().join("issues/1-foo.md"),
+        dir.path().join("issues/open/1-foo.md"),
         "---\nstatus: open\n---\n\n# Foo\n",
     )
     .unwrap();
@@ -426,7 +428,7 @@ fn create_with_labels() {
         .assert()
         .success();
 
-    let content = fs::read_to_string(dir.path().join("issues/1-task.md")).unwrap();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-task.md")).unwrap();
     assert!(content.contains("labels: [bug, urgent]"));
 }
 
@@ -448,7 +450,7 @@ fn create_with_milestone() {
         .assert()
         .success();
 
-    let content = fs::read_to_string(dir.path().join("issues/1-task.md")).unwrap();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-task.md")).unwrap();
     assert!(content.contains("milestone: v1.0"));
 }
 
@@ -494,7 +496,11 @@ fn init_creates_issues_and_done_dirs() {
         .stdout(predicate::str::contains("Initialized"));
 
     assert!(dir.path().join("issues").is_dir());
+    assert!(dir.path().join("issues/open").is_dir());
     assert!(dir.path().join("issues/done").is_dir());
+    assert!(dir.path().join("issues/pending").is_dir());
+    assert!(dir.path().join("issues/in-progress").is_dir());
+    assert!(dir.path().join("issues/unknown").is_dir());
 }
 
 #[test]
@@ -506,7 +512,7 @@ fn init_is_idempotent() {
         .assert()
         .success()
         .stdout(predicate::str::contains("already initialized"));
-    assert!(dir.path().join("issues/done").is_dir());
+    assert!(dir.path().join("issues/open").is_dir());
 }
 
 // ── create --body - (stdin) ───────────────────────────────────────────────────
@@ -520,7 +526,7 @@ fn create_body_from_stdin() {
         .assert()
         .success();
 
-    let content = fs::read_to_string(dir.path().join("issues/1-my-issue.md")).unwrap();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-my-issue.md")).unwrap();
     assert!(content.contains("body from stdin"));
 }
 
@@ -535,7 +541,7 @@ fn create_with_custom_id() {
         .success()
         .stdout(predicate::str::contains("99-my-issue.md"));
 
-    assert!(dir.path().join("issues/99-my-issue.md").exists());
+    assert!(dir.path().join("issues/open/99-my-issue.md").exists());
 }
 
 #[test]
@@ -572,6 +578,91 @@ fn create_with_id_non_numeric_fails() {
         .stderr(predicate::str::contains("positive integer"));
 }
 
+// ── migrate ───────────────────────────────────────────────────────────────────
+
+#[test]
+fn migrate_moves_flat_files_to_status_dirs() {
+    let dir = TempDir::new().unwrap();
+    fs::create_dir_all(dir.path().join("issues")).unwrap();
+    fs::write(
+        dir.path().join("issues/1-open-task.md"),
+        "---\nschema_version: 1\nstatus: open\npriority: medium\narea: core\nlabels: []\n---\n\n# Open Task\n",
+    ).unwrap();
+    fs::write(
+        dir.path().join("issues/2-pending-task.md"),
+        "---\nschema_version: 1\nstatus: pending\npriority: medium\narea: core\nlabels: []\n---\n\n# Pending Task\n",
+    ).unwrap();
+    fs::write(
+        dir.path().join("issues/3-no-frontmatter.md"),
+        "# No Frontmatter\n",
+    )
+    .unwrap();
+
+    renga(&dir)
+        .args(["migrate"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Migrated 3 issue(s)."));
+
+    assert!(dir.path().join("issues/open/1-open-task.md").exists());
+    assert!(dir.path().join("issues/pending/2-pending-task.md").exists());
+    assert!(dir
+        .path()
+        .join("issues/unknown/3-no-frontmatter.md")
+        .exists());
+    assert!(!dir.path().join("issues/1-open-task.md").exists());
+}
+
+#[test]
+fn migrate_nothing_to_migrate() {
+    let dir = setup();
+    renga(&dir)
+        .args(["migrate"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Nothing to migrate."));
+}
+
+#[test]
+fn migrate_skips_collision() {
+    let dir = TempDir::new().unwrap();
+    fs::create_dir_all(dir.path().join("issues/open")).unwrap();
+    // flat file
+    fs::write(
+        dir.path().join("issues/1-task.md"),
+        "---\nschema_version: 1\nstatus: open\npriority: medium\narea: core\nlabels: []\n---\n\n# Task\n",
+    )
+    .unwrap();
+    // already in open/
+    fs::write(
+        dir.path().join("issues/open/1-task.md"),
+        "---\nschema_version: 1\nstatus: open\npriority: high\narea: core\nlabels: []\n---\n\n# Task (existing)\n",
+    )
+    .unwrap();
+
+    renga(&dir)
+        .args(["migrate"])
+        .assert()
+        .success()
+        .stderr(predicate::str::contains("skipping"));
+
+    // existing file in open/ must be preserved
+    let content = fs::read_to_string(dir.path().join("issues/open/1-task.md")).unwrap();
+    assert!(content.contains("Task (existing)"));
+}
+
+#[test]
+fn update_status_moves_to_in_progress() {
+    let dir = setup();
+    renga(&dir).args(["create", "Task"]).assert().success();
+    renga(&dir)
+        .args(["update", "1", "--status", "in-progress"])
+        .assert()
+        .success();
+    assert!(dir.path().join("issues/in-progress/1-task.md").exists());
+    assert!(!dir.path().join("issues/open/1-task.md").exists());
+}
+
 // ── validate ──────────────────────────────────────────────────────────────────
 
 #[test]
@@ -590,7 +681,7 @@ fn validate_clean_issues_exits_ok() {
 fn validate_detects_unparseable_frontmatter() {
     let dir = setup();
     fs::write(
-        dir.path().join("issues/1-bad.md"),
+        dir.path().join("issues/open/1-bad.md"),
         "---\nnot: valid: yaml: [\n---\n\n# Bad\n",
     )
     .unwrap();
@@ -605,12 +696,12 @@ fn validate_detects_unparseable_frontmatter() {
 fn validate_detects_duplicate_ids() {
     let dir = setup();
     fs::write(
-        dir.path().join("issues/1-first.md"),
+        dir.path().join("issues/open/1-first.md"),
         "---\nschema_version: 1\nstatus: open\npriority: medium\narea: core\nlabels: []\n---\n\n# First\n",
     )
     .unwrap();
     fs::write(
-        dir.path().join("issues/1-second.md"),
+        dir.path().join("issues/open/1-second.md"),
         "---\nschema_version: 1\nstatus: open\npriority: medium\narea: core\nlabels: []\n---\n\n# Second\n",
     )
     .unwrap();
@@ -625,7 +716,7 @@ fn validate_detects_duplicate_ids() {
 fn validate_warns_on_missing_schema_version() {
     let dir = setup();
     fs::write(
-        dir.path().join("issues/1-old.md"),
+        dir.path().join("issues/open/1-old.md"),
         "---\nstatus: open\npriority: medium\narea: core\nlabels: []\n---\n\n# Old\n",
     )
     .unwrap();
@@ -640,7 +731,7 @@ fn validate_warns_on_missing_schema_version() {
 fn validate_detects_invalid_status_value() {
     let dir = setup();
     fs::write(
-        dir.path().join("issues/1-bad-status.md"),
+        dir.path().join("issues/open/1-bad-status.md"),
         "---\nschema_version: 1\nstatus: garbage\npriority: medium\narea: core\nlabels: []\n---\n\n# Bad Status\n",
     )
     .unwrap();
@@ -671,7 +762,7 @@ fn update_priority() {
         .args(["update", "1", "--priority", "high"])
         .assert()
         .success();
-    let content = fs::read_to_string(dir.path().join("issues/1-task.md")).unwrap();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-task.md")).unwrap();
     assert!(content.contains("priority: high"));
 }
 
@@ -683,7 +774,7 @@ fn update_area() {
         .args(["update", "1", "--area", "core"])
         .assert()
         .success();
-    let content = fs::read_to_string(dir.path().join("issues/1-task.md")).unwrap();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-task.md")).unwrap();
     assert!(content.contains("area: core"));
 }
 
@@ -695,7 +786,7 @@ fn update_labels() {
         .args(["update", "1", "--label", "bug", "--label", "urgent"])
         .assert()
         .success();
-    let content = fs::read_to_string(dir.path().join("issues/1-task.md")).unwrap();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-task.md")).unwrap();
     assert!(content.contains("bug"));
     assert!(content.contains("urgent"));
 }
@@ -708,7 +799,7 @@ fn update_body() {
         .args(["update", "1", "--body", "new body text"])
         .assert()
         .success();
-    let content = fs::read_to_string(dir.path().join("issues/1-task.md")).unwrap();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-task.md")).unwrap();
     assert!(content.contains("new body text"));
 }
 
@@ -720,7 +811,7 @@ fn update_title_positional() {
         .args(["update", "1", "New Title"])
         .assert()
         .success();
-    let content = fs::read_to_string(dir.path().join("issues/1-old-title.md")).unwrap();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-old-title.md")).unwrap();
     assert!(content.contains("# New Title"));
     assert!(!content.contains("# Old Title"));
 }
@@ -733,7 +824,7 @@ fn update_body_preserves_existing_title() {
         .args(["update", "1", "--body", "description without heading"])
         .assert()
         .success();
-    let content = fs::read_to_string(dir.path().join("issues/1-my-issue.md")).unwrap();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-my-issue.md")).unwrap();
     assert!(content.contains("# My Issue"));
     assert!(content.contains("description without heading"));
 }
@@ -746,7 +837,7 @@ fn update_title_and_body_together() {
         .args(["update", "1", "Updated Title", "--body", "new body text"])
         .assert()
         .success();
-    let content = fs::read_to_string(dir.path().join("issues/1-original.md")).unwrap();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-original.md")).unwrap();
     assert!(content.contains("# Updated Title"));
     assert!(content.contains("new body text"));
 }
@@ -759,7 +850,7 @@ fn update_body_with_heading_uses_provided_heading() {
         .args(["update", "1", "--body", "# New Heading\n\nbody text"])
         .assert()
         .success();
-    let content = fs::read_to_string(dir.path().join("issues/1-my-issue.md")).unwrap();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-my-issue.md")).unwrap();
     assert!(content.contains("# New Heading"));
     assert!(!content.contains("# My Issue"));
 }
@@ -775,7 +866,7 @@ fn update_add_label() {
         .args(["update", "1", "--add-label", "urgent"])
         .assert()
         .success();
-    let content = fs::read_to_string(dir.path().join("issues/1-task.md")).unwrap();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-task.md")).unwrap();
     assert!(content.contains("bug"));
     assert!(content.contains("urgent"));
 }
@@ -791,7 +882,7 @@ fn update_remove_label() {
         .args(["update", "1", "--remove-label", "urgent"])
         .assert()
         .success();
-    let content = fs::read_to_string(dir.path().join("issues/1-task.md")).unwrap();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-task.md")).unwrap();
     assert!(content.contains("bug"));
     assert!(!content.contains("urgent"));
 }
@@ -807,8 +898,25 @@ fn update_add_label_no_duplicates() {
         .args(["update", "1", "--add-label", "bug"])
         .assert()
         .success();
-    let content = fs::read_to_string(dir.path().join("issues/1-task.md")).unwrap();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-task.md")).unwrap();
     assert_eq!(content.matches("bug").count(), 1);
+}
+
+#[test]
+fn update_status_moves_file() {
+    let dir = setup();
+    renga(&dir).args(["create", "Task"]).assert().success();
+    assert!(dir.path().join("issues/open/1-task.md").exists());
+
+    renga(&dir)
+        .args(["update", "1", "--status", "pending"])
+        .assert()
+        .success();
+
+    assert!(dir.path().join("issues/pending/1-task.md").exists());
+    assert!(!dir.path().join("issues/open/1-task.md").exists());
+    let content = fs::read_to_string(dir.path().join("issues/pending/1-task.md")).unwrap();
+    assert!(content.contains("status: pending"));
 }
 
 #[test]
@@ -832,7 +940,7 @@ fn update_body_preserves_frontmatter() {
         .args(["update", "1", "--body", "updated body"])
         .assert()
         .success();
-    let content = fs::read_to_string(dir.path().join("issues/1-task.md")).unwrap();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-task.md")).unwrap();
     assert!(content.contains("area: core"));
     assert!(content.contains("priority: high"));
     assert!(content.contains("updated body"));
@@ -851,7 +959,7 @@ fn update_body_from_stdin() {
         .write_stdin("stdin body\n")
         .assert()
         .success();
-    let content = fs::read_to_string(dir.path().join("issues/1-task.md")).unwrap();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-task.md")).unwrap();
     assert!(content.contains("stdin body"));
 }
 

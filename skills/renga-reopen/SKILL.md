@@ -5,7 +5,7 @@ argument-hint: "<ID>"
 
 # /renga-reopen
 
-Reopen a closed issue by moving it back from `issues/done/`.
+Reopen an issue by moving it to `issues/open/` and setting `status: open`. Works from any status directory (`done/`, `pending/`, `in-progress/`).
 
 ```
 renga reopen <ID>

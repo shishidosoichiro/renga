@@ -44,6 +44,8 @@ pub enum Command {
     Validate,
     /// Show project root, issues directory, config file location, and current settings.
     Info,
+    /// Migrate issues from flat layout to per-status directories.
+    Migrate,
     /// Show help for a command.
     Help {
         /// Command to show help for (omit for overall help).

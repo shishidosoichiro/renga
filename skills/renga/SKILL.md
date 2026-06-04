@@ -13,9 +13,10 @@ All operations are performed by calling the `renga` binary.
 
 ```
 /renga [create] <title>     Create an issue
-/renga done <ID>         Close an issue
-/renga pending <ID>      Put an issue on hold
-/renga reopen <ID>       Reopen a closed issue
+/renga done <ID>            Close an issue
+/renga pending <ID>         Put an issue on hold
+/renga in-progress <ID>     Mark an issue as in-progress
+/renga reopen <ID>          Reopen an issue
 /renga list                 List open, pending, and in-progress issues
 /renga show <ID>         Show issue details
 /renga help [command]       Show help
@@ -72,6 +73,8 @@ renga create "<title>" --slug <slug> --area <area> --body "<description>"
 
 ## done
 
+Moves the file to `issues/done/`.
+
 ```
 renga done <ID>
 ```
@@ -82,15 +85,31 @@ Report the destination file path to the user.
 
 ## pending
 
+Moves the file to `issues/pending/`.
+
 ```
 renga pending <ID>
 ```
 
-Report the updated file path to the user.
+Report the destination file path to the user.
+
+---
+
+## in-progress
+
+Moves the file to `issues/in-progress/`.
+
+```
+renga in-progress <ID>
+```
+
+Report the destination file path to the user.
 
 ---
 
 ## reopen
+
+Moves the file to `issues/open/`. Works from any status directory.
 
 ```
 renga reopen <ID>
@@ -151,6 +170,16 @@ Updates issue fields without opening an editor. Designed for AI agents and scrip
 - `--add-label` adds a label without removing others (repeatable, deduplicates automatically)
 - `--remove-label` removes a specific label (repeatable)
 - Multiple flags can be combined in one call
+
+---
+
+## migrate
+
+Migrate issues from flat layout (`issues/N-name.md`) to per-status directories (`issues/open/`, `issues/pending/`, etc.). Run once on existing repos.
+
+```
+renga migrate
+```
 
 ---
 
