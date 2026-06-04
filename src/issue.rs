@@ -127,7 +127,6 @@ pub enum Priority {
     Unknown,
 }
 
-
 impl fmt::Display for Priority {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {

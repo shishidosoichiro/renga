@@ -435,7 +435,9 @@ fn complete_update_status_values_with_descriptions() {
         .success()
         .stdout(predicate::str::contains("open\tActive issue"))
         .stdout(predicate::str::contains("pending\tBlocked or deferred"))
-        .stdout(predicate::str::contains("in-progress\tActively being worked on"));
+        .stdout(predicate::str::contains(
+            "in-progress\tActively being worked on",
+        ));
 }
 
 #[test]
