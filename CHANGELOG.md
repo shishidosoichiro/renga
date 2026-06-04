@@ -1,6 +1,12 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [0.9.0] - 2026-06-04
+
+### 🚀 Features
+
+- [`3946c67`] *(cli)* Improve renga update with title arg, label ops, and body safety
+- [`e966101`] *(core)* [**breaking**] Reorganize issues into per-status directories
 ## [0.8.0] - 2026-06-03
 
 ### 🚀 Features
