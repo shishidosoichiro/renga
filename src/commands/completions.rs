@@ -9,7 +9,7 @@ use walkdir::WalkDir;
 use anyhow::Result;
 use clap::CommandFactory;
 
-use crate::{cli::Cli, issue::Status, Context};
+use crate::{cli::Cli, Context};
 
 // Thin wrapper scripts: all logic lives in `renga __complete`.
 // Tab-separated `CANDIDATE\tDESCRIPTION` output is handled by each shell appropriately.
@@ -124,14 +124,26 @@ fn write_candidates(args: &[String], ctx: &Context) -> io::Result<()> {
             }
         }
         "completions" => {
-            for shell in ["bash", "zsh", "fish", "powershell", "elvish"] {
-                writeln!(out, "{shell}")?;
+            for (shell, desc) in [
+                ("bash", "Bash"),
+                ("zsh", "Zsh"),
+                ("fish", "Fish"),
+                ("powershell", "PowerShell"),
+                ("elvish", "Elvish"),
+            ] {
+                writeln!(out, "{shell}\t{desc}")?;
             }
         }
         "list" => {
             if prev == "--status" {
-                for s in Status::all_values() {
-                    writeln!(out, "{s}")?;
+                for (s, desc) in [
+                    ("open", "Active issue"),
+                    ("pending", "Blocked or deferred"),
+                    ("in-progress", "Actively being worked on"),
+                    ("done", "The issue is complete"),
+                    ("unknown", "Status could not be determined"),
+                ] {
+                    writeln!(out, "{s}\t{desc}")?;
                 }
             } else {
                 emit_subcmd_flags(&mut out, "list")?;

@@ -397,9 +397,21 @@ fn complete_list_status_values() {
         .args(["__complete", "renga", "list", "--status", ""])
         .assert()
         .success()
-        .stdout(predicate::str::contains("open"))
-        .stdout(predicate::str::contains("pending"))
-        .stdout(predicate::str::contains("done"));
+        .stdout(predicate::str::contains("open\tActive issue"))
+        .stdout(predicate::str::contains("pending\tBlocked or deferred"))
+        .stdout(predicate::str::contains("done\tThe issue is complete"));
+}
+
+#[test]
+fn complete_completions_shell_names_with_descriptions() {
+    let dir = setup();
+    renga(&dir)
+        .args(["__complete", "renga", "completions", ""])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("bash\tBash"))
+        .stdout(predicate::str::contains("zsh\tZsh"))
+        .stdout(predicate::str::contains("fish\tFish"));
 }
 
 #[test]
