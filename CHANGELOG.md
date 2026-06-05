@@ -1,6 +1,15 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [0.10.0] - 2026-06-05
+
+### 🚀 Features
+
+- [`e18ef26`] *(cli)* Add descriptions to completion candidates for --priority and --status
+
+### 🐛 Bug Fixes
+
+- [`952f902`] *(fmt)* Apply cargo fmt to issue.rs and integration.rs
 ## [0.9.1] - 2026-06-04
 
 ### 🐛 Bug Fixes
