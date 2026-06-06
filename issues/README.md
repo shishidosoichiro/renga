@@ -16,6 +16,7 @@ Closed issues are moved to `done/`.
 | [92](92-renga-create-update-json-json.md) | open | medium | renga create・update で JSON 標準入力を受け付ける（--json フラグ） |
 | [151](151-completions-fish-completion-sc.md) | open | medium | completions: fish シェルの completion script が統合テスト未カバー |
 | [152](152-completions-write-candidates-c.md) | open | medium | completions: write_candidates の未カバーパスが多い（グローバルフラグ・completions サブコマンド・create|update の emit_subcmd_flags・update + issue ID） |
+| [153](153-clap-complete-unstable-dynamic.md) | open | low | clap_complete unstable-dynamic が stable になったら __complete と手書きシェルスクリプトを置き換えを検討する |
 
 ---
 
