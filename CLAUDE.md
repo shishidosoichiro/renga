@@ -56,7 +56,7 @@ File-Based Issue Management。詳細仕様は `spec.ja.md` を参照。
 
 | 変更の種類 | 更新が必要なドキュメント |
 |---|---|
-| CLI の動作・引数・出力形式 | `README.md`, `README.ja.md` |
+| CLI の動作・引数・出力形式 | `README.md`, `README.ja.md`, `skills/` 配下の該当 `SKILL.md` |
 | issue ファイルの形式・ID・タイトルの仕様 | `spec.md`, `spec.ja.md` |
 | 公開 struct / enum / fn | `src/` の doc コメント（`///`） |
 | リリース | `CHANGELOG.md`（git-cliff で生成）, `Cargo.toml` のバージョン |
