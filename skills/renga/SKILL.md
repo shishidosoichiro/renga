@@ -33,6 +33,7 @@ These rules apply whenever an AI agent works with renga issues.
 **Before starting work**
 - Run `renga list` to confirm which issues are open or pending.
 - Run `renga show <ID>` on the relevant issue before beginning work.
+- Run `renga in-progress <ID>` to mark the issue as in-progress. Do this before writing any code or making changes — not after.
 
 **During work**
 - When you make a decision or discover a constraint that is not obvious from the issue title, append it to the issue body under a `## Notes` section using `--body` on create or by editing the file directly.
