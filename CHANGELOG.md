@@ -1,6 +1,15 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [0.11.0] - 2026-06-06
+
+### 🚀 Features
+
+- [`e5acf03`] *(cli)* Accept multiple IDs for done/pending/in-progress/reopen
+
+### 🐛 Bug Fixes
+
+- [`ef923a0`] *(cli)* Add descriptions to list --status and completions shell name candidates
 ## [0.10.0] - 2026-06-05
 
 ### 🚀 Features
