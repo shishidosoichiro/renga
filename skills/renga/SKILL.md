@@ -1,7 +1,7 @@
 ---
 name: renga
 description: File-Based Issue Management — track issues as plain Markdown files in your repo
-argument-hint: "[create] <title> | done <ID> | pending <ID> | reopen <ID> | list | show <ID> | help"
+argument-hint: "[create] <title> | done <ID>... | pending <ID>... | reopen <ID>... | list | show <ID> | help"
 ---
 
 # /renga skill
@@ -13,10 +13,10 @@ All operations are performed by calling the `renga` binary.
 
 ```
 /renga [create] <title>     Create an issue
-/renga done <ID>            Close an issue
-/renga pending <ID>         Put an issue on hold
-/renga in-progress <ID>     Mark an issue as in-progress
-/renga reopen <ID>          Reopen an issue
+/renga done <ID>...          Close one or more issues
+/renga pending <ID>...      Put one or more issues on hold
+/renga in-progress <ID>...  Mark one or more issues as in-progress
+/renga reopen <ID>...       Reopen one or more issues
 /renga list                 List open, pending, and in-progress issues
 /renga show <ID>         Show issue details
 /renga help [command]       Show help
@@ -78,10 +78,10 @@ renga create "<title>" [--id <id>] [--slug <slug>] [--priority high|medium|low] 
 Moves the file to `issues/done/`.
 
 ```
-renga done <ID>
+renga done <ID>...
 ```
 
-Report the destination file path to the user.
+Each ID is processed independently. Successes are printed to stdout; failures to stderr. Exits with code 1 if any ID fails.
 
 ---
 
@@ -90,10 +90,10 @@ Report the destination file path to the user.
 Moves the file to `issues/pending/`.
 
 ```
-renga pending <ID>
+renga pending <ID>...
 ```
 
-Report the destination file path to the user.
+Each ID is processed independently. Successes are printed to stdout; failures to stderr. Exits with code 1 if any ID fails.
 
 ---
 
@@ -102,10 +102,10 @@ Report the destination file path to the user.
 Moves the file to `issues/in-progress/`.
 
 ```
-renga in-progress <ID>
+renga in-progress <ID>...
 ```
 
-Report the destination file path to the user.
+Each ID is processed independently. Successes are printed to stdout; failures to stderr. Exits with code 1 if any ID fails.
 
 ---
 
@@ -114,7 +114,7 @@ Report the destination file path to the user.
 Moves the file to `issues/open/`. Works from any status directory.
 
 ```
-renga reopen <ID>
+renga reopen <ID>...
 ```
 
 Report the destination file path to the user.

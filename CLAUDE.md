@@ -77,7 +77,7 @@ File-Based Issue Management。詳細仕様は `spec.ja.md` を参照。
 5. 今回の実装で入ったバグを修正する
 6. コミット（feature + 同一実装内バグ修正をまとめて）
 7. 以前からあったバグがあれば `renga create` で起票してから別の `fix:` コミットで修正する
-8. issue を close する（`renga done <N>`）
+8. issue を close する（`renga done <N>...`、複数 ID 可）
 
 カバレッジは実装時とレビュー時の両方で確認する。
 
@@ -101,7 +101,7 @@ File-Based Issue Management。詳細仕様は `spec.ja.md` を参照。
 ```sh
 renga create "タイトル" --area <area>
 renga list
-renga done <N>
+renga done <N>...
 ```
 
 `/renga` スキルでも同じ操作ができる。
