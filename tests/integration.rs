@@ -183,6 +183,36 @@ fn done_not_found() {
         .stderr(predicate::str::contains("not found"));
 }
 
+#[test]
+fn done_multiple_ids() {
+    let dir = setup();
+    renga(&dir).args(["create", "First"]).assert().success();
+    renga(&dir).args(["create", "Second"]).assert().success();
+    renga(&dir).args(["create", "Third"]).assert().success();
+
+    renga(&dir).args(["done", "1", "2", "3"]).assert().success();
+
+    assert!(dir.path().join("issues/done/1-first.md").exists());
+    assert!(dir.path().join("issues/done/2-second.md").exists());
+    assert!(dir.path().join("issues/done/3-third.md").exists());
+}
+
+#[test]
+fn done_partial_failure() {
+    let dir = setup();
+    renga(&dir).args(["create", "Exists"]).assert().success();
+
+    renga(&dir)
+        .args(["done", "1", "99"])
+        .assert()
+        .failure()
+        .stdout(predicate::str::contains("1-exists.md"))
+        .stderr(predicate::str::contains("99"))
+        .stderr(predicate::str::contains("not found"));
+
+    assert!(dir.path().join("issues/done/1-exists.md").exists());
+}
+
 // ── pending ───────────────────────────────────────────────────────────────────
 
 #[test]
@@ -205,6 +235,34 @@ fn pending_not_found() {
         .stderr(predicate::str::contains("not found"));
 }
 
+#[test]
+fn pending_multiple_ids() {
+    let dir = setup();
+    renga(&dir).args(["create", "Alpha"]).assert().success();
+    renga(&dir).args(["create", "Beta"]).assert().success();
+
+    renga(&dir).args(["pending", "1", "2"]).assert().success();
+
+    assert!(dir.path().join("issues/pending/1-alpha.md").exists());
+    assert!(dir.path().join("issues/pending/2-beta.md").exists());
+}
+
+#[test]
+fn pending_partial_failure() {
+    let dir = setup();
+    renga(&dir).args(["create", "Exists"]).assert().success();
+
+    renga(&dir)
+        .args(["pending", "1", "99"])
+        .assert()
+        .failure()
+        .stdout(predicate::str::contains("1-exists.md"))
+        .stderr(predicate::str::contains("99"))
+        .stderr(predicate::str::contains("not found"));
+
+    assert!(dir.path().join("issues/pending/1-exists.md").exists());
+}
+
 // ── in-progress ───────────────────────────────────────────────────────────────
 
 #[test]
@@ -225,6 +283,37 @@ fn in_progress_not_found() {
         .assert()
         .failure()
         .stderr(predicate::str::contains("not found"));
+}
+
+#[test]
+fn in_progress_multiple_ids() {
+    let dir = setup();
+    renga(&dir).args(["create", "Task A"]).assert().success();
+    renga(&dir).args(["create", "Task B"]).assert().success();
+
+    renga(&dir)
+        .args(["in-progress", "1", "2"])
+        .assert()
+        .success();
+
+    assert!(dir.path().join("issues/in-progress/1-task-a.md").exists());
+    assert!(dir.path().join("issues/in-progress/2-task-b.md").exists());
+}
+
+#[test]
+fn in_progress_partial_failure() {
+    let dir = setup();
+    renga(&dir).args(["create", "Exists"]).assert().success();
+
+    renga(&dir)
+        .args(["in-progress", "1", "99"])
+        .assert()
+        .failure()
+        .stdout(predicate::str::contains("1-exists.md"))
+        .stderr(predicate::str::contains("99"))
+        .stderr(predicate::str::contains("not found"));
+
+    assert!(dir.path().join("issues/in-progress/1-exists.md").exists());
 }
 
 // ── reopen ────────────────────────────────────────────────────────────────────
@@ -267,6 +356,37 @@ fn reopen_in_progress_issue() {
 
     let content = fs::read_to_string(dir.path().join("issues/open/1-active.md")).unwrap();
     assert!(content.contains("status: open"));
+}
+
+#[test]
+fn reopen_multiple_ids() {
+    let dir = setup();
+    renga(&dir).args(["create", "First"]).assert().success();
+    renga(&dir).args(["create", "Second"]).assert().success();
+    renga(&dir).args(["done", "1"]).assert().success();
+    renga(&dir).args(["done", "2"]).assert().success();
+
+    renga(&dir).args(["reopen", "1", "2"]).assert().success();
+
+    assert!(dir.path().join("issues/open/1-first.md").exists());
+    assert!(dir.path().join("issues/open/2-second.md").exists());
+}
+
+#[test]
+fn reopen_partial_failure() {
+    let dir = setup();
+    renga(&dir).args(["create", "Exists"]).assert().success();
+    renga(&dir).args(["done", "1"]).assert().success();
+
+    renga(&dir)
+        .args(["reopen", "1", "99"])
+        .assert()
+        .failure()
+        .stdout(predicate::str::contains("1-exists.md"))
+        .stderr(predicate::str::contains("99"))
+        .stderr(predicate::str::contains("not found"));
+
+    assert!(dir.path().join("issues/open/1-exists.md").exists());
 }
 
 // ── show ──────────────────────────────────────────────────────────────────────

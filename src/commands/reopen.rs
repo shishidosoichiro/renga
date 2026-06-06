@@ -1,5 +1,7 @@
 //! `renga reopen` command handler.
 
+use std::path::{Path, PathBuf};
+
 use anyhow::{Context as _, Result};
 
 use crate::{
@@ -12,11 +14,31 @@ use crate::{
 pub fn run(args: ReopenArgs, ctx: &Context) -> Result<()> {
     ctx.check_issues_dir()?;
 
-    let path = find_issue(&ctx.issues_dir, &args.id, true)?
-        .ok_or_else(|| FbimError::IssueNotFound(args.id.clone()))?;
-
     let open_dir = ctx.status_dir("open");
     std::fs::create_dir_all(&open_dir)?;
+
+    let mut had_error = false;
+    for id in &args.ids {
+        match reopen_one(id, &open_dir, ctx) {
+            Ok(dest) => println!("{}", dest.display()),
+            Err(e) => {
+                eprintln!("error: {e}");
+                had_error = true;
+            }
+        }
+    }
+
+    readme::write_readme(&ctx.issues_dir, &ctx.config)?;
+
+    if had_error {
+        std::process::exit(1);
+    }
+    Ok(())
+}
+
+fn reopen_one(id: &str, open_dir: &Path, ctx: &Context) -> Result<PathBuf> {
+    let path = find_issue(&ctx.issues_dir, id, true)?
+        .ok_or_else(|| FbimError::IssueNotFound(id.to_owned()))?;
 
     let file_name = path
         .file_name()
@@ -26,16 +48,15 @@ pub fn run(args: ReopenArgs, ctx: &Context) -> Result<()> {
     let content = std::fs::read_to_string(&path)?;
 
     if path == dest {
-        // Already in open/ — reject if already open.
         if let Ok(issue) = Issue::parse(&path, &content) {
             if issue.status == Status::Open {
-                anyhow::bail!("issue {} already exists as an open issue", args.id);
+                anyhow::bail!("issue {} already exists as an open issue", id);
             }
         }
     } else if dest.exists() {
         anyhow::bail!(
             "cannot reopen {}: {} already exists as an open issue",
-            args.id,
+            id,
             dest.display()
         );
     }
@@ -54,8 +75,5 @@ pub fn run(args: ReopenArgs, ctx: &Context) -> Result<()> {
         std::fs::write(&dest, &updated)?;
     }
 
-    readme::write_readme(&ctx.issues_dir, &ctx.config)?;
-    println!("{}", dest.display());
-
-    Ok(())
+    Ok(dest)
 }

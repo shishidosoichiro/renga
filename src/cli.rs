@@ -116,29 +116,33 @@ pub struct CreateArgs {
 /// Arguments for `renga done`.
 #[derive(Args)]
 pub struct DoneArgs {
-    /// Issue ID (e.g. `42`).
-    pub id: String,
+    /// Issue ID(s) to mark as done (e.g. `42` or `1 2 3`).
+    #[arg(required = true, num_args(1..))]
+    pub ids: Vec<String>,
 }
 
 /// Arguments for `renga pending`.
 #[derive(Args)]
 pub struct PendingArgs {
-    /// Issue ID (e.g. `42`).
-    pub id: String,
+    /// Issue ID(s) to mark as pending (e.g. `42` or `1 2 3`).
+    #[arg(required = true, num_args(1..))]
+    pub ids: Vec<String>,
 }
 
 /// Arguments for `renga in-progress`.
 #[derive(Args)]
 pub struct InProgressArgs {
-    /// Issue ID (e.g. `42`).
-    pub id: String,
+    /// Issue ID(s) to mark as in-progress (e.g. `42` or `1 2 3`).
+    #[arg(required = true, num_args(1..))]
+    pub ids: Vec<String>,
 }
 
 /// Arguments for `renga reopen`.
 #[derive(Args)]
 pub struct ReopenArgs {
-    /// Issue ID (e.g. `42`).
-    pub id: String,
+    /// Issue ID(s) to reopen (e.g. `42` or `1 2 3`).
+    #[arg(required = true, num_args(1..))]
+    pub ids: Vec<String>,
 }
 
 /// Arguments for `renga list`.

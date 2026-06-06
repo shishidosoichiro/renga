@@ -1,5 +1,7 @@
 //! `renga pending` command handler.
 
+use std::path::{Path, PathBuf};
+
 use anyhow::{Context as _, Result};
 
 use crate::{
@@ -12,11 +14,31 @@ use crate::{
 pub fn run(args: PendingArgs, ctx: &Context) -> Result<()> {
     ctx.check_issues_dir()?;
 
-    let path = find_issue(&ctx.issues_dir, &args.id, false)?
-        .ok_or_else(|| FbimError::IssueNotFound(args.id.clone()))?;
-
     let pending_dir = ctx.status_dir("pending");
     std::fs::create_dir_all(&pending_dir)?;
+
+    let mut had_error = false;
+    for id in &args.ids {
+        match move_one(id, &pending_dir, ctx) {
+            Ok(dest) => println!("{}", dest.display()),
+            Err(e) => {
+                eprintln!("error: {e}");
+                had_error = true;
+            }
+        }
+    }
+
+    readme::write_readme(&ctx.issues_dir, &ctx.config)?;
+
+    if had_error {
+        std::process::exit(1);
+    }
+    Ok(())
+}
+
+fn move_one(id: &str, pending_dir: &Path, ctx: &Context) -> Result<PathBuf> {
+    let path = find_issue(&ctx.issues_dir, id, false)?
+        .ok_or_else(|| FbimError::IssueNotFound(id.to_owned()))?;
 
     let file_name = path
         .file_name()
@@ -36,8 +58,5 @@ pub fn run(args: PendingArgs, ctx: &Context) -> Result<()> {
         std::fs::remove_file(&path)?;
     }
 
-    readme::write_readme(&ctx.issues_dir, &ctx.config)?;
-    println!("{}", dest.display());
-
-    Ok(())
+    Ok(dest)
 }

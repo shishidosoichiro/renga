@@ -71,10 +71,10 @@ curl -fsSL https://raw.githubusercontent.com/shishidosoichiro/renga/main/skills/
 | コマンド | 動作 |
 |---|---|
 | `/renga [create] <タイトル>` | issue を作成する |
-| `/renga done <ID>` | 完了にする |
-| `/renga pending <ID>` | 保留にする |
-| `/renga in-progress <ID>` | 作業中にする |
-| `/renga reopen <ID>` | 再開する |
+| `/renga done <ID>...` | 完了にする |
+| `/renga pending <ID>...` | 保留にする |
+| `/renga in-progress <ID>...` | 作業中にする |
+| `/renga reopen <ID>...` | 再開する |
 | `/renga list` | open/pending の一覧を表示する |
 | `/renga show <ID>` | 詳細を表示する |
 
@@ -117,10 +117,10 @@ cargo install renga
 |---|---|
 | `renga init` | issues ディレクトリを初期化する |
 | `renga create <タイトル> [--id <N>] [--slug <slug>] [--priority high\|medium\|low] [--area <area>] [--body <テキスト\|-\>] [--milestone <milestone>] [--label <label>]...` | issue を作成する（`--body -` で標準入力から本文を読む） |
-| `renga done <ID>` | issue を完了にする |
-| `renga pending <ID>` | issue を保留にする |
-| `renga in-progress <ID>` | issue を作業中にする |
-| `renga reopen <ID>` | issue を再開する |
+| `renga done <ID>...` | issue を完了にする |
+| `renga pending <ID>...` | issue を保留にする |
+| `renga in-progress <ID>...` | issue を作業中にする |
+| `renga reopen <ID>...` | issue を再開する |
 | `renga list [--status open\|pending\|in-progress\|done\|unknown] [--area <area>] [--label <label>] [--milestone <milestone>] [--json]` | issue 一覧を表示する |
 | `renga show <ID> [--json]` | issue の詳細を表示する |
 | `renga edit <ID>` | `$EDITOR` で issue を開く（人間向け） |

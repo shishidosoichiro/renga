@@ -71,10 +71,10 @@ Then use it directly in any Claude Code session:
 | Command | Description |
 |---|---|
 | `/renga [create] <title>` | Create an issue |
-| `/renga done <ID>` | Mark as done |
-| `/renga pending <ID>` | Put on hold |
-| `/renga in-progress <ID>` | Mark as in-progress |
-| `/renga reopen <ID>` | Reopen |
+| `/renga done <ID>...` | Mark as done |
+| `/renga pending <ID>...` | Put on hold |
+| `/renga in-progress <ID>...` | Mark as in-progress |
+| `/renga reopen <ID>...` | Reopen |
 | `/renga list` | List open and pending issues |
 | `/renga show <ID>` | Show details |
 
@@ -117,10 +117,10 @@ cargo install renga
 |---|---|
 | `renga init` | Initialize the issues directory |
 | `renga create <title> [--id <N>] [--slug <slug>] [--priority high\|medium\|low] [--area <area>] [--body <text\|-\>] [--milestone <milestone>] [--label <label>]...` | Create an issue (`--body -` reads from stdin) |
-| `renga done <ID>` | Mark an issue as done |
-| `renga pending <ID>` | Put an issue on hold |
-| `renga in-progress <ID>` | Mark an issue as in-progress |
-| `renga reopen <ID>` | Reopen a closed issue |
+| `renga done <ID>...` | Mark an issue as done |
+| `renga pending <ID>...` | Put an issue on hold |
+| `renga in-progress <ID>...` | Mark an issue as in-progress |
+| `renga reopen <ID>...` | Reopen a closed issue |
 | `renga list [--status open\|pending\|in-progress\|done\|unknown] [--area <area>] [--label <label>] [--milestone <milestone>] [--json]` | List issues |
 | `renga show <ID> [--json]` | Show issue details |
 | `renga edit <ID>` | Open issue in `$EDITOR` (human) |
