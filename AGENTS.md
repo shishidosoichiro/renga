@@ -9,6 +9,16 @@
 - **根本原因を特定する**: エラーや問題を回避するのではなく、根本原因を特定して解決する。`--no-verify`・`#[allow(...)]`・コンパイルエラーを黙らせる回避策は使わない。
 - **ミスや改善を指摘されたら即座に self-improve を起動する**: 宍戸さんにミスや改善を指摘されたとき、または同じ種類のミスがセッション内で 2 回以上起きたとき → その場で retro issue を起票してから、利用可能な self-improve / worker サブエージェントに改善案のレビューを依頼する。利用できる同等のサブエージェントがない場合は、retro issue に理由とセルフ改善案を残す。
 
+## Ambiguity and constraints
+
+Do not silently reinterpret the user's explicit request into a
+nearest-match implementation. If the request is impossible,
+contradictory, constrained, or ambiguous enough to change the
+result, stop before acting, explain the issue, and ask one
+clarifying question or list alternatives. Do not implement an
+alternative or retry with a different interpretation without
+confirmation.
+
 ## エージェント活用方針
 
 Codex でサブエージェントまたは custom agent が利用可能な場合は、以下の用途で活用する。Claude Code 固有の `Agent(subagent_type=...)` 構文は使わず、その環境で利用できる同等の subagent / custom agent / tool を使う。
