@@ -469,6 +469,18 @@ fn completions_zsh() {
         .stdout(predicate::str::contains("renga"));
 }
 
+#[test]
+fn completions_fish() {
+    let dir = setup();
+    renga(&dir)
+        .args(["completions", "fish"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("# fish completion for renga"))
+        .stdout(predicate::str::contains("complete -c renga -f"))
+        .stdout(predicate::str::contains("renga __complete $tokens"));
+}
+
 // ── __complete ────────────────────────────────────────────────────────────────
 
 #[test]
