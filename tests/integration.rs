@@ -496,6 +496,17 @@ fn complete_lists_subcommands() {
 }
 
 #[test]
+fn complete_lists_global_flags() {
+    let dir = setup();
+    renga(&dir)
+        .args(["__complete", "renga", "-"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("--version\tPrint version"))
+        .stdout(predicate::str::contains("--help\tPrint help"));
+}
+
+#[test]
 fn complete_done_shows_open_issues() {
     let dir = setup();
     renga(&dir).args(["create", "My Task"]).assert().success();
@@ -535,6 +546,20 @@ fn complete_list_status_values() {
 }
 
 #[test]
+fn complete_list_flags() {
+    let dir = setup();
+    renga(&dir)
+        .args(["__complete", "renga", "list", ""])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(
+            "--status\tFilter by status. Comma-separated:",
+        ))
+        .stdout(predicate::str::contains("--area\tFilter by area"))
+        .stdout(predicate::str::contains("--json\tOutput as JSON"));
+}
+
+#[test]
 fn complete_completions_shell_names_with_descriptions() {
     let dir = setup();
     renga(&dir)
@@ -547,6 +572,20 @@ fn complete_completions_shell_names_with_descriptions() {
 }
 
 #[test]
+fn complete_create_flags() {
+    let dir = setup();
+    renga(&dir)
+        .args(["__complete", "renga", "create", ""])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(
+            "--id\tIssue ID to use instead of auto-incrementing",
+        ))
+        .stdout(predicate::str::contains("--priority\tPriority level"))
+        .stdout(predicate::str::contains("--label\tLabels to attach"));
+}
+
+#[test]
 fn complete_create_priority_values_with_descriptions() {
     let dir = setup();
     renga(&dir)
@@ -556,6 +595,21 @@ fn complete_create_priority_values_with_descriptions() {
         .stdout(predicate::str::contains("high\tHigh priority"))
         .stdout(predicate::str::contains("medium\tMedium priority"))
         .stdout(predicate::str::contains("low\tLow priority"));
+}
+
+#[test]
+fn complete_update_shows_open_issues_and_flags() {
+    let dir = setup();
+    renga(&dir).args(["create", "My Task"]).assert().success();
+
+    renga(&dir)
+        .args(["__complete", "renga", "update", ""])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("1\t"))
+        .stdout(predicate::str::contains("My Task"))
+        .stdout(predicate::str::contains("--priority\tNew priority level"))
+        .stdout(predicate::str::contains("--status\tNew status"));
 }
 
 #[test]
