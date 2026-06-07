@@ -1,0 +1,108 @@
+# 調査系
+prefix_rule(
+    pattern = ["git", "status"],
+    decision = "allow",
+    justification = "Read-only git status is safe in this project",
+)
+
+prefix_rule(
+    pattern = ["git", "diff"],
+    decision = "allow",
+    justification = "Read-only git diff is safe in this project",
+)
+
+prefix_rule(
+    pattern = ["git", "log"],
+    decision = "allow",
+    justification = "Read-only git log is safe in this project",
+)
+
+prefix_rule(
+    pattern = ["rg"],
+    decision = "allow",
+    justification = "Repository search is safe",
+)
+
+prefix_rule(
+    pattern = ["fd"],
+    decision = "allow",
+    justification = "Repository file search is safe",
+)
+
+# Rust
+prefix_rule(
+    pattern = ["cargo", "check"],
+    decision = "allow",
+    justification = "Routine Rust compile check",
+)
+
+prefix_rule(
+    pattern = ["cargo", "test"],
+    decision = "allow",
+    justification = "Routine Rust test execution",
+)
+
+prefix_rule(
+    pattern = ["cargo", "fmt"],
+    decision = "allow",
+    justification = "Routine Rust formatting",
+)
+
+prefix_rule(
+    pattern = ["cargo", "clippy"],
+    decision = "allow",
+    justification = "Routine Rust linting",
+)
+
+# Node がある場合
+prefix_rule(
+    pattern = ["npm", "test"],
+    decision = "allow",
+    justification = "Routine frontend test execution",
+)
+
+prefix_rule(
+    pattern = ["npm", "run", "build"],
+    decision = "allow",
+    justification = "Routine frontend build",
+)
+
+# DB migration はプロジェクトによって危険度が違うので確認
+prefix_rule(
+    pattern = ["sqlx", "migrate", "run"],
+    decision = "prompt",
+    justification = "Database migrations can affect persistent state",
+)
+
+# Git の外部影響
+prefix_rule(
+    pattern = ["git", "commit"],
+    decision = "prompt",
+    justification = "Commits should be reviewed by the user",
+)
+
+prefix_rule(
+    pattern = ["git", "push"],
+    decision = "prompt",
+    justification = "Pushing affects remote repositories",
+)
+
+# Kubernetes / Helm は必ず確認
+prefix_rule(
+    pattern = ["kubectl"],
+    decision = "prompt",
+    justification = "kubectl can affect Kubernetes clusters",
+)
+
+prefix_rule(
+    pattern = ["helm"],
+    decision = "prompt",
+    justification = "helm can affect Kubernetes clusters",
+)
+
+# 危険コマンド
+prefix_rule(
+    pattern = ["rm", "-rf"],
+    decision = "forbidden",
+    justification = "Broad recursive deletion must not be auto-approved",
+)

@@ -1,0 +1,82 @@
+approval_policy = "on-request"
+default_permissions = "default"
+web_search = "live"
+
+[permissions.default]
+description = "project development permissions"
+extends = ":workspace"
+
+[permissions.default.filesystem.":workspace_roots"]
+"." = "write"
+".git" = "write"
+".git/**" = "write"
+
+# Codex / Claude の設定は参照だけ許可
+".codex" = "read"
+".claude" = "read"
+
+# 秘密っぽいものはプロジェクト内でも読ませない
+"**/*.env" = "deny"
+"**/.env.*" = "deny"
+"**/*secret*" = "deny"
+"**/*credential*" = "deny"
+"**/*token*" = "deny"
+"**/*key*" = "deny"
+
+# 生成物・キャッシュは書き込み可
+"target" = "write"
+"node_modules" = "write"
+"dist" = "write"
+"build" = "write"
+
+[permissions.default.filesystem]
+"~/.ssh" = "deny"
+"~/.kube" = "deny"
+"~/.aws" = "deny"
+"~/.config/gcloud" = "deny"
+
+[permissions.default.network]
+enabled = true
+mode = "limited"
+
+[permissions.default.network.domains]
+# OpenAI / Codex
+"developers.openai.com" = "allow"
+"api.openai.com" = "allow"
+
+# GitHub / GitLab
+"github.com" = "allow"
+"*.github.com" = "allow"
+"objects.githubusercontent.com" = "allow"
+"raw.githubusercontent.com" = "allow"
+"gitlab.com" = "allow"
+"docs.gitlab.com" = "allow"
+
+# Rust
+"crates.io" = "allow"
+"static.crates.io" = "allow"
+"index.crates.io" = "allow"
+"docs.rs" = "allow"
+"doc.rust-lang.org" = "allow"
+"rust-lang.org" = "allow"
+"*.rust-lang.org" = "allow"
+
+# Kubernetes / Cloud native
+"kubernetes.io" = "allow"
+"*.kubernetes.io" = "allow"
+"helm.sh" = "allow"
+"*.helm.sh" = "allow"
+"cncf.io" = "allow"
+"*.cncf.io" = "allow"
+
+# PostgreSQL
+"postgresql.org" = "allow"
+"*.postgresql.org" = "allow"
+
+# kiwi 仮ドメイン
+"kiwi.io" = "allow"
+"*.kiwi.io" = "allow"
+
+# 自宅開発環境
+"gitlab.home" = "allow"
+"harbor.home" = "allow"
