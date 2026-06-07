@@ -46,3 +46,4 @@ Closed issues are moved to `done/`.
 | [84](84-mcp-renga-mcp-server.md) | open | low | MCP サーバーモード（renga mcp-server）の追加を検討する |
 
 ---
+

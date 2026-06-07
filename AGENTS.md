@@ -19,6 +19,15 @@ clarifying question or list alternatives. Do not implement an
 alternative or retry with a different interpretation without
 confirmation.
 
+When the user asks a consultation-style question such as "what should
+we do first?", "how should we proceed?", or "what do you recommend?",
+treat it as decision support, not implementation permission. Present
+the options, tradeoffs, and one recommendation, then stop and ask for
+confirmation before editing files, running long verification, committing,
+or closing issues. Do not start implementation until the target issue or
+change scope, the intended action, and explicit permission to proceed are
+all clear.
+
 ## エージェント活用方針
 
 Codex でサブエージェントまたは custom agent が利用可能な場合は、以下の用途で活用する。Claude Code 固有の `Agent(subagent_type=...)` 構文は使わず、その環境で利用できる同等の subagent / custom agent / tool を使う。
