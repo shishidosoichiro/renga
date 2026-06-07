@@ -108,6 +108,8 @@ File-Based Issue Management。詳細仕様は `spec.ja.md` を参照。
 
 **コミットメッセージの言語**: `type`・`scope`・`description` はすべて英語で書く（`Use English for the description` — CONTRIBUTING.md 参照）。issue ファイルのタイトル・本文、`AGENTS.md`、`CLAUDE.md`、`.claude/agents/`、`.codex/agents/`、`.agents/` は日本語でよい。
 
+**コミット type の選択**: `type` は issue の `label` や `area` ではなく、実際の diff の種類で決める。production code の挙動を変えずテストだけを追加・修正する場合は、issue が `found_at:*` 付きでも `test:` を使う。`fix:` は production code のバグ修正を含む変更に使う。
+
 **コミット粒度の規律**:
 
 - `feat:` と `fix:` を同一コミットに混ぜない（ただし「今回の実装で入ったバグ」は feature コミットに含めてよい）
