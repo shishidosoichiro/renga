@@ -1,6 +1,6 @@
 ---
 schema_version: 1
-status: open
+status: done
 priority: medium
 area: cli
 labels: [found_at:0.11.0, fixed_at:0.11.0]
