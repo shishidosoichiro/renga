@@ -1,0 +1,3 @@
+interface:
+  display_name: "Install"
+  short_description: "Install the renga binary"
