@@ -54,6 +54,7 @@ pub fn run(args: UpdateArgs, ctx: &Context) -> Result<()> {
         .ok_or_else(|| FbimError::IssueNotFound(input.id.clone()))?;
 
     let mut content = std::fs::read_to_string(&path)?;
+    Issue::parse(&path, &content)?;
 
     if let Some(priority) = &input.priority {
         content = set_frontmatter_field(&content, "priority", priority);

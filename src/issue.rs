@@ -457,8 +457,8 @@ pub fn replace_or_prepend_heading(body: &str, title: &str) -> String {
 
 /// Update a single frontmatter field in raw file content without re-serialising.
 ///
-/// Leaves all other lines unchanged. If the field is not found, returns the
-/// content unmodified.
+/// Leaves all other lines unchanged. If the field is not found in frontmatter,
+/// inserts it before the closing frontmatter fence.
 ///
 /// # Examples
 ///
@@ -479,6 +479,10 @@ pub fn set_frontmatter_field(content: &str, field: &str, value: &str) -> String 
     for line in content.lines() {
         if !fm_closed && line.trim() == "---" {
             if in_fm {
+                if !found {
+                    out.push(format!("{field}: {value}"));
+                    found = true;
+                }
                 in_fm = false;
                 fm_closed = true;
             } else if out.is_empty() {
@@ -614,6 +618,16 @@ mod tests {
         assert!(updated.contains("status: done"));
         assert!(updated.contains("priority: high"));
         assert!(updated.contains("area: core"));
+        assert!(updated.ends_with('\n'));
+    }
+
+    #[test]
+    fn set_frontmatter_field_adds_missing_field() {
+        let content = "---\nstatus: open\npriority: high\n---\n\n# Title\n";
+        let updated = set_frontmatter_field(content, "milestone", "v1");
+        assert!(updated.contains("status: open"));
+        assert!(updated.contains("priority: high"));
+        assert!(updated.contains("milestone: v1\n---"));
         assert!(updated.ends_with('\n'));
     }
 

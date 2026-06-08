@@ -16,6 +16,7 @@ Closed issues are moved to `done/`.
 | [92](92-renga-create-update-json-json.md) | open | medium | renga create・update で JSON 標準入力を受け付ける（--json フラグ） |
 | [153](153-clap-complete-unstable-dynamic.md) | open | low | clap_complete unstable-dynamic が stable になったら __complete と手書きシェルスクリプトを置き換えを検討する |
 | [167](167-split-complete-update-test.md) | open | low | complete_update_shows_open_issues_and_flags を2つのテストに分割する |
+| [168](168-update-milestone-does-not-add.md) | open | medium | update --milestone does not add missing frontmatter field |
 
 ---
 

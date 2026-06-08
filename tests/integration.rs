@@ -1082,6 +1082,32 @@ fn update_area() {
 }
 
 #[test]
+fn update_milestone_adds_missing_field() {
+    let dir = setup();
+    renga(&dir).args(["create", "Task"]).assert().success();
+    renga(&dir)
+        .args(["update", "1", "--milestone", "v1"])
+        .assert()
+        .success();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-task.md")).unwrap();
+    assert!(content.contains("milestone: v1"));
+}
+
+#[test]
+fn update_rejects_unparseable_frontmatter() {
+    let dir = setup();
+    let path = dir.path().join("issues/open/1-bad.md");
+    fs::write(&path, "---\nnot: valid: yaml: [\n---\n\n# Bad\n").unwrap();
+    renga(&dir)
+        .args(["update", "1", "--milestone", "v1"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("invalid frontmatter"));
+    let content = fs::read_to_string(path).unwrap();
+    assert!(!content.contains("milestone: v1"));
+}
+
+#[test]
 fn update_labels() {
     let dir = setup();
     renga(&dir).args(["create", "Task"]).assert().success();
