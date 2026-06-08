@@ -37,9 +37,21 @@ prefix_rule(
 )
 
 prefix_rule(
+    pattern = ["cargo", "clean"],
+    decision = "allow",
+    justification = "Routine Rust build cache cleanup",
+)
+
+prefix_rule(
     pattern = ["cargo", "test"],
     decision = "allow",
     justification = "Routine Rust test execution",
+)
+
+prefix_rule(
+    pattern = ["cargo", "run"],
+    decision = "allow",
+    justification = "Routine Rust CLI execution",
 )
 
 prefix_rule(

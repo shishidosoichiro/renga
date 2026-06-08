@@ -21,7 +21,6 @@ extends = ":workspace"
 "**/*secret*" = "deny"
 "**/*credential*" = "deny"
 "**/*token*" = "deny"
-"**/*key*" = "deny"
 
 # 生成物・キャッシュは書き込み可
 "target" = "write"

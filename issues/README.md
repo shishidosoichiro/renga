@@ -15,6 +15,7 @@ Closed issues are moved to `done/`.
 | [172](open/172-codex-agents.md) | open | medium | Codex/.agents 向けの公開ドキュメントと開発規約を整合させる |
 | [173](open/173-retro-unwrap.md) | open | medium | retro: 全体レビューで unwrap 観点の確認結果を報告し漏らした |
 | [175](open/175-retro-validate-frontmatter.md) | open | medium | retro: validate の frontmatter なし判定を実装バグとして誤分類した |
+| [177](open/177-retro-codex.md) | open | medium | retro: .codex 設定変更のコミット前確認 |
 
 ---
 
