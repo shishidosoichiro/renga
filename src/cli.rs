@@ -84,8 +84,11 @@ pub enum Command {
 #[derive(Args)]
 pub struct CreateArgs {
     /// Issue title (multiple words, no quotes required).
-    #[arg(required = true)]
+    #[arg(required_unless_present = "json")]
     pub title: Vec<String>,
+    /// Read issue fields as JSON from stdin.
+    #[arg(long)]
+    pub json: bool,
     /// Issue ID to use instead of auto-incrementing (e.g. `42`).
     #[arg(long)]
     pub id: Option<String>,
@@ -93,12 +96,12 @@ pub struct CreateArgs {
     #[arg(long)]
     pub slug: Option<String>,
     /// Priority level.
-    #[arg(long, default_value = "medium", value_parser = [
+    #[arg(long, value_parser = [
         PossibleValue::new("high").help("High priority"),
         PossibleValue::new("medium").help("Medium priority"),
         PossibleValue::new("low").help("Low priority"),
     ])]
-    pub priority: String,
+    pub priority: Option<String>,
     /// Area for categorization (e.g. `core`, `cli`, `docs`).
     #[arg(long, default_value = "")]
     pub area: String,
@@ -190,6 +193,9 @@ pub struct UpdateArgs {
     /// New title (positional, multi-word). Updates the `# Heading` line in the body.
     #[arg(num_args(0..))]
     pub title: Vec<String>,
+    /// Read fields to update as JSON from stdin.
+    #[arg(long)]
+    pub json: bool,
     /// New priority level.
     #[arg(long, value_parser = [
         PossibleValue::new("high").help("High priority"),

@@ -63,6 +63,7 @@ If `$ARGUMENTS` starts with `create`, strip it and use the rest as the title. Ot
 
 ```
 renga create "<title>" [--id <id>] [--slug <slug>] [--priority high|medium|low] [--area <area>] [--milestone <milestone>] [--label <label>]... [--body <text|->]
+renga create --json
 ```
 
 - `--slug`: Kebab-case English slug derived from the title (max 30 chars). Auto-generated from title if omitted.
@@ -70,6 +71,7 @@ renga create "<title>" [--id <id>] [--slug <slug>] [--priority high|medium|low] 
 - `--priority`: Default is `medium`. Use `high` for correctness issues, `low` for suggestions.
 - `--label`: Labels to attach (repeatable: `--label bug --label urgent`).
 - `--body`: **Always include.** Write a brief description of what needs to be done and why. The title alone is not sufficient.
+- `--json`: Read one JSON object from stdin. Supported fields are `title`, `id`, `slug`, `priority`, `area`, `body`, `milestone`, and `labels`. Do not combine with field arguments.
 - Report the created file path to the user.
 
 ---
@@ -161,6 +163,7 @@ Opens the issue file in `$EDITOR`. For human use only — AI agents cannot inter
 
 ```
 renga update <ID> [<title>] [--priority high|medium|low] [--area <area>] [--status open|pending|in-progress] [--milestone <milestone>] [--label <label>]... [--add-label <label>]... [--remove-label <label>]... [--body <text|->]
+renga update <ID> --json
 ```
 
 Updates issue fields without opening an editor. Designed for AI agents and scripts.
@@ -171,6 +174,7 @@ Updates issue fields without opening an editor. Designed for AI agents and scrip
 - `--label` is repeatable and **replaces** all existing labels
 - `--add-label` adds a label without removing others (repeatable, deduplicates automatically)
 - `--remove-label` removes a specific label (repeatable)
+- `--json` reads one JSON object from stdin. Supported fields are `title`, `priority`, `area`, `status`, `milestone`, `labels`, `add_labels`, `remove_labels`, and `body`. Do not combine with field arguments.
 - Multiple flags can be combined in one call
 
 ---

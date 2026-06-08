@@ -3,6 +3,7 @@
 use std::io::Read;
 
 use anyhow::{Context as _, Result};
+use serde::Deserialize;
 
 use crate::{
     cli::UpdateArgs,
@@ -13,56 +14,63 @@ use crate::{
     readme, Context, FbimError,
 };
 
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct UpdateJsonInput {
+    title: Option<String>,
+    priority: Option<String>,
+    area: Option<String>,
+    status: Option<String>,
+    milestone: Option<String>,
+    labels: Option<Vec<String>>,
+    #[serde(default)]
+    add_labels: Vec<String>,
+    #[serde(default)]
+    remove_labels: Vec<String>,
+    body: Option<String>,
+}
+
+struct UpdateInput {
+    id: String,
+    title: Option<String>,
+    priority: Option<String>,
+    area: Option<String>,
+    status: Option<String>,
+    milestone: Option<String>,
+    labels: Option<Vec<String>>,
+    add_labels: Vec<String>,
+    remove_labels: Vec<String>,
+    body: Option<String>,
+}
+
 /// Run the update command.
 pub fn run(args: UpdateArgs, ctx: &Context) -> Result<()> {
     ctx.check_issues_dir()?;
 
-    let path = find_issue(&ctx.issues_dir, &args.id, false)?
-        .ok_or_else(|| FbimError::IssueNotFound(args.id.clone()))?;
+    let input = read_input(args)?;
+    validate_input(&input)?;
+
+    let path = find_issue(&ctx.issues_dir, &input.id, false)?
+        .ok_or_else(|| FbimError::IssueNotFound(input.id.clone()))?;
 
     let mut content = std::fs::read_to_string(&path)?;
 
-    if let Some(priority) = &args.priority {
+    if let Some(priority) = &input.priority {
         content = set_frontmatter_field(&content, "priority", priority);
     }
-    if let Some(area) = &args.area {
+    if let Some(area) = &input.area {
         content = set_frontmatter_field(&content, "area", area);
     }
-    if let Some(status) = &args.status {
+    if let Some(status) = &input.status {
         content = set_frontmatter_field(&content, "status", status);
     }
-    if let Some(milestone) = &args.milestone {
+    if let Some(milestone) = &input.milestone {
         content = set_frontmatter_field(&content, "milestone", milestone);
     }
-    if !args.label.is_empty() {
-        for l in &args.label {
+    if let Some(labels) = &input.labels {
+        for l in labels {
             validate_label(l)?;
         }
-        let labels_yaml = format!(
-            "[{}]",
-            args.label
-                .iter()
-                .map(|l| l.as_str())
-                .collect::<Vec<_>>()
-                .join(", ")
-        );
-        content = set_frontmatter_field(&content, "labels", &labels_yaml);
-    }
-    if !args.add_label.is_empty() || !args.remove_label.is_empty() {
-        for l in &args.add_label {
-            validate_label(l)?;
-        }
-        for l in &args.remove_label {
-            validate_label(l)?;
-        }
-        let issue = Issue::parse(&path, &content)?;
-        let mut labels = issue.labels.clone();
-        for l in &args.add_label {
-            if !labels.contains(l) {
-                labels.push(l.clone());
-            }
-        }
-        labels.retain(|l| !args.remove_label.contains(l));
         let labels_yaml = format!(
             "[{}]",
             labels
@@ -73,27 +81,42 @@ pub fn run(args: UpdateArgs, ctx: &Context) -> Result<()> {
         );
         content = set_frontmatter_field(&content, "labels", &labels_yaml);
     }
-    if !args.title.is_empty() {
-        let new_title = args.title.join(" ");
+    if !input.add_labels.is_empty() || !input.remove_labels.is_empty() {
+        for l in &input.add_labels {
+            validate_label(l)?;
+        }
+        for l in &input.remove_labels {
+            validate_label(l)?;
+        }
+        let issue = Issue::parse(&path, &content)?;
+        let mut labels = issue.labels.clone();
+        for l in &input.add_labels {
+            if !labels.contains(l) {
+                labels.push(l.clone());
+            }
+        }
+        labels.retain(|l| !input.remove_labels.contains(l));
+        let labels_yaml = format!(
+            "[{}]",
+            labels
+                .iter()
+                .map(|l| l.as_str())
+                .collect::<Vec<_>>()
+                .join(", ")
+        );
+        content = set_frontmatter_field(&content, "labels", &labels_yaml);
+    }
+    if let Some(new_title) = &input.title {
         let (fm_str, body) = split_frontmatter(&content)
             .with_context(|| format!("no frontmatter in {}", path.display()))?;
-        let new_body = replace_or_prepend_heading(body, &new_title);
+        let new_body = replace_or_prepend_heading(body, new_title);
         content = format!("---\n{fm_str}\n---\n\n{new_body}");
     }
-    if let Some(body_arg) = &args.body {
-        let body_text = if body_arg == "-" {
-            let mut buf = String::new();
-            std::io::stdin()
-                .read_to_string(&mut buf)
-                .context("failed to read body from stdin")?;
-            buf
-        } else {
-            body_arg.clone()
-        };
+    if let Some(body_text) = &input.body {
         let (fm_str, existing_body) = split_frontmatter(&content)
             .with_context(|| format!("no frontmatter in {}", path.display()))?;
         let body_with_title = if body_text.lines().any(|l| l.starts_with("# ")) {
-            body_text
+            body_text.clone()
         } else {
             let existing_heading = existing_body
                 .lines()
@@ -109,7 +132,7 @@ pub fn run(args: UpdateArgs, ctx: &Context) -> Result<()> {
     }
 
     // If --status was given, move the file to the matching status directory.
-    let dest = if let Some(new_status) = &args.status {
+    let dest = if let Some(new_status) = &input.status {
         let dest_dir = ctx.status_dir(new_status);
         std::fs::create_dir_all(&dest_dir)?;
         let file_name = path
@@ -135,5 +158,99 @@ pub fn run(args: UpdateArgs, ctx: &Context) -> Result<()> {
     readme::write_readme(&ctx.issues_dir, &ctx.config)?;
     println!("{}", dest.display());
 
+    Ok(())
+}
+
+fn read_input(args: UpdateArgs) -> Result<UpdateInput> {
+    if args.json {
+        ensure_no_cli_fields_with_json(&args)?;
+        let mut buf = String::new();
+        std::io::stdin()
+            .read_to_string(&mut buf)
+            .context("failed to read JSON from stdin")?;
+        let json: UpdateJsonInput =
+            serde_json::from_str(&buf).context("failed to parse JSON input")?;
+        return Ok(UpdateInput {
+            id: args.id,
+            title: json.title,
+            priority: json.priority,
+            area: json.area,
+            status: json.status,
+            milestone: json.milestone,
+            labels: json.labels,
+            add_labels: json.add_labels,
+            remove_labels: json.remove_labels,
+            body: json.body,
+        });
+    }
+
+    let body = match args.body.as_deref() {
+        Some("-") => {
+            let mut buf = String::new();
+            std::io::stdin()
+                .read_to_string(&mut buf)
+                .context("failed to read body from stdin")?;
+            Some(buf)
+        }
+        other => other.map(|s| s.to_string()),
+    };
+
+    Ok(UpdateInput {
+        id: args.id,
+        title: if args.title.is_empty() {
+            None
+        } else {
+            Some(args.title.join(" "))
+        },
+        priority: args.priority,
+        area: args.area,
+        status: args.status,
+        milestone: args.milestone,
+        labels: if args.label.is_empty() {
+            None
+        } else {
+            Some(args.label)
+        },
+        add_labels: args.add_label,
+        remove_labels: args.remove_label,
+        body,
+    })
+}
+
+fn ensure_no_cli_fields_with_json(args: &UpdateArgs) -> Result<()> {
+    if !args.title.is_empty()
+        || args.priority.is_some()
+        || args.area.is_some()
+        || args.status.is_some()
+        || args.milestone.is_some()
+        || !args.label.is_empty()
+        || !args.add_label.is_empty()
+        || !args.remove_label.is_empty()
+        || args.body.is_some()
+    {
+        anyhow::bail!("--json cannot be combined with update field arguments");
+    }
+    Ok(())
+}
+
+fn validate_input(input: &UpdateInput) -> Result<()> {
+    if let Some(priority) = &input.priority {
+        match priority.as_str() {
+            "high" | "medium" | "low" => {}
+            _ => anyhow::bail!(
+                "invalid priority '{}': must be high, medium, or low",
+                priority
+            ),
+        }
+    }
+    if let Some(status) = &input.status {
+        match status.as_str() {
+            "open" | "pending" | "in-progress" => {}
+            _ => anyhow::bail!(
+                "invalid status '{}': must be open, pending, or in-progress",
+                status
+            ),
+        }
+    }
     Ok(())
 }

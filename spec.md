@@ -99,6 +99,7 @@ Brief description of what needs to be done.
 ```
 renga init
 renga create <title> [--id <N>] [--slug <slug>] [--priority high|medium|low] [--area <area>] [--body <text|-\>] [--milestone <milestone>] [--label <label>]...
+renga create --json
 renga done <ID>...
 renga pending <ID>...
 renga in-progress <ID>...
@@ -107,6 +108,7 @@ renga list [--status open|pending|in-progress|done|unknown] [--area <area>] [--l
 renga show <ID> [--json]
 renga edit <ID>
 renga update <ID> [<title>] [--priority high|medium|low] [--area <area>] [--status open|pending|in-progress] [--milestone <milestone>] [--label <label>]... [--add-label <label>]... [--remove-label <label>]... [--body <text|->]
+renga update <ID> --json
 renga info
 renga migrate
 renga validate
@@ -115,6 +117,15 @@ renga help [command]
 ```
 
 `N` is the plain integer issue ID (e.g. `42`). Legacy zero-padded IDs (e.g. `00042`) are also accepted.
+
+`renga create --json` reads one JSON object from stdin. Supported fields are
+`title` (required), `id`, `slug`, `priority`, `area`, `body`, `milestone`, and
+`labels`. It cannot be combined with positional or field flags.
+
+`renga update <ID> --json` reads one JSON object from stdin. Supported fields
+are `title`, `priority`, `area`, `status`, `milestone`, `labels`, `add_labels`,
+`remove_labels`, and `body`. It cannot be combined with positional or field
+flags; `<ID>` remains the issue selector.
 
 ## `.renga.yml`
 

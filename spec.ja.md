@@ -99,6 +99,7 @@ labels: []
 ```
 renga init
 renga create <title> [--id <N>] [--slug <slug>] [--priority high|medium|low] [--area <area>] [--body <text|-\>] [--milestone <milestone>] [--label <label>]...
+renga create --json
 renga done <ID>...
 renga pending <ID>...
 renga in-progress <ID>...
@@ -107,6 +108,7 @@ renga list [--status open|pending|in-progress|done|unknown] [--area <area>] [--l
 renga show <ID> [--json]
 renga edit <ID>
 renga update <ID> [<title>] [--priority high|medium|low] [--area <area>] [--status open|pending|in-progress] [--milestone <milestone>] [--label <label>]... [--add-label <label>]... [--remove-label <label>]... [--body <text|->]
+renga update <ID> --json
 renga info
 renga migrate
 renga validate
@@ -115,6 +117,15 @@ renga help [command]
 ```
 
 `N` はゼロ埋めなしの整数 ID（例: `42`）。レガシーのゼロ埋め ID（例: `00042`）も受け付ける。
+
+`renga create --json` は標準入力から 1 つの JSON object を読む。対応フィールドは
+`title`（必須）、`id`、`slug`、`priority`、`area`、`body`、`milestone`、`labels`。
+positional 引数やフィールド指定フラグとは併用できない。
+
+`renga update <ID> --json` は標準入力から 1 つの JSON object を読む。対応フィールドは
+`title`、`priority`、`area`、`status`、`milestone`、`labels`、`add_labels`、
+`remove_labels`、`body`。positional 引数やフィールド指定フラグとは併用できず、
+`<ID>` は更新対象の指定として残る。
 
 ## `.renga.yml` の仕様
 

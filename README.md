@@ -117,6 +117,7 @@ cargo install renga
 |---|---|
 | `renga init` | Initialize the issues directory |
 | `renga create <title> [--id <N>] [--slug <slug>] [--priority high\|medium\|low] [--area <area>] [--body <text\|-\>] [--milestone <milestone>] [--label <label>]...` | Create an issue (`--body -` reads from stdin) |
+| `renga create --json` | Create an issue from a JSON object on stdin |
 | `renga done <ID>...` | Mark an issue as done |
 | `renga pending <ID>...` | Put an issue on hold |
 | `renga in-progress <ID>...` | Mark an issue as in-progress |
@@ -125,6 +126,7 @@ cargo install renga
 | `renga show <ID> [--json]` | Show issue details |
 | `renga edit <ID>` | Open issue in `$EDITOR` (human) |
 | `renga update <ID> [<title>] [--priority ...] [--area ...] [--status ...] [--milestone ...] [--label ...]... [--add-label ...]... [--remove-label ...]... [--body <text\|->]` | Update issue fields (AI/scripts) |
+| `renga update <ID> --json` | Update issue fields from a JSON object on stdin |
 | `renga info` | Show project root, issues directory, config location, and current settings |
 | `renga migrate` | Move issues from flat layout to per-status directories |
 | `renga validate` | Check all issues for schema errors and duplicate IDs |
@@ -134,6 +136,10 @@ cargo install renga
 ```sh
 # JSON output can be piped to jq
 renga list --json | jq '.[] | select(.area == "auth")'
+
+# JSON input is useful for scripts and AI agents
+printf '%s\n' '{"title":"Bug","area":"cli","labels":["bug"],"body":"details"}' | renga create --json
+printf '%s\n' '{"priority":"high","add_labels":["urgent"]}' | renga update 1 --json
 ```
 
 ## How renga finds your issues

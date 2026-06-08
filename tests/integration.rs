@@ -582,7 +582,10 @@ fn complete_create_flags() {
             "--id\tIssue ID to use instead of auto-incrementing",
         ))
         .stdout(predicate::str::contains("--priority\tPriority level"))
-        .stdout(predicate::str::contains("--label\tLabels to attach"));
+        .stdout(predicate::str::contains("--label\tLabels to attach"))
+        .stdout(predicate::str::contains(
+            "--json\tRead issue fields as JSON from stdin",
+        ));
 }
 
 #[test]
@@ -609,7 +612,10 @@ fn complete_update_shows_open_issues_and_flags() {
         .stdout(predicate::str::contains("1\t"))
         .stdout(predicate::str::contains("My Task"))
         .stdout(predicate::str::contains("--priority\tNew priority level"))
-        .stdout(predicate::str::contains("--status\tNew status"));
+        .stdout(predicate::str::contains("--status\tNew status"))
+        .stdout(predicate::str::contains(
+            "--json\tRead fields to update as JSON from stdin",
+        ));
 }
 
 #[test]
@@ -764,6 +770,67 @@ fn create_body_from_stdin() {
 
     let content = fs::read_to_string(dir.path().join("issues/open/1-my-issue.md")).unwrap();
     assert!(content.contains("body from stdin"));
+}
+
+#[test]
+fn create_from_json_stdin() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "--json"])
+        .write_stdin(
+            r#"{"title":"JSON Issue","slug":"json-issue","priority":"high","area":"cli","body":"body from json","milestone":"v1","labels":["bug","urgent"]}"#,
+        )
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("1-json-issue.md"));
+
+    let content = fs::read_to_string(dir.path().join("issues/open/1-json-issue.md")).unwrap();
+    assert!(content.contains("priority: high"));
+    assert!(content.contains("area: cli"));
+    assert!(content.contains("milestone: v1"));
+    assert!(content.contains("labels: [bug, urgent]"));
+    assert!(content.contains("# JSON Issue"));
+    assert!(content.contains("body from json"));
+}
+
+#[test]
+fn create_from_json_requires_title() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "--json"])
+        .write_stdin(r#"{"area":"cli"}"#)
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("title"));
+}
+
+#[test]
+fn create_json_rejects_cli_fields() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "--json", "--area", "cli"])
+        .write_stdin(r#"{"title":"Task"}"#)
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("--json cannot be combined"));
+
+    renga(&dir)
+        .args(["create", "--json", "--priority", "medium"])
+        .write_stdin(r#"{"title":"Task"}"#)
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("--json cannot be combined"));
+}
+
+#[test]
+fn create_json_rejects_unknown_fields() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "--json"])
+        .write_stdin(r#"{"title":"Task","label":["bug"]}"#)
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("unknown field"));
 }
 
 // ── create --id ───────────────────────────────────────────────────────────────
@@ -1197,6 +1264,69 @@ fn update_body_from_stdin() {
         .success();
     let content = fs::read_to_string(dir.path().join("issues/open/1-task.md")).unwrap();
     assert!(content.contains("stdin body"));
+}
+
+#[test]
+fn update_from_json_stdin() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "Task", "--label", "old", "--milestone", "v1"])
+        .assert()
+        .success();
+    renga(&dir)
+        .args(["update", "1", "--json"])
+        .write_stdin(
+            r#"{"title":"JSON Title","priority":"low","area":"core","status":"pending","milestone":"v2","labels":["new"],"add_labels":["urgent"],"body":"json body"}"#,
+        )
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("issues/pending/1-task.md"));
+
+    let content = fs::read_to_string(dir.path().join("issues/pending/1-task.md")).unwrap();
+    assert!(content.contains("priority: low"));
+    assert!(content.contains("area: core"));
+    assert!(content.contains("status: pending"));
+    assert!(content.contains("milestone: v2"));
+    assert!(content.contains("labels: [new, urgent]"));
+    assert!(content.contains("# JSON Title"));
+    assert!(content.contains("json body"));
+    assert!(!content.contains("old"));
+}
+
+#[test]
+fn update_from_json_rejects_invalid_json() {
+    let dir = setup();
+    renga(&dir).args(["create", "Task"]).assert().success();
+    renga(&dir)
+        .args(["update", "1", "--json"])
+        .write_stdin("{")
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("failed to parse JSON input"));
+}
+
+#[test]
+fn update_json_rejects_cli_fields() {
+    let dir = setup();
+    renga(&dir).args(["create", "Task"]).assert().success();
+    renga(&dir)
+        .args(["update", "1", "--json", "--priority", "high"])
+        .write_stdin(r#"{"area":"cli"}"#)
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("--json cannot be combined"));
+}
+
+#[test]
+fn update_json_rejects_unknown_fields() {
+    let dir = setup();
+    renga(&dir).args(["create", "Task"]).assert().success();
+    renga(&dir)
+        .args(["update", "1", "--json"])
+        .write_stdin(r#"{"add_label":["urgent"]}"#)
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("unknown field"));
 }
 
 #[test]
