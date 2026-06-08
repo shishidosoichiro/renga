@@ -1,6 +1,6 @@
 ---
 schema_version: 1
-status: in-progress
+status: done
 priority: high
 area: core
 labels: [found_at:0.9.0]
