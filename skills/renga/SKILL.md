@@ -17,6 +17,7 @@ All operations are performed by calling the `renga` binary.
 /renga pending <ID>...      Put one or more issues on hold
 /renga in-progress <ID>...  Mark one or more issues as in-progress
 /renga reopen <ID>...       Reopen one or more issues
+/renga update <ID> ...      Update issue fields
 /renga list                 List open, pending, and in-progress issues
 /renga show <ID>         Show issue details
 /renga help [command]       Show help

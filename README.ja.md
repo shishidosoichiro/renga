@@ -65,6 +65,7 @@ curl -fsSL https://raw.githubusercontent.com/shishidosoichiro/renga/main/skills/
 ```
 /renga create "入力バリデーションを追加する"
 /renga list
+/renga update 3 --add-label bug
 /renga done 3
 ```
 
@@ -75,6 +76,7 @@ curl -fsSL https://raw.githubusercontent.com/shishidosoichiro/renga/main/skills/
 | `/renga pending <ID>...` | 保留にする |
 | `/renga in-progress <ID>...` | 作業中にする |
 | `/renga reopen <ID>...` | 再開する |
+| `/renga update <ID> ...` | issue のフィールドを更新する |
 | `/renga list` | open/pending の一覧を表示する |
 | `/renga show <ID>` | 詳細を表示する |
 

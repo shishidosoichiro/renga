@@ -65,6 +65,7 @@ Then use it directly in any Claude Code session:
 ```
 /renga create "Add input validation"
 /renga list
+/renga update 3 --add-label bug
 /renga done 3
 ```
 
@@ -75,6 +76,7 @@ Then use it directly in any Claude Code session:
 | `/renga pending <ID>...` | Put on hold |
 | `/renga in-progress <ID>...` | Mark as in-progress |
 | `/renga reopen <ID>...` | Reopen |
+| `/renga update <ID> ...` | Update issue fields |
 | `/renga list` | List open and pending issues |
 | `/renga show <ID>` | Show details |
 
