@@ -59,11 +59,3 @@ Closed issues are moved to `done/`.
 
 ---
 
-## test
-
-| # | status | priority | title |
-|---|---|---|---|
-| [176](open/176-project-tests-race-on-process.md) | open | medium | project tests race on process current_dir |
-
----
-

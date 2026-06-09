@@ -1,6 +1,6 @@
 ---
 schema_version: 1
-status: open
+status: done
 priority: medium
 area: test
 labels: [found_at:0.2.0]
