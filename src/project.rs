@@ -11,7 +11,11 @@ use std::path::{Path, PathBuf};
 /// Falls back to `$CWD/issues` if nothing is found upstream.
 pub fn find_project_root() -> (PathBuf, PathBuf) {
     let cwd = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
-    for dir in cwd.ancestors() {
+    find_project_root_from(&cwd)
+}
+
+fn find_project_root_from(start: &Path) -> (PathBuf, PathBuf) {
+    for dir in start.ancestors() {
         let renga_yml = dir.join(".renga.yml");
         if renga_yml.exists() {
             let rel = read_issues_dir_from_yml(&renga_yml);
@@ -28,8 +32,8 @@ pub fn find_project_root() -> (PathBuf, PathBuf) {
             return (dir.to_path_buf(), issues);
         }
     }
-    let issues = cwd.join("issues");
-    (cwd, issues)
+    let issues = start.join("issues");
+    (start.to_path_buf(), issues)
 }
 
 /// Read the `issues_dir` value from a `.renga.yml` file without a full YAML parse.
@@ -66,10 +70,7 @@ mod tests {
         // canonicalize to resolve macOS /var -> /private/var symlink
         let canonical = dir.path().canonicalize().unwrap();
 
-        let original = std::env::current_dir().unwrap();
-        std::env::set_current_dir(dir.path()).unwrap();
-        let (root, issues) = find_project_root();
-        std::env::set_current_dir(original).unwrap();
+        let (root, issues) = find_project_root_from(&canonical);
 
         assert_eq!(root, canonical);
         assert_eq!(issues, canonical.join("issues"));
@@ -81,10 +82,7 @@ mod tests {
         fs::write(dir.path().join(".renga.yml"), "issues_dir: my-issues\n").unwrap();
         let canonical = dir.path().canonicalize().unwrap();
 
-        let original = std::env::current_dir().unwrap();
-        std::env::set_current_dir(dir.path()).unwrap();
-        let (root, issues) = find_project_root();
-        std::env::set_current_dir(original).unwrap();
+        let (root, issues) = find_project_root_from(&canonical);
 
         assert_eq!(root, canonical);
         assert_eq!(issues, canonical.join("my-issues"));
@@ -98,10 +96,7 @@ mod tests {
         fs::create_dir_all(&subdir).unwrap();
         let canonical_root = dir.path().canonicalize().unwrap();
 
-        let original = std::env::current_dir().unwrap();
-        std::env::set_current_dir(&subdir).unwrap();
-        let (root, issues) = find_project_root();
-        std::env::set_current_dir(original).unwrap();
+        let (root, issues) = find_project_root_from(&subdir.canonicalize().unwrap());
 
         assert_eq!(root, canonical_root);
         assert_eq!(issues, canonical_root.join("issues"));
