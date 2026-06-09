@@ -1,6 +1,16 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [0.12.0] - 2026-06-09
+
+### 🚀 Features
+
+- [`7c3232f`] *(cli)* Accept JSON input for create and update
+
+### 🐛 Bug Fixes
+
+- [`214093a`] *(cli)* Add missing milestone field on update
+- [`7817e8b`] *(core)* Generate README links relative to issues dir
 ## [0.11.0] - 2026-06-06
 
 ### 🚀 Features
