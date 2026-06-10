@@ -16,6 +16,7 @@ Closed issues are moved to `done/`.
 | [173](open/173-retro-unwrap.md) | open | medium | retro: 全体レビューで unwrap 観点の確認結果を報告し漏らした |
 | [175](open/175-retro-validate-frontmatter.md) | open | medium | retro: validate の frontmatter なし判定を実装バグとして誤分類した |
 | [177](open/177-retro-codex.md) | open | medium | retro: .codex 設定変更のコミット前確認 |
+| [181](open/181-retro.md) | open | medium | retro: できるかどうかの質問に確認実行で返した |
 
 ---
 
@@ -47,6 +48,7 @@ Closed issues are moved to `done/`.
 | [102](pending/102-code-of-conduct-md.md) | pending | medium | CODE_OF_CONDUCT.md を追加する |
 | [103](pending/103-security-md.md) | pending | medium | SECURITY.md を追加する |
 | [170](open/170-validate-frontmatter-issue-err.md) | open | medium | spec.md の frontmatter optional 記述と validate の error 判定を整理する |
+| [179](open/179-git-cliff-utc.md) | open | medium | git-cliff のリリース日が UTC 基準になる |
 
 ---
 

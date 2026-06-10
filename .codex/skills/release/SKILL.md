@@ -10,7 +10,12 @@ renga の新バージョンをリリースする。バージョン番号（例: 
 ## Steps
 
 1. `renga list` を実行し、open な issue を確認する。リリースに含めるべき未対応 issue がある場合はユーザーに確認する
-2. バージョン番号を会話から取得する。指定がなければユーザーに確認する
+2. バージョン番号を会話から取得する。指定がなければ、候補を出す前に以下を確認してからユーザーに確認する
+   - `git tag --list 'v*' --sort=-version:refname` で最新タグを確認する
+   - `cargo search renga --limit 5` または `cargo info renga` で crates.io の最新公開版を確認する
+   - `CHANGELOG.md` の最新リリースセクションを確認する
+   - `git log <latest-tag>..HEAD --oneline` で前回リリース以降の差分を確認する
+   - `feat` / `fix` / breaking change を分類し、semver 候補の根拠を明示する
 3. テストがすべて通ることを確認する: `cargo test`
 4. `Cargo.toml` の `version` フィールドを新バージョンに更新する
 5. `git cliff --tag v<version> -o CHANGELOG.md` で CHANGELOG を生成する（手書き禁止）
@@ -36,3 +41,4 @@ renga の新バージョンをリリースする。バージョン番号（例: 
 - ステップ7の実行前に必ずユーザーの承認を得る
 - CHANGELOG は必ず git-cliff で生成する。手書きしない
 - バージョンは semver に従う（破壊的変更 → major、機能追加 → minor、バグ修正 → patch）
+- 次バージョンは `Cargo.toml` の現在値だけで判断しない。最後に公開されたバージョンから `HEAD` までの user-visible change を根拠にする

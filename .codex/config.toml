@@ -34,6 +34,12 @@ extends = ":workspace"
 "~/.aws" = "deny"
 "~/.config/gcloud" = "deny"
 
+# cargo install renga writes the registry cache, binary, and install metadata under ~/.cargo.
+"~/.cargo/bin" = "write"
+"~/.cargo/registry" = "write"
+"~/.cargo/.crates.toml" = "write"
+"~/.cargo/.crates2.json" = "write"
+
 [permissions.default.network]
 enabled = true
 mode = "limited"
