@@ -27,6 +27,9 @@ Closed issues are moved to `done/`.
 | [87](open/87-renga-next-priority-area-issue.md) | open | medium | renga next — priority・area から次に着手すべき issue を返す（AI のトークン節約） |
 | [153](open/153-clap-complete-unstable-dynamic.md) | open | low | clap_complete unstable-dynamic が stable になったら __complete と手書きシェルスクリプトを置き換えを検討する |
 | [167](open/167-split-complete-update-test.md) | open | low | complete_update_shows_open_issues_and_flags を2つのテストに分割する |
+| [183](open/183-skills-renga-list-skill-md-arg.md) | open | low | skills/renga-list/SKILL.md の argument-hint に --milestone が欠落している |
+| [184](open/184-skills-renga-create-skill-md-a.md) | open | low | skills/renga-create/SKILL.md の argument-hint に --milestone と --assignee が欠落している |
+| [185](open/185-update-assignee-milestone.md) | open | medium | update --assignee でアサイニーをクリアする方法がない（milestone も同様） |
 
 ---
 
@@ -58,6 +61,14 @@ Closed issues are moved to `done/`.
 |---|---|---|---|
 | [58](open/58-zenn-reddit.md) | open | medium | メディア活動: Zenn / Reddit への投稿 |
 | [84](open/84-mcp-renga-mcp-server.md) | open | low | MCP サーバーモード（renga mcp-server）の追加を検討する |
+
+---
+
+## test
+
+| # | status | priority | title |
+|---|---|---|---|
+| [186](open/186-update-json-assignee.md) | open | low | update --json に assignee を含む統合テストがない |
 
 ---
 
