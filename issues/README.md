@@ -35,7 +35,6 @@ Closed issues are moved to `done/`.
 | # | status | priority | title |
 |---|---|---|---|
 | [89](open/89-renga-done-ai-issue.md) | open | medium | renga done 実行時に AI の作業ログを issue ファイルに構造化して記録する |
-| [174](open/174-regex-unwrap.md) | open | medium | Regex 初期化の unwrap() が非テストコードに残っている |
 
 ---
 
@@ -47,8 +46,6 @@ Closed issues are moved to `done/`.
 | [14](pending/14-changelog-keep-a-changelog.md) | pending | medium | CHANGELOG を Keep a Changelog 形式に移行するか検討する |
 | [102](pending/102-code-of-conduct-md.md) | pending | medium | CODE_OF_CONDUCT.md を追加する |
 | [103](pending/103-security-md.md) | pending | medium | SECURITY.md を追加する |
-| [170](open/170-validate-frontmatter-issue-err.md) | open | medium | spec.md の frontmatter optional 記述と validate の error 判定を整理する |
-| [179](open/179-git-cliff-utc.md) | open | medium | git-cliff のリリース日が UTC 基準になる |
 
 ---
 
