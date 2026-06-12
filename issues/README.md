@@ -27,7 +27,6 @@ Closed issues are moved to `done/`.
 | [87](open/87-renga-next-priority-area-issue.md) | open | medium | renga next — priority・area から次に着手すべき issue を返す（AI のトークン節約） |
 | [153](open/153-clap-complete-unstable-dynamic.md) | open | low | clap_complete unstable-dynamic が stable になったら __complete と手書きシェルスクリプトを置き換えを検討する |
 | [167](open/167-split-complete-update-test.md) | open | low | complete_update_shows_open_issues_and_flags を2つのテストに分割する |
-| [185](open/185-update-assignee-milestone.md) | open | medium | update --assignee でアサイニーをクリアする方法がない（milestone も同様） |
 
 ---
 
