@@ -8,8 +8,8 @@ use serde::Deserialize;
 use crate::{
     cli::UpdateArgs,
     issue::{
-        find_issue, replace_or_prepend_heading, set_frontmatter_field, split_frontmatter,
-        validate_label, Issue,
+        find_issue, remove_frontmatter_field, replace_or_prepend_heading, set_frontmatter_field,
+        split_frontmatter, validate_label, Issue,
     },
     readme, Context, FbimError,
 };
@@ -68,10 +68,18 @@ pub fn run(args: UpdateArgs, ctx: &Context) -> Result<()> {
         content = set_frontmatter_field(&content, "status", status);
     }
     if let Some(milestone) = &input.milestone {
-        content = set_frontmatter_field(&content, "milestone", milestone);
+        content = if milestone.is_empty() {
+            remove_frontmatter_field(&content, "milestone")
+        } else {
+            set_frontmatter_field(&content, "milestone", milestone)
+        };
     }
     if let Some(assignee) = &input.assignee {
-        content = set_frontmatter_field(&content, "assignee", assignee);
+        content = if assignee.is_empty() {
+            remove_frontmatter_field(&content, "assignee")
+        } else {
+            set_frontmatter_field(&content, "assignee", assignee)
+        };
     }
     if let Some(labels) = &input.labels {
         for l in labels {

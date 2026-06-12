@@ -15,7 +15,8 @@ renga update <ID> --json
 - `<title>`: Optional positional argument. Updates the `# Heading` line in the body.
 - `--body`: Replaces the body. If the new body has no `# Heading`, the existing title is automatically preserved.
 - `--body -`: Reads the new body from stdin.
-- `--assignee`: Optional. Set the person or agent responsible for the issue.
+- `--milestone`: Optional. Set the milestone. Pass `--milestone ''` to remove the field.
+- `--assignee`: Optional. Set the person or agent responsible for the issue. Pass `--assignee ''` to remove the field.
 - `--label`: Repeatable and replaces all existing labels.
 - `--add-label`: Adds a label without removing others. Repeatable and deduplicates automatically.
 - `--remove-label`: Removes a specific label. Repeatable.

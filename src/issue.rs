@@ -518,6 +518,50 @@ pub fn set_frontmatter_field(content: &str, field: &str, value: &str) -> String 
     result
 }
 
+/// Remove a single frontmatter field from raw file content without re-serialising.
+///
+/// Leaves all other lines unchanged. If the field is not present, the content is
+/// returned unchanged.
+///
+/// # Examples
+///
+/// ```
+/// use renga::issue::remove_frontmatter_field;
+/// let content = "---\nstatus: open\nmilestone: v1\n---\n\n# Title\n";
+/// let updated = remove_frontmatter_field(content, "milestone");
+/// assert!(!updated.contains("milestone:"));
+/// assert!(updated.contains("status: open"));
+/// ```
+pub fn remove_frontmatter_field(content: &str, field: &str) -> String {
+    let prefix = format!("{field}:");
+    let mut in_fm = false;
+    let mut fm_closed = false;
+    let mut out: Vec<String> = Vec::new();
+
+    for line in content.lines() {
+        if !fm_closed && line.trim() == "---" {
+            if in_fm {
+                in_fm = false;
+                fm_closed = true;
+            } else if out.is_empty() {
+                in_fm = true;
+            }
+            out.push(line.to_string());
+            continue;
+        }
+        if in_fm && line.starts_with(&prefix) {
+            continue; // drop this line
+        }
+        out.push(line.to_string());
+    }
+
+    let mut result = out.join("\n");
+    if content.ends_with('\n') {
+        result.push('\n');
+    }
+    result
+}
+
 pub(crate) fn split_frontmatter(content: &str) -> Option<(&str, &str)> {
     let rest = content.strip_prefix("---\n")?;
     if let Some(pos) = rest.find("\n---\n") {
@@ -663,6 +707,30 @@ mod tests {
         let content = "# Title\n\n---\nstatus: open\n---\n";
         let updated = set_frontmatter_field(content, "status", "done");
         assert_eq!(updated, content);
+    }
+
+    #[test]
+    fn remove_frontmatter_field_removes_existing_field() {
+        let content = "---\nstatus: open\nmilestone: v1\narea: core\n---\n\n# Title\n";
+        let updated = remove_frontmatter_field(content, "milestone");
+        assert!(!updated.contains("milestone:"));
+        assert!(updated.contains("status: open"));
+        assert!(updated.contains("area: core"));
+    }
+
+    #[test]
+    fn remove_frontmatter_field_noop_when_field_absent() {
+        let content = "---\nstatus: open\narea: core\n---\n\n# Title\n";
+        let updated = remove_frontmatter_field(content, "milestone");
+        assert_eq!(updated, content);
+    }
+
+    #[test]
+    fn remove_frontmatter_field_ignores_hr_in_body() {
+        let content = "---\nstatus: open\nmilestone: v1\n---\n\n# Title\n\n---\nmilestone: fake\n";
+        let updated = remove_frontmatter_field(content, "milestone");
+        assert!(!updated.contains("milestone: v1"));
+        assert!(updated.contains("milestone: fake"));
     }
 
     #[test]

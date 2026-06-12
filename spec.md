@@ -128,6 +128,9 @@ are `title`, `priority`, `area`, `status`, `milestone`, `assignee`, `labels`,
 `add_labels`, `remove_labels`, and `body`. It cannot be combined with positional
 or field flags; `<ID>` remains the issue selector.
 
+Passing an empty string to `--milestone` or `--assignee` removes the field from
+frontmatter entirely (e.g. `renga update 1 --assignee ''`).
+
 ## `.renga.yml`
 
 Optional configuration file placed in the project root.

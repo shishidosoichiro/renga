@@ -1471,6 +1471,36 @@ fn create_json_with_assignee() {
 }
 
 #[test]
+fn update_clears_assignee() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "Task", "--assignee", "alice"])
+        .assert()
+        .success();
+    renga(&dir)
+        .args(["update", "1", "--assignee", ""])
+        .assert()
+        .success();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-task.md")).unwrap();
+    assert!(!content.contains("assignee:"));
+}
+
+#[test]
+fn update_clears_milestone() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "Task", "--milestone", "v1"])
+        .assert()
+        .success();
+    renga(&dir)
+        .args(["update", "1", "--milestone", ""])
+        .assert()
+        .success();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-task.md")).unwrap();
+    assert!(!content.contains("milestone:"));
+}
+
+#[test]
 fn update_json_with_assignee() {
     let dir = setup();
     renga(&dir).args(["create", "Task"]).assert().success();
@@ -1481,4 +1511,36 @@ fn update_json_with_assignee() {
         .success();
     let content = fs::read_to_string(dir.path().join("issues/open/1-task.md")).unwrap();
     assert!(content.contains("assignee: charlie"));
+}
+
+#[test]
+fn update_json_clears_assignee() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "Task", "--assignee", "alice"])
+        .assert()
+        .success();
+    renga(&dir)
+        .args(["update", "1", "--json"])
+        .write_stdin(r#"{"assignee": ""}"#)
+        .assert()
+        .success();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-task.md")).unwrap();
+    assert!(!content.contains("assignee:"));
+}
+
+#[test]
+fn update_json_clears_milestone() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "Task", "--milestone", "v1"])
+        .assert()
+        .success();
+    renga(&dir)
+        .args(["update", "1", "--json"])
+        .write_stdin(r#"{"milestone": ""}"#)
+        .assert()
+        .success();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-task.md")).unwrap();
+    assert!(!content.contains("milestone:"));
 }

@@ -128,6 +128,8 @@ positional 引数やフィールド指定フラグとは併用できない。
 `remove_labels`、`body`。positional 引数やフィールド指定フラグとは併用できず、
 `<ID>` は更新対象の指定として残る。
 
+`--milestone` または `--assignee` に空文字列を渡すと、そのフィールドを frontmatter から削除する（例: `renga update 1 --assignee ''`）。
+
 ## `.renga.yml` の仕様
 
 プロジェクトルートに置く設定ファイル。省略可能。

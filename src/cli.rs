@@ -219,10 +219,10 @@ pub struct UpdateArgs {
         PossibleValue::new("in-progress").help("Actively being worked on"),
     ])]
     pub status: Option<String>,
-    /// New milestone.
+    /// New milestone. Pass an empty string (`--milestone ''`) to remove the field.
     #[arg(long)]
     pub milestone: Option<String>,
-    /// New assignee.
+    /// New assignee. Pass an empty string (`--assignee ''`) to remove the field.
     #[arg(long)]
     pub assignee: Option<String>,
     /// Replace labels (repeatable). Use `--label foo --label bar`.

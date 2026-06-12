@@ -130,6 +130,8 @@ cargo install renga
 | `renga update <ID> [<title>] [--priority ...] [--area ...] [--status ...] [--milestone ...] [--assignee ...] [--label ...]... [--add-label ...]... [--remove-label ...]... [--body <text\|->]` | Update issue fields (AI/scripts) |
 | `renga update <ID> --json` | Update issue fields from a JSON object on stdin |
 | `renga info` | Show project root, issues directory, config location, and current settings |
+
+Pass an empty string to `--milestone` or `--assignee` to remove the field: `renga update 1 --assignee ''`.
 | `renga migrate` | Move issues from flat layout to per-status directories |
 | `renga validate` | Check all issues for schema errors and duplicate IDs |
 | `renga completions bash\|zsh\|fish` | Print shell completion script |
