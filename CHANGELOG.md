@@ -1,7 +1,18 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
-## [0.12.0] - 2026-06-09
+## [0.13.0] - 2026-06-12
+
+### 🚀 Features
+
+- [`725e164`] *(core)* Add assignee field to issue front matter
+- [`c63020e`] *(core)* Clear milestone/assignee by passing empty string
+
+### 🐛 Bug Fixes
+
+- [`7cef518`] *(docs)* Add missing --milestone to skill argument-hints
+- [`10ccbe3`] Clear release blockers
+## [0.12.0] - 2026-06-10
 
 ### 🚀 Features
 
@@ -29,7 +40,7 @@ All notable changes to this project will be documented in this file.
 ### 🐛 Bug Fixes
 
 - [`952f902`] *(fmt)* Apply cargo fmt to issue.rs and integration.rs
-## [0.9.1] - 2026-06-04
+## [0.9.1] - 2026-06-05
 
 ### 🐛 Bug Fixes
 
@@ -39,7 +50,7 @@ All notable changes to this project will be documented in this file.
 
 - [`8f999fe`] *(cli)* Derive completion values from Status and Priority enums
 - [`8ab5a1e`] *(cli)* Derive completion flags and values from Cli::command()
-## [0.9.0] - 2026-06-04
+## [0.9.0] - 2026-06-05
 
 ### 🚀 Features
 
@@ -56,17 +67,17 @@ All notable changes to this project will be documented in this file.
 ### 🚀 Features
 
 - [`e0cee31`] *(cli)* Add --label to create and --json to show
-## [0.6.0] - 2026-05-28
+## [0.6.0] - 2026-05-29
 
 ### 🚀 Features
 
 - [`0a80332`] *(cli)* Renga edit・renga update コマンドを追加 (#86, #88)
-## [0.5.1] - 2026-05-28
+## [0.5.1] - 2026-05-29
 
 ### 🚀 Features
 
 - [`ad18af6`] Crates.io に publish (#57) — バッジ追加・cargo install renga に更新
-## [0.5.0] - 2026-05-28
+## [0.5.0] - 2026-05-29
 
 ### 🚀 Features
 
@@ -110,7 +121,7 @@ All notable changes to this project will be documented in this file.
 
 - [`4f62bf8`] Parse できない issue ファイルをスキップして警告を出す
 - [`2f3463d`] Frontmatter のない Markdown ファイルもデフォルト値で表示する
-## [0.2.1] - 2026-05-25
+## [0.2.1] - 2026-05-26
 
 ### 🐛 Bug Fixes
 
@@ -121,7 +132,7 @@ All notable changes to this project will be documented in this file.
 ### 🚀 Features
 
 - [`03c12c7`] ID のゼロ埋めを廃止し整数 ID に変更する
-## [0.1.0] - 2026-05-24
+## [0.1.0] - 2026-05-25
 
 ### 🚀 Features
 
