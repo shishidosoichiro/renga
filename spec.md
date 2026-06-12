@@ -44,6 +44,7 @@ priority: high|medium|low   # optional
 area: area-name             # optional (e.g. core, cli, docs)
 labels: []
 milestone: v1.0             # optional (e.g. v1.0, 2026-Q3, sprint-3)
+assignee: alice             # optional (who is responsible for this issue)
 ---
 ```
 
@@ -51,7 +52,7 @@ Frontmatter is optional. When absent, `status` is `unknown`, `priority` is `-` (
 
 `schema_version` identifies the frontmatter format version. New files include `schema_version: 1`. Files without this field (created before the field was introduced) are treated as absent (`None` internally); tools handle them the same as version 1.
 
-`area`, `priority`, and `milestone` fields are optional even when frontmatter is present. Omitting `area` places the issue in no group (shown without a heading in `issues/README.md`). Omitting `priority` defaults to `medium`. Omitting `milestone` means the issue belongs to no milestone.
+`area`, `priority`, `milestone`, and `assignee` fields are optional even when frontmatter is present. Omitting `area` places the issue in no group (shown without a heading in `issues/README.md`). Omitting `priority` defaults to `medium`. Omitting `milestone` means the issue belongs to no milestone. Omitting `assignee` means no one is assigned.
 
 **status values**
 
@@ -98,16 +99,16 @@ Brief description of what needs to be done.
 
 ```
 renga init
-renga create <title> [--id <N>] [--slug <slug>] [--priority high|medium|low] [--area <area>] [--body <text|-\>] [--milestone <milestone>] [--label <label>]...
+renga create <title> [--id <N>] [--slug <slug>] [--priority high|medium|low] [--area <area>] [--body <text|-\>] [--milestone <milestone>] [--assignee <assignee>] [--label <label>]...
 renga create --json
 renga done <ID>...
 renga pending <ID>...
 renga in-progress <ID>...
 renga reopen <ID>...
-renga list [--status open|pending|in-progress|done|unknown] [--area <area>] [--label <label>] [--milestone <milestone>] [--json]
+renga list [--status open|pending|in-progress|done|unknown] [--area <area>] [--label <label>] [--milestone <milestone>] [--assignee <assignee>] [--json]
 renga show <ID> [--json]
 renga edit <ID>
-renga update <ID> [<title>] [--priority high|medium|low] [--area <area>] [--status open|pending|in-progress] [--milestone <milestone>] [--label <label>]... [--add-label <label>]... [--remove-label <label>]... [--body <text|->]
+renga update <ID> [<title>] [--priority high|medium|low] [--area <area>] [--status open|pending|in-progress] [--milestone <milestone>] [--assignee <assignee>] [--label <label>]... [--add-label <label>]... [--remove-label <label>]... [--body <text|->]
 renga update <ID> --json
 renga info
 renga migrate
@@ -119,13 +120,13 @@ renga help [command]
 `N` is the plain integer issue ID (e.g. `42`). Legacy zero-padded IDs (e.g. `00042`) are also accepted.
 
 `renga create --json` reads one JSON object from stdin. Supported fields are
-`title` (required), `id`, `slug`, `priority`, `area`, `body`, `milestone`, and
-`labels`. It cannot be combined with positional or field flags.
+`title` (required), `id`, `slug`, `priority`, `area`, `body`, `milestone`,
+`assignee`, and `labels`. It cannot be combined with positional or field flags.
 
 `renga update <ID> --json` reads one JSON object from stdin. Supported fields
-are `title`, `priority`, `area`, `status`, `milestone`, `labels`, `add_labels`,
-`remove_labels`, and `body`. It cannot be combined with positional or field
-flags; `<ID>` remains the issue selector.
+are `title`, `priority`, `area`, `status`, `milestone`, `assignee`, `labels`,
+`add_labels`, `remove_labels`, and `body`. It cannot be combined with positional
+or field flags; `<ID>` remains the issue selector.
 
 ## `.renga.yml`
 

@@ -118,16 +118,16 @@ cargo install renga
 | コマンド | 動作 |
 |---|---|
 | `renga init` | issues ディレクトリを初期化する |
-| `renga create <タイトル> [--id <N>] [--slug <slug>] [--priority high\|medium\|low] [--area <area>] [--body <テキスト\|-\>] [--milestone <milestone>] [--label <label>]...` | issue を作成する（`--body -` で標準入力から本文を読む） |
+| `renga create <タイトル> [--id <N>] [--slug <slug>] [--priority high\|medium\|low] [--area <area>] [--body <テキスト\|-\>] [--milestone <milestone>] [--assignee <assignee>] [--label <label>]...` | issue を作成する（`--body -` で標準入力から本文を読む） |
 | `renga create --json` | 標準入力の JSON object から issue を作成する |
 | `renga done <ID>...` | issue を完了にする |
 | `renga pending <ID>...` | issue を保留にする |
 | `renga in-progress <ID>...` | issue を作業中にする |
 | `renga reopen <ID>...` | issue を再開する |
-| `renga list [--status open\|pending\|in-progress\|done\|unknown] [--area <area>] [--label <label>] [--milestone <milestone>] [--json]` | issue 一覧を表示する |
+| `renga list [--status open\|pending\|in-progress\|done\|unknown] [--area <area>] [--label <label>] [--milestone <milestone>] [--assignee <assignee>] [--json]` | issue 一覧を表示する |
 | `renga show <ID> [--json]` | issue の詳細を表示する |
 | `renga edit <ID>` | `$EDITOR` で issue を開く（人間向け） |
-| `renga update <ID> [<タイトル>] [--priority ...] [--area ...] [--status ...] [--milestone ...] [--label ...]... [--add-label ...]... [--remove-label ...]... [--body <テキスト\|->]` | issue のフィールドを更新する（AI・スクリプト向け） |
+| `renga update <ID> [<タイトル>] [--priority ...] [--area ...] [--status ...] [--milestone ...] [--assignee ...] [--label ...]... [--add-label ...]... [--remove-label ...]... [--body <テキスト\|->]` | issue のフィールドを更新する（AI・スクリプト向け） |
 | `renga update <ID> --json` | 標準入力の JSON object から issue のフィールドを更新する |
 | `renga info` | プロジェクトルート・issues ディレクトリ・設定ファイルの場所と現在の設定を表示する |
 | `renga migrate` | フラット構造のイシューをステータス別ディレクトリに移動する |

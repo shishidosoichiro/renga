@@ -31,6 +31,7 @@ pub fn run(args: ListArgs, ctx: &Context) -> Result<()> {
         args.area.as_deref(),
         args.label.as_deref(),
         args.milestone.as_deref(),
+        args.assignee.as_deref(),
     )?;
 
     if args.json {
@@ -43,6 +44,7 @@ pub fn run(args: ListArgs, ctx: &Context) -> Result<()> {
             area: &'a str,
             labels: &'a [String],
             milestone: Option<&'a str>,
+            assignee: Option<&'a str>,
             title: &'a str,
         }
 
@@ -73,6 +75,7 @@ pub fn run(args: ListArgs, ctx: &Context) -> Result<()> {
                 area: &i.area,
                 labels: &i.labels,
                 milestone: i.milestone.as_deref(),
+                assignee: i.assignee.as_deref(),
                 title: &i.title,
             })
             .collect();

@@ -1376,3 +1376,109 @@ fn edit_opens_editor() {
         .assert()
         .success();
 }
+
+// ── assignee ──────────────────────────────────────────────────────────────────
+
+#[test]
+fn create_with_assignee() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "Task", "--assignee", "alice"])
+        .assert()
+        .success();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-task.md")).unwrap();
+    assert!(content.contains("assignee: alice"));
+}
+
+#[test]
+fn create_without_assignee_omits_field() {
+    let dir = setup();
+    renga(&dir).args(["create", "Task"]).assert().success();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-task.md")).unwrap();
+    assert!(!content.contains("assignee:"));
+}
+
+#[test]
+fn update_sets_assignee() {
+    let dir = setup();
+    renga(&dir).args(["create", "Task"]).assert().success();
+    renga(&dir)
+        .args(["update", "1", "--assignee", "bob"])
+        .assert()
+        .success();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-task.md")).unwrap();
+    assert!(content.contains("assignee: bob"));
+}
+
+#[test]
+fn list_filters_by_assignee() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "Task A", "--assignee", "alice"])
+        .assert()
+        .success();
+    renga(&dir).args(["create", "Task B"]).assert().success();
+    let output = renga(&dir)
+        .args(["list", "--assignee", "alice"])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    let out = String::from_utf8(output).unwrap();
+    assert!(out.contains("Task A"));
+    assert!(!out.contains("Task B"));
+}
+
+#[test]
+fn list_json_includes_assignee() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "Task", "--assignee", "alice"])
+        .assert()
+        .success();
+    renga(&dir)
+        .args(["list", "--json"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("\"assignee\": \"alice\""));
+}
+
+#[test]
+fn show_json_includes_assignee() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "Task", "--assignee", "alice"])
+        .assert()
+        .success();
+    renga(&dir)
+        .args(["show", "1", "--json"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("\"assignee\": \"alice\""));
+}
+
+#[test]
+fn create_json_with_assignee() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "--json"])
+        .write_stdin(r#"{"title": "Task", "assignee": "alice"}"#)
+        .assert()
+        .success();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-task.md")).unwrap();
+    assert!(content.contains("assignee: alice"));
+}
+
+#[test]
+fn update_json_with_assignee() {
+    let dir = setup();
+    renga(&dir).args(["create", "Task"]).assert().success();
+    renga(&dir)
+        .args(["update", "1", "--json"])
+        .write_stdin(r#"{"assignee": "charlie"}"#)
+        .assert()
+        .success();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-task.md")).unwrap();
+    assert!(content.contains("assignee: charlie"));
+}

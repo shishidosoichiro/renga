@@ -22,6 +22,7 @@ struct UpdateJsonInput {
     area: Option<String>,
     status: Option<String>,
     milestone: Option<String>,
+    assignee: Option<String>,
     labels: Option<Vec<String>>,
     #[serde(default)]
     add_labels: Vec<String>,
@@ -37,6 +38,7 @@ struct UpdateInput {
     area: Option<String>,
     status: Option<String>,
     milestone: Option<String>,
+    assignee: Option<String>,
     labels: Option<Vec<String>>,
     add_labels: Vec<String>,
     remove_labels: Vec<String>,
@@ -67,6 +69,9 @@ pub fn run(args: UpdateArgs, ctx: &Context) -> Result<()> {
     }
     if let Some(milestone) = &input.milestone {
         content = set_frontmatter_field(&content, "milestone", milestone);
+    }
+    if let Some(assignee) = &input.assignee {
+        content = set_frontmatter_field(&content, "assignee", assignee);
     }
     if let Some(labels) = &input.labels {
         for l in labels {
@@ -178,6 +183,7 @@ fn read_input(args: UpdateArgs) -> Result<UpdateInput> {
             area: json.area,
             status: json.status,
             milestone: json.milestone,
+            assignee: json.assignee,
             labels: json.labels,
             add_labels: json.add_labels,
             remove_labels: json.remove_labels,
@@ -207,6 +213,7 @@ fn read_input(args: UpdateArgs) -> Result<UpdateInput> {
         area: args.area,
         status: args.status,
         milestone: args.milestone,
+        assignee: args.assignee,
         labels: if args.label.is_empty() {
             None
         } else {
@@ -224,6 +231,7 @@ fn ensure_no_cli_fields_with_json(args: &UpdateArgs) -> Result<()> {
         || args.area.is_some()
         || args.status.is_some()
         || args.milestone.is_some()
+        || args.assignee.is_some()
         || !args.label.is_empty()
         || !args.add_label.is_empty()
         || !args.remove_label.is_empty()

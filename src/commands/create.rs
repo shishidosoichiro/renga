@@ -23,6 +23,7 @@ struct CreateJsonInput {
     area: String,
     body: Option<String>,
     milestone: Option<String>,
+    assignee: Option<String>,
     #[serde(default)]
     labels: Vec<String>,
 }
@@ -35,6 +36,7 @@ struct CreateInput {
     area: String,
     body: Option<String>,
     milestone: Option<String>,
+    assignee: Option<String>,
     labels: Vec<String>,
 }
 
@@ -75,6 +77,10 @@ pub fn run(args: CreateArgs, ctx: &Context) -> Result<()> {
         Some(m) => format!("milestone: {m}\n"),
         None => String::new(),
     };
+    let assignee_line = match &input.assignee {
+        Some(a) => format!("assignee: {a}\n"),
+        None => String::new(),
+    };
 
     for l in &input.labels {
         validate_label(l)?;
@@ -86,7 +92,7 @@ pub fn run(args: CreateArgs, ctx: &Context) -> Result<()> {
     };
 
     let content = format!(
-        "---\nschema_version: 1\nstatus: open\npriority: {}\narea: {}\nlabels: {labels_yaml}\n{milestone_line}---\n\n# {}\n{}",
+        "---\nschema_version: 1\nstatus: open\npriority: {}\narea: {}\nlabels: {labels_yaml}\n{milestone_line}{assignee_line}---\n\n# {}\n{}",
         input.priority, input.area, input.title, body_section
     );
 
@@ -125,6 +131,7 @@ fn read_input(args: CreateArgs) -> Result<CreateInput> {
             area: json.area,
             body: json.body,
             milestone: json.milestone,
+            assignee: json.assignee,
             labels: json.labels,
         });
     }
@@ -148,6 +155,7 @@ fn read_input(args: CreateArgs) -> Result<CreateInput> {
         area: args.area,
         body,
         milestone: args.milestone,
+        assignee: args.assignee,
         labels: args.label,
     })
 }
@@ -160,6 +168,7 @@ fn ensure_no_cli_fields_with_json(args: &CreateArgs) -> Result<()> {
         || !args.area.is_empty()
         || args.body.is_some()
         || args.milestone.is_some()
+        || args.assignee.is_some()
         || !args.label.is_empty()
     {
         anyhow::bail!("--json cannot be combined with create field arguments");

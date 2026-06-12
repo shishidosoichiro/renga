@@ -28,6 +28,7 @@ pub fn run(args: ShowArgs, ctx: &Context) -> Result<()> {
             area: &'a str,
             labels: &'a [String],
             milestone: Option<&'a str>,
+            assignee: Option<&'a str>,
             title: &'a str,
         }
 
@@ -56,6 +57,7 @@ pub fn run(args: ShowArgs, ctx: &Context) -> Result<()> {
             area: &issue.area,
             labels: &issue.labels,
             milestone: issue.milestone.as_deref(),
+            assignee: issue.assignee.as_deref(),
             title: &issue.title,
         };
         println!("{}", serde_json::to_string_pretty(&row)?);

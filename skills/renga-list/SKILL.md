@@ -1,6 +1,6 @@
 ---
 description: List renga issues
-argument-hint: "[--status open|pending|in-progress|done] [--area <area>] [--label <label>] [--json]"
+argument-hint: "[--status open|pending|in-progress|done] [--area <area>] [--label <label>] [--assignee <assignee>] [--json]"
 ---
 
 # /renga-list

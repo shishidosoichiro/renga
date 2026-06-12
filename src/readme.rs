@@ -150,6 +150,7 @@ pub fn write_readme(issues_dir: &Path, config: &Config) -> Result<()> {
         None,
         None,
         None,
+        None,
     )?;
     let content = generate_with_linker(&issues, config, |issue| {
         issue_link_from_base(issue, issues_dir)
@@ -176,6 +177,7 @@ mod tests {
             area: area.to_string(),
             labels: vec![],
             milestone: None,
+            assignee: None,
             title: title.to_string(),
             raw_content: String::new(),
         }

@@ -44,6 +44,7 @@ priority: high/medium/low   # 省略可能
 area: エリア名              # 省略可能（例: core, cli, docs）
 labels: []
 milestone: v1.0             # 省略可能（例: v1.0, 2026-Q3, sprint-3）
+assignee: alice             # 省略可能（担当者）
 ---
 ```
 
@@ -51,7 +52,7 @@ frontmatter は省略可能。省略した場合は `status: unknown`、`priorit
 
 `schema_version` は frontmatter のフォーマットバージョンを示す。新規作成ファイルには `schema_version: 1` が含まれる。このフィールドがない旧ファイルは内部的に `None`（不在）として保持され、ツールはバージョン 1 と同等に扱う。
 
-`area`・`priority`・`milestone` は frontmatter がある場合でも省略可能。`area` を省略すると issue はグループなし扱いになり、`issues/README.md` では見出しなしで表示される。`priority` を省略すると `medium` がデフォルトになる。`milestone` を省略するとどのマイルストーンにも属さない。
+`area`・`priority`・`milestone`・`assignee` は frontmatter がある場合でも省略可能。`area` を省略すると issue はグループなし扱いになり、`issues/README.md` では見出しなしで表示される。`priority` を省略すると `medium` がデフォルトになる。`milestone` を省略するとどのマイルストーンにも属さない。`assignee` を省略すると担当者なしとなる。
 
 **status の値**
 
@@ -98,16 +99,16 @@ labels: []
 
 ```
 renga init
-renga create <title> [--id <N>] [--slug <slug>] [--priority high|medium|low] [--area <area>] [--body <text|-\>] [--milestone <milestone>] [--label <label>]...
+renga create <title> [--id <N>] [--slug <slug>] [--priority high|medium|low] [--area <area>] [--body <text|-\>] [--milestone <milestone>] [--assignee <assignee>] [--label <label>]...
 renga create --json
 renga done <ID>...
 renga pending <ID>...
 renga in-progress <ID>...
 renga reopen <ID>...
-renga list [--status open|pending|in-progress|done|unknown] [--area <area>] [--label <label>] [--milestone <milestone>] [--json]
+renga list [--status open|pending|in-progress|done|unknown] [--area <area>] [--label <label>] [--milestone <milestone>] [--assignee <assignee>] [--json]
 renga show <ID> [--json]
 renga edit <ID>
-renga update <ID> [<title>] [--priority high|medium|low] [--area <area>] [--status open|pending|in-progress] [--milestone <milestone>] [--label <label>]... [--add-label <label>]... [--remove-label <label>]... [--body <text|->]
+renga update <ID> [<title>] [--priority high|medium|low] [--area <area>] [--status open|pending|in-progress] [--milestone <milestone>] [--assignee <assignee>] [--label <label>]... [--add-label <label>]... [--remove-label <label>]... [--body <text|->]
 renga update <ID> --json
 renga info
 renga migrate
@@ -119,11 +120,11 @@ renga help [command]
 `N` はゼロ埋めなしの整数 ID（例: `42`）。レガシーのゼロ埋め ID（例: `00042`）も受け付ける。
 
 `renga create --json` は標準入力から 1 つの JSON object を読む。対応フィールドは
-`title`（必須）、`id`、`slug`、`priority`、`area`、`body`、`milestone`、`labels`。
+`title`（必須）、`id`、`slug`、`priority`、`area`、`body`、`milestone`、`assignee`、`labels`。
 positional 引数やフィールド指定フラグとは併用できない。
 
 `renga update <ID> --json` は標準入力から 1 つの JSON object を読む。対応フィールドは
-`title`、`priority`、`area`、`status`、`milestone`、`labels`、`add_labels`、
+`title`、`priority`、`area`、`status`、`milestone`、`assignee`、`labels`、`add_labels`、
 `remove_labels`、`body`。positional 引数やフィールド指定フラグとは併用できず、
 `<ID>` は更新対象の指定として残る。
 

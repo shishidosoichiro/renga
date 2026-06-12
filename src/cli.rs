@@ -111,6 +111,9 @@ pub struct CreateArgs {
     /// Milestone to assign (e.g. `v1.0`, `2026-Q3`).
     #[arg(long)]
     pub milestone: Option<String>,
+    /// Assignee responsible for the issue (e.g. `alice`, `app-implementer`).
+    #[arg(long)]
+    pub assignee: Option<String>,
     /// Labels to attach (repeatable: `--label bug --label urgent`).
     #[arg(long)]
     pub label: Vec<String>,
@@ -163,6 +166,9 @@ pub struct ListArgs {
     /// Filter by milestone.
     #[arg(long)]
     pub milestone: Option<String>,
+    /// Filter by assignee.
+    #[arg(long)]
+    pub assignee: Option<String>,
     /// Output as JSON.
     #[arg(long)]
     pub json: bool,
@@ -216,6 +222,9 @@ pub struct UpdateArgs {
     /// New milestone.
     #[arg(long)]
     pub milestone: Option<String>,
+    /// New assignee.
+    #[arg(long)]
+    pub assignee: Option<String>,
     /// Replace labels (repeatable). Use `--label foo --label bar`.
     #[arg(long)]
     pub label: Vec<String>,

@@ -161,6 +161,7 @@ struct FrontmatterRaw {
     #[serde(default)]
     labels: Vec<String>,
     milestone: Option<String>,
+    assignee: Option<String>,
 }
 
 /// A parsed issue file.
@@ -190,6 +191,8 @@ pub struct Issue {
     pub labels: Vec<String>,
     /// Milestone the issue belongs to (e.g. `"v1.0"`, `"2026-Q3"`). Optional.
     pub milestone: Option<String>,
+    /// Assignee responsible for the issue (e.g. `"alice"`, `"app-implementer"`). Optional.
+    pub assignee: Option<String>,
     /// Title extracted from the first `# Heading` line in the body.
     ///
     /// The title lives only in the body — not in frontmatter.
@@ -216,6 +219,7 @@ impl Issue {
             area: fm.area.unwrap_or_default(),
             labels: fm.labels,
             milestone: fm.milestone,
+            assignee: fm.assignee,
             title: title_or_stem(body, path),
             raw_content: content.to_string(),
         })
@@ -276,6 +280,7 @@ pub fn all_issues(
     area_filter: Option<&str>,
     label_filter: Option<&str>,
     milestone_filter: Option<&str>,
+    assignee_filter: Option<&str>,
 ) -> Result<Vec<Issue>> {
     let mut files: Vec<PathBuf> = WalkDir::new(issues_dir)
         .min_depth(1)
@@ -312,6 +317,7 @@ pub fn all_issues(
                     area: String::new(),
                     labels: vec![],
                     milestone: None,
+                    assignee: None,
                     title: title_or_stem(title_src, &path),
                     raw_content: content,
                 }
@@ -335,6 +341,11 @@ pub fn all_issues(
         }
         if let Some(milestone) = milestone_filter {
             if issue.milestone.as_deref() != Some(milestone) {
+                continue;
+            }
+        }
+        if let Some(assignee) = assignee_filter {
+            if issue.assignee.as_deref() != Some(assignee) {
                 continue;
             }
         }
@@ -714,7 +725,7 @@ mod tests {
             "---\nnot valid yaml: [\n---\n\n# My Title\n",
         )
         .unwrap();
-        let issues = all_issues(dir.path(), None, None, None, None).unwrap();
+        let issues = all_issues(dir.path(), None, None, None, None, None).unwrap();
         let issue = issues.iter().find(|i| i.id == "5").unwrap();
         assert_eq!(issue.status, Status::Unknown);
         assert_eq!(issue.title, "My Title");
@@ -728,7 +739,7 @@ mod tests {
             "---\nnot valid yaml: [\n---\n\nno h1 here\n",
         )
         .unwrap();
-        let issues = all_issues(dir.path(), None, None, None, None).unwrap();
+        let issues = all_issues(dir.path(), None, None, None, None, None).unwrap();
         let issue = issues.iter().find(|i| i.id == "6").unwrap();
         assert_eq!(issue.title, "6-no-title");
     }
