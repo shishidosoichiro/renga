@@ -48,7 +48,7 @@ assignee: alice             # 省略可能（担当者）
 ---
 ```
 
-frontmatter は省略可能。省略した場合は `status: unknown`、`priority` は `-`（unknown）、`area` は空（グループなし）として扱う。
+通常の読み取り・一覧表示では frontmatter は省略可能。省略した場合は `status: unknown`、`priority` は `-`（unknown）、`area` は空（グループなし）として扱う。一方で `renga validate` はより厳密に検査し、frontmatter がない、または parse できないファイルを error として報告する。これにより、作業完了前に壊れた issue ファイルを検出できる。
 
 `schema_version` は frontmatter のフォーマットバージョンを示す。新規作成ファイルには `schema_version: 1` が含まれる。このフィールドがない旧ファイルは内部的に `None`（不在）として保持され、ツールはバージョン 1 と同等に扱う。
 

@@ -4,20 +4,11 @@ use std::{
     fmt,
     path::{Path, PathBuf},
     str::FromStr,
-    sync::LazyLock,
 };
 
 use anyhow::{Context as _, Result};
-use regex::Regex;
 use serde::{Deserialize, Serialize};
 use walkdir::WalkDir;
-
-static RE_ISSUE_FILE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^\d+-.*\.md$").unwrap());
-static RE_ISSUE_FILE_CAP: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^(\d+)-.*\.md$").unwrap());
-static RE_ID_PREFIX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^(\d+)-").unwrap());
-static RE_SLUG_SEPARATOR: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"[^a-zA-Z0-9]+").unwrap());
-static RE_LINENUM_PREFIX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^\d+:\s*").unwrap());
 
 /// Status of an issue.
 ///
@@ -248,7 +239,7 @@ pub fn find_issue(issues_dir: &Path, id: &str, include_done: bool) -> Result<Opt
             continue;
         }
         let name = entry.file_name().to_string_lossy();
-        if !RE_ISSUE_FILE_CAP.is_match(name.as_ref()) {
+        if issue_file_id(&name).is_none() {
             continue;
         }
         if !include_done {
@@ -260,8 +251,8 @@ pub fn find_issue(issues_dir: &Path, id: &str, include_done: bool) -> Result<Opt
                 continue;
             }
         }
-        if let Some(cap) = RE_ISSUE_FILE_CAP.captures(name.as_ref()) {
-            if cap[1].parse::<u64>().unwrap_or(0) == num {
+        if let Some(id) = issue_file_id(&name) {
+            if id.parse::<u64>().unwrap_or(0) == num {
                 return Ok(Some(entry.path().to_path_buf()));
             }
         }
@@ -287,7 +278,7 @@ pub fn all_issues(
         .into_iter()
         .filter_map(|e| e.ok())
         .filter(|e| e.file_type().is_file())
-        .filter(|e| RE_ISSUE_FILE.is_match(&e.file_name().to_string_lossy()))
+        .filter(|e| is_issue_file_name(&e.file_name().to_string_lossy()))
         .map(|e| e.path().to_path_buf())
         .collect();
 
@@ -369,8 +360,8 @@ pub fn next_id(issues_dir: &Path) -> Result<String> {
             continue;
         }
         let name = entry.file_name().to_string_lossy();
-        if let Some(cap) = RE_ID_PREFIX.captures(&name) {
-            if let Ok(n) = cap[1].parse::<u64>() {
+        if let Some(id) = id_prefix(&name) {
+            if let Ok(n) = id.parse::<u64>() {
                 max = max.max(n);
             }
         }
@@ -391,7 +382,7 @@ pub fn next_id(issues_dir: &Path) -> Result<String> {
 /// ```
 pub fn make_slug(title: &str) -> String {
     let lower = title.to_lowercase();
-    let slug = RE_SLUG_SEPARATOR.replace_all(&lower, "-");
+    let slug = replace_non_ascii_alnum_runs(&lower);
     let slug = slug.trim_matches('-');
     // slug is ASCII-only after replacement, so byte slicing is safe
     let slug = if slug.len() > 30 { &slug[..30] } else { slug };
@@ -576,7 +567,8 @@ pub(crate) fn split_frontmatter(content: &str) -> Option<(&str, &str)> {
 fn extract_id(path: &Path) -> String {
     path.file_stem()
         .and_then(|s| s.to_str())
-        .and_then(|s| Some(RE_ID_PREFIX.captures(s)?[1].to_string()))
+        .and_then(id_prefix)
+        .map(str::to_string)
         .unwrap_or_default()
 }
 
@@ -584,10 +576,52 @@ fn extract_title(body: &str) -> String {
     // Strip legacy "NNN: " numeric prefix if present
     for line in body.lines() {
         if let Some(rest) = line.strip_prefix("# ") {
-            return RE_LINENUM_PREFIX.replace(rest.trim(), "").to_string();
+            return strip_linenum_prefix(rest.trim()).to_string();
         }
     }
     String::new()
+}
+
+pub(crate) fn is_issue_file_name(name: &str) -> bool {
+    issue_file_id(name).is_some()
+}
+
+fn issue_file_id(name: &str) -> Option<&str> {
+    let stem = name.strip_suffix(".md")?;
+    id_prefix(stem)
+}
+
+fn id_prefix(s: &str) -> Option<&str> {
+    let (id, _) = s.split_once('-')?;
+    if id.is_empty() || !id.bytes().all(|b| b.is_ascii_digit()) {
+        return None;
+    }
+    Some(id)
+}
+
+fn replace_non_ascii_alnum_runs(s: &str) -> String {
+    let mut out = String::with_capacity(s.len());
+    let mut last_was_separator = false;
+    for ch in s.chars() {
+        if ch.is_ascii_alphanumeric() {
+            out.push(ch);
+            last_was_separator = false;
+        } else if !last_was_separator {
+            out.push('-');
+            last_was_separator = true;
+        }
+    }
+    out
+}
+
+fn strip_linenum_prefix(s: &str) -> &str {
+    let Some((prefix, rest)) = s.split_once(':') else {
+        return s;
+    };
+    if prefix.is_empty() || !prefix.bytes().all(|b| b.is_ascii_digit()) {
+        return s;
+    }
+    rest.trim_start()
 }
 
 fn title_or_stem(body: &str, path: &Path) -> String {
@@ -751,6 +785,21 @@ mod tests {
         let title = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaa bb";
         let slug = make_slug(title);
         assert!(!slug.ends_with('-'), "slug must not end with dash: {slug}");
+    }
+
+    #[test]
+    fn issue_file_name_requires_integer_prefix_and_md_extension() {
+        assert!(is_issue_file_name("1-task.md"));
+        assert!(is_issue_file_name("00001-task.md"));
+        assert!(!is_issue_file_name("task.md"));
+        assert!(!is_issue_file_name("1-task.txt"));
+        assert!(!is_issue_file_name("1task.md"));
+    }
+
+    #[test]
+    fn extract_title_strips_legacy_line_number_prefix() {
+        assert_eq!(extract_title("# 123:   Old title\n"), "Old title");
+        assert_eq!(extract_title("# 123 Old title\n"), "123 Old title");
     }
 
     #[test]

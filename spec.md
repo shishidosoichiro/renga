@@ -48,7 +48,7 @@ assignee: alice             # optional (who is responsible for this issue)
 ---
 ```
 
-Frontmatter is optional. When absent, `status` is `unknown`, `priority` is `-` (unknown), and `area` is empty (no group).
+Frontmatter is optional for normal read/list operations. When absent, `status` is `unknown`, `priority` is `-` (unknown), and `area` is empty (no group). `renga validate` is stricter: missing or unparseable frontmatter is reported as an error so malformed issue files can be found before closing work.
 
 `schema_version` identifies the frontmatter format version. New files include `schema_version: 1`. Files without this field (created before the field was introduced) are treated as absent (`None` internally); tools handle them the same as version 1.
 

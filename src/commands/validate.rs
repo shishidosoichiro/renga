@@ -1,17 +1,13 @@
 //! `renga validate` command handler.
 
-use std::{collections::HashMap, sync::LazyLock};
-
 use anyhow::Result;
-use regex::Regex;
+use std::collections::HashMap;
 use walkdir::WalkDir;
 
 use crate::{
-    issue::{Issue, Status},
+    issue::{is_issue_file_name, Issue, Status},
     Context,
 };
-
-static RE_ISSUE_FILE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^\d+-.*\.md$").unwrap());
 
 /// A single validation finding.
 #[derive(Debug)]
@@ -39,7 +35,7 @@ pub fn validate(ctx: &Context) -> Result<Vec<Finding>> {
         .into_iter()
         .filter_map(|e| e.ok())
         .filter(|e| e.file_type().is_file())
-        .filter(|e| RE_ISSUE_FILE.is_match(&e.file_name().to_string_lossy()))
+        .filter(|e| is_issue_file_name(&e.file_name().to_string_lossy()))
         .map(|e| e.path().to_path_buf())
         .collect();
     files.sort();
