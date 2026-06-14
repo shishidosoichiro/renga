@@ -133,7 +133,7 @@ cargo install renga
 
 Pass an empty string to `--milestone` or `--assignee` to remove the field: `renga update 1 --assignee ''`.
 | `renga migrate` | Move issues from flat layout to per-status directories |
-| `renga validate` | Check all issues for schema errors and duplicate IDs |
+| `renga validate [ID]... [--auto-correct]` | Check issues for schema/status errors, duplicate IDs, and status directory mismatches |
 | `renga completions bash\|zsh\|fish` | Print shell completion script |
 | `renga help [command]` | Show help |
 

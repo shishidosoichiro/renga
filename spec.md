@@ -48,7 +48,9 @@ assignee: alice             # optional (who is responsible for this issue)
 ---
 ```
 
-Frontmatter is optional for normal read/list operations. When absent, `status` is `unknown`, `priority` is `-` (unknown), and `area` is empty (no group). `renga validate` is stricter: missing or unparseable frontmatter is reported as an error so malformed issue files can be found before closing work.
+Frontmatter is optional for normal read/list operations. When absent, `status` is `unknown`, `priority` is `-` (unknown), and `area` is empty (no group). `renga validate` is stricter: missing or unparseable frontmatter, and frontmatter without a `status` field, are reported as errors so malformed issue files can be found before closing work.
+
+The `status` frontmatter field is the authoritative source of issue status. Per-status directories (`open/`, `pending/`, `in-progress/`, `done/`) are a synchronized layout for discoverability. `renga validate` reports an error when a file is stored outside the directory named by its frontmatter status. `renga validate --auto-correct` moves mismatched files to the directory declared by frontmatter.
 
 `schema_version` identifies the frontmatter format version. New files include `schema_version: 1`. Files without this field (created before the field was introduced) are treated as absent (`None` internally); tools handle them the same as version 1.
 
@@ -112,7 +114,7 @@ renga update <ID> [<title>] [--priority high|medium|low] [--area <area>] [--stat
 renga update <ID> --json
 renga info
 renga migrate
-renga validate
+renga validate [ID]... [--auto-correct]
 renga completions <bash|zsh|fish>
 renga help [command]
 ```
@@ -130,6 +132,11 @@ or field flags; `<ID>` remains the issue selector.
 
 Passing an empty string to `--milestone` or `--assignee` removes the field from
 frontmatter entirely (e.g. `renga update 1 --assignee ''`).
+
+`renga validate` without IDs checks every issue file under `issues/`. Passing
+one or more IDs restricts validation to those issue IDs while still detecting
+duplicate files for the selected IDs. `--auto-correct` fixes status directory
+mismatches by moving files to the directory declared by frontmatter status.
 
 ## `.renga.yml`
 

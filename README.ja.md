@@ -133,7 +133,7 @@ cargo install renga
 
 `--milestone` または `--assignee` に空文字列を渡すとフィールドを削除できる: `renga update 1 --assignee ''`
 | `renga migrate` | フラット構造のイシューをステータス別ディレクトリに移動する |
-| `renga validate` | 全 issue のスキーマエラー・ID 重複を検出する |
+| `renga validate [ID]... [--auto-correct]` | issue のスキーマ・status エラー、ID 重複、status ディレクトリ不整合を検出する |
 | `renga completions bash\|zsh\|fish` | シェル補完スクリプトを表示する |
 | `renga help [コマンド]` | ヘルプを表示する |
 

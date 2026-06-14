@@ -645,6 +645,26 @@ fn complete_update_status_values_with_descriptions() {
 }
 
 #[test]
+fn complete_validate_shows_all_issues_and_flags() {
+    let dir = setup();
+    renga(&dir).args(["create", "Open Task"]).assert().success();
+    renga(&dir).args(["create", "Done Task"]).assert().success();
+    renga(&dir).args(["done", "2"]).assert().success();
+
+    renga(&dir)
+        .args(["__complete", "renga", "validate", ""])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("1\t"))
+        .stdout(predicate::str::contains("Open Task"))
+        .stdout(predicate::str::contains("2\t"))
+        .stdout(predicate::str::contains("Done Task"))
+        .stdout(predicate::str::contains(
+            "--auto-correct\tMove files to the status directory declared in frontmatter",
+        ));
+}
+
+#[test]
 fn reopen_fails_when_open_issue_with_same_name_exists() {
     let dir = setup();
     renga(&dir).args(["create", "Foo"]).assert().success();
@@ -1016,6 +1036,77 @@ fn validate_detects_duplicate_ids() {
 }
 
 #[test]
+fn validate_id_only_checks_selected_issue() {
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/open/1-good.md"),
+        "---\nschema_version: 1\nstatus: open\npriority: medium\narea: core\nlabels: []\n---\n\n# Good\n",
+    )
+    .unwrap();
+    fs::write(
+        dir.path().join("issues/open/2-bad.md"),
+        "---\nnot: valid: yaml: [\n---\n\n# Bad\n",
+    )
+    .unwrap();
+    renga(&dir)
+        .args(["validate", "1"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("ok"));
+}
+
+#[test]
+fn validate_selected_id_detects_duplicate_candidates() {
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/open/1-first.md"),
+        "---\nschema_version: 1\nstatus: open\npriority: medium\narea: core\nlabels: []\n---\n\n# First\n",
+    )
+    .unwrap();
+    fs::write(
+        dir.path().join("issues/done/1-second.md"),
+        "---\nschema_version: 1\nstatus: done\npriority: medium\narea: core\nlabels: []\n---\n\n# Second\n",
+    )
+    .unwrap();
+    renga(&dir)
+        .args(["validate", "1"])
+        .assert()
+        .failure()
+        .stdout(predicate::str::contains("duplicate ID"));
+}
+
+#[test]
+fn validate_selected_id_detects_duplicate_even_when_frontmatter_is_bad() {
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/open/1-first.md"),
+        "---\nschema_version: 1\nstatus: open\npriority: medium\narea: core\nlabels: []\n---\n\n# First\n",
+    )
+    .unwrap();
+    fs::write(
+        dir.path().join("issues/done/1-bad.md"),
+        "---\nnot: valid: yaml: [\n---\n\n# Bad\n",
+    )
+    .unwrap();
+    renga(&dir)
+        .args(["validate", "1"])
+        .assert()
+        .failure()
+        .stdout(predicate::str::contains("unparseable frontmatter"))
+        .stdout(predicate::str::contains("duplicate ID"));
+}
+
+#[test]
+fn validate_selected_missing_id_fails() {
+    let dir = setup();
+    renga(&dir)
+        .args(["validate", "99"])
+        .assert()
+        .failure()
+        .stdout(predicate::str::contains("issue not found"));
+}
+
+#[test]
 fn validate_warns_on_missing_schema_version() {
     let dir = setup();
     fs::write(
@@ -1043,6 +1134,59 @@ fn validate_detects_invalid_status_value() {
         .assert()
         .failure()
         .stdout(predicate::str::contains("invalid status value"));
+}
+
+#[test]
+fn validate_detects_missing_status() {
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/done/1-missing-status.md"),
+        "---\nschema_version: 1\npriority: medium\narea: core\nlabels: []\n---\n\n# Missing Status\n",
+    )
+    .unwrap();
+    renga(&dir)
+        .args(["validate", "1", "--auto-correct"])
+        .assert()
+        .failure()
+        .stdout(predicate::str::contains("missing status"));
+
+    assert!(dir.path().join("issues/done/1-missing-status.md").exists());
+    assert!(!dir.path().join("issues/open/1-missing-status.md").exists());
+}
+
+#[test]
+fn validate_detects_status_directory_mismatch() {
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/done/1-mismatch.md"),
+        "---\nschema_version: 1\nstatus: open\npriority: medium\narea: core\nlabels: []\n---\n\n# Mismatch\n",
+    )
+    .unwrap();
+    renga(&dir)
+        .args(["validate"])
+        .assert()
+        .failure()
+        .stdout(predicate::str::contains("status directory mismatch"));
+}
+
+#[test]
+fn validate_auto_correct_moves_to_frontmatter_status_directory() {
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/done/1-mismatch.md"),
+        "---\nschema_version: 1\nstatus: open\npriority: medium\narea: core\nlabels: []\n---\n\n# Mismatch\n",
+    )
+    .unwrap();
+    renga(&dir)
+        .args(["validate", "1", "--auto-correct"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(
+            "corrected: done/1-mismatch.md -> open/1-mismatch.md",
+        ));
+
+    assert!(dir.path().join("issues/open/1-mismatch.md").exists());
+    assert!(!dir.path().join("issues/done/1-mismatch.md").exists());
 }
 
 #[test]

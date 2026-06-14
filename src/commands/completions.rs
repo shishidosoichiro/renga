@@ -123,6 +123,10 @@ fn write_candidates(args: &[String], ctx: &Context) -> io::Result<()> {
                 emit_subcmd_flags(&mut out, "update")?;
             }
         }
+        "validate" => {
+            emit_all_issues(&mut out, ctx)?;
+            emit_subcmd_flags(&mut out, "validate")?;
+        }
         "completions" => {
             for (shell, desc) in [
                 ("bash", "Bash"),
@@ -233,20 +237,27 @@ fn emit_open_issues<W: Write>(out: &mut W, ctx: &Context) -> io::Result<()> {
     if !ctx.issues_dir.exists() {
         return Ok(());
     }
-    emit_issues_recursive(out, &ctx.issues_dir, false)
+    emit_issues_recursive(out, &ctx.issues_dir, Some(false))
 }
 
 fn emit_done_issues<W: Write>(out: &mut W, ctx: &Context) -> io::Result<()> {
     if !ctx.issues_dir.exists() {
         return Ok(());
     }
-    emit_issues_recursive(out, &ctx.issues_dir, true)
+    emit_issues_recursive(out, &ctx.issues_dir, Some(true))
+}
+
+fn emit_all_issues<W: Write>(out: &mut W, ctx: &Context) -> io::Result<()> {
+    if !ctx.issues_dir.exists() {
+        return Ok(());
+    }
+    emit_issues_recursive(out, &ctx.issues_dir, None)
 }
 
 fn emit_issues_recursive<W: Write>(
     out: &mut W,
     issues_dir: &Path,
-    only_done: bool,
+    only_done: Option<bool>,
 ) -> io::Result<()> {
     let mut entries: Vec<_> = WalkDir::new(issues_dir)
         .min_depth(1)
@@ -256,10 +267,10 @@ fn emit_issues_recursive<W: Write>(
         .filter(|e| {
             let rel = e.path().strip_prefix(issues_dir).unwrap_or(e.path());
             let in_done = rel.starts_with("done");
-            if only_done {
-                in_done
-            } else {
-                !in_done
+            match only_done {
+                Some(true) => in_done,
+                Some(false) => !in_done,
+                None => true,
             }
         })
         .filter(|e| {

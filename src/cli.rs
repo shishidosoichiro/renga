@@ -40,8 +40,8 @@ pub enum Command {
     Edit(EditArgs),
     /// Update fields of an issue.
     Update(UpdateArgs),
-    /// Validate all issue files for schema errors and duplicate IDs.
-    Validate,
+    /// Validate issue files for schema errors and duplicate IDs.
+    Validate(ValidateArgs),
     /// Show project root, issues directory, config file location, and current settings.
     Info,
     /// Migrate issues from flat layout to per-status directories.
@@ -237,4 +237,15 @@ pub struct UpdateArgs {
     /// Replace body text. Use `-` to read from stdin.
     #[arg(long)]
     pub body: Option<String>,
+}
+
+/// Arguments for `renga validate`.
+#[derive(Args)]
+pub struct ValidateArgs {
+    /// Issue ID(s) to validate. Omit to validate all issue files.
+    #[arg(num_args(0..))]
+    pub ids: Vec<String>,
+    /// Move files to the status directory declared in frontmatter.
+    #[arg(long)]
+    pub auto_correct: bool,
 }

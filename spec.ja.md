@@ -48,7 +48,9 @@ assignee: alice             # 省略可能（担当者）
 ---
 ```
 
-通常の読み取り・一覧表示では frontmatter は省略可能。省略した場合は `status: unknown`、`priority` は `-`（unknown）、`area` は空（グループなし）として扱う。一方で `renga validate` はより厳密に検査し、frontmatter がない、または parse できないファイルを error として報告する。これにより、作業完了前に壊れた issue ファイルを検出できる。
+通常の読み取り・一覧表示では frontmatter は省略可能。省略した場合は `status: unknown`、`priority` は `-`（unknown）、`area` は空（グループなし）として扱う。一方で `renga validate` はより厳密に検査し、frontmatter がない、parse できない、または frontmatter に `status` フィールドがないファイルを error として報告する。これにより、作業完了前に壊れた issue ファイルを検出できる。
+
+`status` frontmatter フィールドが issue status の正とする情報源。ステータス別ディレクトリ（`open/`, `pending/`, `in-progress/`, `done/`）は発見性のための同期済みレイアウトである。ファイルが frontmatter の status と異なるディレクトリに置かれている場合、`renga validate` は error として報告する。`renga validate --auto-correct` は frontmatter の status に合わせてファイルを移動する。
 
 `schema_version` は frontmatter のフォーマットバージョンを示す。新規作成ファイルには `schema_version: 1` が含まれる。このフィールドがない旧ファイルは内部的に `None`（不在）として保持され、ツールはバージョン 1 と同等に扱う。
 
@@ -112,7 +114,7 @@ renga update <ID> [<title>] [--priority high|medium|low] [--area <area>] [--stat
 renga update <ID> --json
 renga info
 renga migrate
-renga validate
+renga validate [ID]... [--auto-correct]
 renga completions <bash|zsh|fish>
 renga help [command]
 ```
@@ -129,6 +131,8 @@ positional 引数やフィールド指定フラグとは併用できない。
 `<ID>` は更新対象の指定として残る。
 
 `--milestone` または `--assignee` に空文字列を渡すと、そのフィールドを frontmatter から削除する（例: `renga update 1 --assignee ''`）。
+
+`renga validate` は ID を指定しない場合、`issues/` 配下の全 issue ファイルを検査する。1つ以上の ID を渡すと対象 issue ID だけを検査するが、指定した ID の重複ファイルは引き続き検出する。`--auto-correct` は status ディレクトリ不整合を修正し、frontmatter status が示すディレクトリへファイルを移動する。
 
 ## `.renga.yml` の仕様
 

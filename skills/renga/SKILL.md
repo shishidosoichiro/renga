@@ -193,12 +193,15 @@ renga migrate
 ## validate
 
 ```
-renga validate
+renga validate [ID]... [--auto-correct]
 ```
 
 Run after making bulk changes to issue files. Display the output to the user.
-Exit code 1 means errors were found (unparseable frontmatter, invalid status,
-duplicate IDs). Warnings (missing schema_version) exit with code 0.
+Exit code 1 means errors were found (unparseable frontmatter, missing/invalid
+status, duplicate IDs, status directory mismatch). Warnings
+(missing schema_version) exit with code 0. Omit IDs to validate all issue files.
+Pass one or more IDs to limit validation to those issues. `--auto-correct`
+moves files to the directory declared by frontmatter status.
 
 ---
 

@@ -586,7 +586,7 @@ pub(crate) fn is_issue_file_name(name: &str) -> bool {
     issue_file_id(name).is_some()
 }
 
-fn issue_file_id(name: &str) -> Option<&str> {
+pub(crate) fn issue_file_id(name: &str) -> Option<&str> {
     let stem = name.strip_suffix(".md")?;
     id_prefix(stem)
 }
