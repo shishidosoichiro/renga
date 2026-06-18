@@ -137,6 +137,11 @@ cargo install renga
 | `renga completions bash\|zsh\|fish` | シェル補完スクリプトを表示する |
 | `renga help [コマンド]` | ヘルプを表示する |
 
+frontmatter の `status` を正とする情報源とする。active issue が誤って
+`done/` 配下にある場合、active issue 用コマンドはその issue を操作し、warning と
+`renga validate <ID> --auto-correct` の推奨を表示する。通常の `status: done`
+issue は reopen するまで active issue 用コマンドでは変更できない。
+
 ```sh
 # JSON 出力を jq にパイプする
 renga list --json | jq '.[] | select(.area == "auth")'

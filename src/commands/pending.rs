@@ -6,7 +6,7 @@ use anyhow::{Context as _, Result};
 
 use crate::{
     cli::PendingArgs,
-    issue::{find_issue, set_frontmatter_field},
+    issue::{find_active_issue, set_frontmatter_field},
     readme, Context, FbimError,
 };
 
@@ -37,8 +37,12 @@ pub fn run(args: PendingArgs, ctx: &Context) -> Result<()> {
 }
 
 fn move_one(id: &str, pending_dir: &Path, ctx: &Context) -> Result<PathBuf> {
-    let path = find_issue(&ctx.issues_dir, id, false)?
+    let active = find_active_issue(&ctx.issues_dir, id)?
         .ok_or_else(|| FbimError::IssueNotFound(id.to_owned()))?;
+    if let Some(warning) = &active.warning {
+        warning.warn();
+    }
+    let path = active.path;
 
     let file_name = path
         .file_name()

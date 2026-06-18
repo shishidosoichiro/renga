@@ -8,8 +8,8 @@ use serde::Deserialize;
 use crate::{
     cli::UpdateArgs,
     issue::{
-        find_issue, remove_frontmatter_field, replace_or_prepend_heading, set_frontmatter_field,
-        split_frontmatter, validate_label, Issue,
+        find_active_issue, remove_frontmatter_field, replace_or_prepend_heading,
+        set_frontmatter_field, split_frontmatter, validate_label, Issue,
     },
     readme, Context, FbimError,
 };
@@ -52,8 +52,12 @@ pub fn run(args: UpdateArgs, ctx: &Context) -> Result<()> {
     let input = read_input(args)?;
     validate_input(&input)?;
 
-    let path = find_issue(&ctx.issues_dir, &input.id, false)?
+    let active = find_active_issue(&ctx.issues_dir, &input.id)?
         .ok_or_else(|| FbimError::IssueNotFound(input.id.clone()))?;
+    if let Some(warning) = &active.warning {
+        warning.warn();
+    }
+    let path = active.path;
 
     let mut content = std::fs::read_to_string(&path)?;
     Issue::parse(&path, &content)?;

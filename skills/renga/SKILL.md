@@ -203,6 +203,12 @@ status, duplicate IDs, status directory mismatch). Warnings
 Pass one or more IDs to limit validation to those issues. `--auto-correct`
 moves files to the directory declared by frontmatter status.
 
+Frontmatter `status` is authoritative. If an issue is stored under `done/` but
+frontmatter status is active (`open`, `pending`, or `in-progress`), active-issue
+commands operate on it, print a warning, and recommend
+`renga validate <ID> --auto-correct`. Normal `status: done` issues must be
+reopened before active-issue commands can change them.
+
 ---
 
 ## help

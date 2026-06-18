@@ -193,6 +193,39 @@ pub struct Issue {
     pub raw_content: String,
 }
 
+/// Result of resolving an active issue by ID.
+pub struct ActiveIssuePath {
+    /// Path to the issue file.
+    pub path: PathBuf,
+    /// Warning to display when the issue was found through a recoverable
+    /// status-directory mismatch.
+    pub warning: Option<StatusDirectoryMismatch>,
+}
+
+/// A recoverable mismatch between frontmatter status and the status directory.
+pub struct StatusDirectoryMismatch {
+    /// Numeric issue ID requested by the user.
+    pub id: String,
+    /// Directory where the file is currently stored.
+    pub actual_dir: String,
+    /// Status declared by frontmatter.
+    pub frontmatter_status: Status,
+}
+
+impl StatusDirectoryMismatch {
+    /// Print an actionable warning to stderr.
+    pub fn warn(&self) {
+        eprintln!(
+            "warning: issue {} is stored in {}/ but frontmatter status is {}",
+            self.id, self.actual_dir, self.frontmatter_status
+        );
+        eprintln!(
+            "warning: run `renga validate {} --auto-correct` to fix the directory layout",
+            self.id
+        );
+    }
+}
+
 impl Issue {
     /// Parse an issue from its file path and raw content string.
     pub fn parse(path: &Path, content: &str) -> Result<Self> {
@@ -258,6 +291,46 @@ pub fn find_issue(issues_dir: &Path, id: &str, include_done: bool) -> Result<Opt
         }
     }
     Ok(None)
+}
+
+/// Search for an active issue by ID.
+///
+/// Normal `done/` issues are excluded. If the file is misplaced under `done/`
+/// but its frontmatter status is active (`open`, `pending`, or `in-progress`),
+/// it is returned with a warning so callers can keep the visible active issue
+/// operable while guiding the user to repair the directory layout.
+pub fn find_active_issue(issues_dir: &Path, id: &str) -> Result<Option<ActiveIssuePath>> {
+    if let Some(path) = find_issue(issues_dir, id, false)? {
+        return Ok(Some(ActiveIssuePath {
+            path,
+            warning: None,
+        }));
+    }
+
+    let Some(path) = find_issue(issues_dir, id, true)? else {
+        return Ok(None);
+    };
+    let actual_dir = status_dir_name(&path, issues_dir);
+    if actual_dir.as_deref() != Some("done") {
+        return Ok(None);
+    }
+
+    let issue = Issue::load(&path)?;
+    if !matches!(
+        issue.status,
+        Status::Open | Status::Pending | Status::InProgress
+    ) {
+        return Ok(None);
+    }
+
+    Ok(Some(ActiveIssuePath {
+        path,
+        warning: Some(StatusDirectoryMismatch {
+            id: id.to_string(),
+            actual_dir: actual_dir.unwrap_or_else(|| "done".to_string()),
+            frontmatter_status: issue.status,
+        }),
+    }))
 }
 
 /// Collect issues from `issues_dir` recursively, applying optional filters.
@@ -622,6 +695,16 @@ fn strip_linenum_prefix(s: &str) -> &str {
         return s;
     }
     rest.trim_start()
+}
+
+fn status_dir_name(path: &Path, issues_dir: &Path) -> Option<String> {
+    path.strip_prefix(issues_dir)
+        .ok()?
+        .components()
+        .next()?
+        .as_os_str()
+        .to_str()
+        .map(str::to_string)
 }
 
 fn title_or_stem(body: &str, path: &Path) -> String {

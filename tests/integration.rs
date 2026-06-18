@@ -184,6 +184,26 @@ fn done_not_found() {
 }
 
 #[test]
+fn done_operates_on_misplaced_active_issue_with_warning() {
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/done/1-misplaced.md"),
+        "---\nschema_version: 1\nstatus: open\npriority: medium\narea: core\nlabels: []\n---\n\n# Misplaced\n",
+    )
+    .unwrap();
+
+    renga(&dir)
+        .args(["done", "1"])
+        .assert()
+        .success()
+        .stderr(predicate::str::contains("stored in done/"))
+        .stderr(predicate::str::contains("renga validate 1 --auto-correct"));
+
+    let content = fs::read_to_string(dir.path().join("issues/done/1-misplaced.md")).unwrap();
+    assert!(content.contains("status: done"));
+}
+
+#[test]
 fn done_multiple_ids() {
     let dir = setup();
     renga(&dir).args(["create", "First"]).assert().success();
@@ -236,6 +256,24 @@ fn pending_not_found() {
 }
 
 #[test]
+fn pending_operates_on_misplaced_active_issue_with_warning() {
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/done/1-misplaced.md"),
+        "---\nschema_version: 1\nstatus: open\npriority: medium\narea: core\nlabels: []\n---\n\n# Misplaced\n",
+    )
+    .unwrap();
+
+    renga(&dir)
+        .args(["pending", "1"])
+        .assert()
+        .success()
+        .stderr(predicate::str::contains("stored in done/"));
+
+    assert!(dir.path().join("issues/pending/1-misplaced.md").exists());
+}
+
+#[test]
 fn pending_multiple_ids() {
     let dir = setup();
     renga(&dir).args(["create", "Alpha"]).assert().success();
@@ -283,6 +321,27 @@ fn in_progress_not_found() {
         .assert()
         .failure()
         .stderr(predicate::str::contains("not found"));
+}
+
+#[test]
+fn in_progress_operates_on_misplaced_active_issue_with_warning() {
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/done/1-misplaced.md"),
+        "---\nschema_version: 1\nstatus: pending\npriority: medium\narea: core\nlabels: []\n---\n\n# Misplaced\n",
+    )
+    .unwrap();
+
+    renga(&dir)
+        .args(["in-progress", "1"])
+        .assert()
+        .success()
+        .stderr(predicate::str::contains("stored in done/"));
+
+    assert!(dir
+        .path()
+        .join("issues/in-progress/1-misplaced.md")
+        .exists());
 }
 
 #[test]
@@ -1393,6 +1452,38 @@ fn update_status_moves_file() {
 }
 
 #[test]
+fn update_operates_on_misplaced_active_issue_with_warning() {
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/done/1-misplaced.md"),
+        "---\nschema_version: 1\nstatus: open\npriority: medium\narea: core\nlabels: []\n---\n\n# Misplaced\n",
+    )
+    .unwrap();
+
+    renga(&dir)
+        .args(["update", "1", "--assignee", "alice"])
+        .assert()
+        .success()
+        .stderr(predicate::str::contains("stored in done/"));
+
+    let content = fs::read_to_string(dir.path().join("issues/done/1-misplaced.md")).unwrap();
+    assert!(content.contains("assignee: alice"));
+}
+
+#[test]
+fn update_keeps_normal_done_issue_out_of_scope() {
+    let dir = setup();
+    renga(&dir).args(["create", "Task"]).assert().success();
+    renga(&dir).args(["done", "1"]).assert().success();
+
+    renga(&dir)
+        .args(["update", "1", "--assignee", "alice"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("not found"));
+}
+
+#[test]
 fn update_not_found() {
     let dir = setup();
     renga(&dir)
@@ -1519,6 +1610,23 @@ fn edit_opens_editor() {
         .args(["edit", "1"])
         .assert()
         .success();
+}
+
+#[test]
+fn edit_operates_on_misplaced_active_issue_with_warning() {
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/done/1-misplaced.md"),
+        "---\nschema_version: 1\nstatus: open\npriority: medium\narea: core\nlabels: []\n---\n\n# Misplaced\n",
+    )
+    .unwrap();
+
+    renga(&dir)
+        .env("EDITOR", "true")
+        .args(["edit", "1"])
+        .assert()
+        .success()
+        .stderr(predicate::str::contains("stored in done/"));
 }
 
 // ── assignee ──────────────────────────────────────────────────────────────────

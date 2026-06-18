@@ -134,6 +134,8 @@ positional 引数やフィールド指定フラグとは併用できない。
 
 `renga validate` は ID を指定しない場合、`issues/` 配下の全 issue ファイルを検査する。1つ以上の ID を渡すと対象 issue ID だけを検査するが、指定した ID の重複ファイルは引き続き検出する。`--auto-correct` は status ディレクトリ不整合を修正し、frontmatter status が示すディレクトリへファイルを移動する。
 
+issue ファイルが `done/` 配下にあっても frontmatter status が active（`open`、`pending`、`in-progress`）なら、active issue 用コマンドはその issue を操作できる。これは frontmatter status を正とする情報源とみなすためである。この場合、コマンドは warning を表示し、`renga validate <ID> --auto-correct` を推奨する。通常の `status: done` issue は reopen されるまで active issue 用コマンドの対象外である。
+
 ## `.renga.yml` の仕様
 
 プロジェクトルートに置く設定ファイル。省略可能。

@@ -137,6 +137,11 @@ Pass an empty string to `--milestone` or `--assignee` to remove the field: `reng
 | `renga completions bash\|zsh\|fish` | Print shell completion script |
 | `renga help [command]` | Show help |
 
+Frontmatter `status` is authoritative. If an active issue is accidentally stored
+under `done/`, active-issue commands still operate on it, print a warning, and
+recommend `renga validate <ID> --auto-correct`. Normal `status: done` issues
+must be reopened before active-issue commands can change them.
+
 ```sh
 # JSON output can be piped to jq
 renga list --json | jq '.[] | select(.area == "auth")'

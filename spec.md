@@ -138,6 +138,12 @@ one or more IDs restricts validation to those issue IDs while still detecting
 duplicate files for the selected IDs. `--auto-correct` fixes status directory
 mismatches by moving files to the directory declared by frontmatter status.
 
+If an issue file is stored under `done/` but its frontmatter status is active
+(`open`, `pending`, or `in-progress`), active-issue commands may still operate
+on it because frontmatter status is authoritative. Such commands print a
+warning and recommend `renga validate <ID> --auto-correct`. A normal
+`status: done` issue remains outside active-issue commands unless reopened.
+
 ## `.renga.yml`
 
 Optional configuration file placed in the project root.

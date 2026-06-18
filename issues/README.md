@@ -37,7 +37,6 @@ Closed issues are moved to `done/`.
 | # | status | priority | title |
 |---|---|---|---|
 | [89](open/89-renga-done-ai-issue.md) | open | medium | renga done 実行時に AI の作業ログを issue ファイルに構造化して記録する |
-| [193](open/193-update-fails-on-inconsistent-status.md) | open | high | status 不整合ファイルに対して renga update / renga pending 等が not found になる |
 | [194](open/194-bulk-update-command.md) | open | medium | area や assignee を条件にした一括更新コマンドがない |
 | [195](open/195-prevent-duplicate-ids.md) | open | medium | issue 作成時に重複 ID を防止できない |
 

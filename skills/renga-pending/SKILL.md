@@ -11,4 +11,8 @@ Move an issue to `issues/pending/` and set `status: pending` (blocked or deferre
 renga pending <ID>...
 ```
 
+If the issue is stored under `done/` but its frontmatter status is active, the
+command still moves it to `issues/pending/` and prints a warning recommending
+`renga validate <ID> --auto-correct`.
+
 Report the updated file path to the user.

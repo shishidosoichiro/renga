@@ -22,4 +22,9 @@ renga update <ID> --json
 - `--remove-label`: Removes a specific label. Repeatable.
 - `--json`: Reads one JSON object from stdin. Supported fields are `title`, `priority`, `area`, `status`, `milestone`, `assignee`, `labels`, `add_labels`, `remove_labels`, and `body`. Do not combine with field arguments.
 
+If the issue is stored under `done/` but its frontmatter status is active, the
+command still updates it and prints a warning recommending
+`renga validate <ID> --auto-correct`. Normal `status: done` issues must be
+reopened before update.
+
 Report the updated file path to the user.
