@@ -18,6 +18,7 @@ Closed issues are moved to `done/`.
 | [177](open/177-retro-codex.md) | open | medium | retro: .codex 設定変更のコミット前確認 |
 | [181](open/181-retro.md) | open | medium | retro: できるかどうかの質問に確認実行で返した |
 | [197](open/197-retro-status-authoritative-sou.md) | open | medium | retro: status authoritative source の既存判断を確認せず推奨した |
+| [198](open/198-retro-update-edit-done-issue.md) | open | medium | retro: update/edit の done issue 操作方針で反証を出さずに同意した |
 
 ---
 
