@@ -315,9 +315,11 @@ pub fn find_active_issue(issues_dir: &Path, id: &str) -> Result<Option<ActiveIss
         return Ok(None);
     }
 
-    let issue = Issue::load(&path)?;
+    let Some(frontmatter_status) = explicit_frontmatter_status(&path)? else {
+        return Ok(None);
+    };
     if !matches!(
-        issue.status,
+        frontmatter_status,
         Status::Open | Status::Pending | Status::InProgress
     ) {
         return Ok(None);
@@ -328,7 +330,7 @@ pub fn find_active_issue(issues_dir: &Path, id: &str) -> Result<Option<ActiveIss
         warning: Some(StatusDirectoryMismatch {
             id: id.to_string(),
             actual_dir: actual_dir.unwrap_or_else(|| "done".to_string()),
-            frontmatter_status: issue.status,
+            frontmatter_status,
         }),
     }))
 }
@@ -705,6 +707,16 @@ fn status_dir_name(path: &Path, issues_dir: &Path) -> Option<String> {
         .as_os_str()
         .to_str()
         .map(str::to_string)
+}
+
+fn explicit_frontmatter_status(path: &Path) -> Result<Option<Status>> {
+    let content =
+        std::fs::read_to_string(path).with_context(|| format!("reading {}", path.display()))?;
+    let (fm_str, _) = split_frontmatter(&content)
+        .with_context(|| format!("no frontmatter in {}", path.display()))?;
+    let fm: FrontmatterRaw = serde_yaml::from_str(fm_str)
+        .with_context(|| format!("invalid frontmatter in {}", path.display()))?;
+    Ok(fm.status)
 }
 
 fn title_or_stem(body: &str, path: &Path) -> String {

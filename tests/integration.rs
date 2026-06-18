@@ -274,6 +274,28 @@ fn pending_operates_on_misplaced_active_issue_with_warning() {
 }
 
 #[test]
+fn pending_does_not_operate_on_done_issue_with_missing_status() {
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/done/1-missing-status.md"),
+        "---\nschema_version: 1\npriority: medium\narea: core\nlabels: []\n---\n\n# Missing status\n",
+    )
+    .unwrap();
+
+    renga(&dir)
+        .args(["pending", "1"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("not found"));
+
+    assert!(dir.path().join("issues/done/1-missing-status.md").exists());
+    assert!(!dir
+        .path()
+        .join("issues/pending/1-missing-status.md")
+        .exists());
+}
+
+#[test]
 fn pending_multiple_ids() {
     let dir = setup();
     renga(&dir).args(["create", "Alpha"]).assert().success();
