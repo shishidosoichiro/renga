@@ -51,9 +51,23 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/). The type is
 
 **Agent-internal changes** (`scope: agent`) — changes to `CLAUDE.md`, `.claude/agents/`, or Claude Code skills that have no effect on the CLI or library. Use `chore(agent):` so git-cliff excludes them from the changelog automatically. Do not use `feat(agent):` or `refactor(agent):` for these changes.
 
-**Breaking changes** — add `!` after the type (`feat!:`) or add a `BREAKING CHANGE:` footer.
+**Breaking changes** — add `!` after the type (`feat!:`) or add a `BREAKING CHANGE:` footer. Include migration steps in the commit body.
 
 Use English for the description.
+
+**Write for the reader of the changelog, not the implementer.** The `description` is the exact text that appears in `CHANGELOG.md` via git-cliff. Write it so a user upgrading between versions understands what changed and why it matters — not what internal work was done.
+
+- `feat:` — what the user can now do that they couldn't before
+- `fix:` — what specific misbehaviour was corrected
+
+| | Example |
+|---|---|
+| Bad | `fix: clear release blockers` |
+| Bad | `feat: refactor status enum` |
+| Good | `fix: skip unparseable issue files instead of aborting` |
+| Good | `feat: accept multiple IDs for done/pending/reopen` |
+
+Internal work, issue numbers, and implementation details belong in the commit body, not the subject.
 
 ## Branching
 
