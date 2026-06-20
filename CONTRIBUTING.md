@@ -85,10 +85,11 @@ Releases follow [Semantic Versioning](https://semver.org/). Because Renga is pre
 **Release steps**
 
 1. Make and commit all changes with appropriate Conventional Commit messages.
-2. Regenerate the changelog with the upcoming tag:
+2. Generate the changelog entry for the new version and prepend it to `CHANGELOG.md`:
    ```sh
-   git cliff --tag v0.x.0 -o CHANGELOG.md
+   git cliff v0.(x-1).0..HEAD --tag v0.x.0 --prepend CHANGELOG.md
    ```
+   Review the output and edit for clarity before committing. Earlier releases are in `CHANGELOG-legacy.md`.
 3. Bump the version in `Cargo.toml` (and run `cargo build` to update `Cargo.lock`).
 4. Commit the changelog and version bump:
    ```sh
