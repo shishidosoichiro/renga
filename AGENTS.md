@@ -91,22 +91,30 @@ File-Based Issue Management。詳細仕様は `spec.ja.md` を参照。
 
 1. 実装 + テスト追加
 2. カバレッジ確認（`cargo llvm-cov --summary-only -- --test-threads=1`）
-3. **コミット前に** review / reviewer 相当のサブエージェントでコードレビューを受ける。利用可能なレビュー用サブエージェントがない場合のみ、その理由を明記してセルフレビューする。観点: 正確性・テストカバレッジ・clippy/fmt・公開アイテムの doc コメント。レビュー観点にはカバレッジ確認（`cargo llvm-cov --summary-only -- --test-threads=1`）を含める
+3. **コミット前に** review / reviewer 相当のサブエージェントでコードレビューを受ける。利用可能なレビュー用サブエージェントがない場合のみ、その理由を明記してセルフレビューする。観点: 正確性・テストカバレッジ・clippy/fmt・公開アイテムの doc コメント・生成される `CHANGELOG.md` の読みやすさ。レビュー観点にはカバレッジ確認（`cargo llvm-cov --summary-only -- --test-threads=1`）を含める
 4. レビュー指摘を分類する（判定基準: 「このバグは今回変更したコードに由来するか？」）
    - **今回の実装で入ったバグ**（新規追加ファイルや今回変更した箇所に起因）→ コミット前に修正し feature コミットに含める。issue 化する場合は `found_in_impl` ラベルを付ける
    - **以前のバージョンから存在していたバグ** → コミット後に別の `fix:` コミットで修正する。issue 化する場合は `found_at:X.Y.Z`（バグが混入したバージョン）ラベルを付け、修正時に `fixed_at:X.Y.Z` ラベルを付けてクローズする
 5. 今回の実装で入ったバグを修正する
-6. コミット（feature + 同一実装内バグ修正をまとめて）
-7. 以前からあったバグがあれば `renga create` で起票してから別の `fix:` コミットで修正する
-8. issue を close する（`renga done <N>...`、複数 ID 可）
+6. `renga done <N>...` で issue を close してから、コード変更・issue close をまとめてコミットする
+7. 以前からあったバグがあれば `renga create` で起票してから、別の `fix:` コミットで修正し同時に close する
 
 カバレッジは実装時とレビュー時の両方で確認する。
 
-**コミット前・issue close 前の自問**: 「このコードをスタッフエンジニアがレビューしたら承認するか？」と自問する。feat と fix が混在していないか、テストが不十分でないか、ドキュメントが更新されているかを確認する。
+**コミット前の自問**: 「このコードをスタッフエンジニアがレビューしたら承認するか？」と自問する。feat と fix が混在していないか、テストが不十分でないか、ドキュメントが更新されているか、`git cliff` で生成される `CHANGELOG.md` に commit subject がそのまま載っても意味が通るかを確認する。
 
 **変更の順序**: 新規追加を先にコミット・確認してから、削除や簡略化を行う（追加 → 確認 → 破壊）。
 
 **コミットメッセージの言語**: `type`・`scope`・`description` はすべて英語で書く（`Use English for the description` — CONTRIBUTING.md 参照）。issue ファイルのタイトル・本文、`AGENTS.md`、`CLAUDE.md`、`.claude/agents/`、`.codex/agents/`、`.agents/` は日本語でよい。
+
+**コミットメッセージの changelog 品質**: `feat:` / `fix:` の subject は git-cliff により `CHANGELOG.md` のリリースノート本文になる前提で書く。subject だけを読んで、ユーザーまたは将来のメンテナが「何が追加・変更・修正されたか」を理解できなければならない。内部作業状態・issue 処理・リリース準備の都合を subject にしない。
+
+- 悪い例: `fix: clear release blockers`
+- 良い例: `fix: validate only selected issues`
+- 良い例: `fix: operate on misplaced active issues`
+- 良い例: `feat: add assignee field to issue front matter`
+
+`feat:` はユーザーが得る能力、`fix:` は修正された具体的な不具合や誤動作を書く。背景・根本原因・移行注意点が subject に収まらない場合は commit body に書く。
 
 **コミット type の選択**: `type` は issue の `label` や `area` ではなく、実際の diff の種類で決める。production code の挙動を変えずテストだけを追加・修正する場合は、issue が `found_at:*` 付きでも `test:` を使う。`fix:` は production code のバグ修正を含む変更に使う。type 誤分類を修正したときは、直近の関連コミットを `git log --oneline --stat` で横断確認し、同じ誤分類が残っていないか確認してから完了報告する。
 
