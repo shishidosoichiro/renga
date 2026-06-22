@@ -1,7 +1,3 @@
-# Changelog (v0.1.0 – v0.13.0)
-
-This file covers releases up to v0.13.0. From v0.14.0 onward, see [CHANGELOG.md](CHANGELOG.md).
-
 ## [0.13.0] - 2026-06-12
 
 ### Features
