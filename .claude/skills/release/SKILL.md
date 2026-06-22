@@ -12,7 +12,7 @@ renga の新バージョンをリリースする。`$ARGUMENTS` にバージョ�
 2. `$ARGUMENTS` からバージョン番号を取得する。指定がなければユーザーに確認する
 3. テストがすべて通ることを確認する: `cargo test`
 4. `Cargo.toml` の `version` フィールドを新バージョンに更新する
-5. `git cliff --tag v<version> -o CHANGELOG.md` で CHANGELOG を生成する（手書き禁止）
+5. `just changelog <version>` で CHANGELOG を生成する（手書き禁止）
 6. 変更内容をユーザーに確認する
 7. ユーザーの承認を得てからコミット・タグ・プッシュ・publish する:
    ```
