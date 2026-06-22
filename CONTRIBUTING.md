@@ -6,6 +6,7 @@
 
 - Rust 1.95.0 (pinned via `rust-toolchain.toml` — `rustup` picks it up automatically)
 - `git-cliff` for changelog generation: `cargo install git-cliff`
+- `just` for release tasks: `cargo install just`
 - `cargo-llvm-cov` for coverage: `cargo install cargo-llvm-cov --locked`
 
 **Build and test**
@@ -85,12 +86,11 @@ Releases follow [Semantic Versioning](https://semver.org/). Because Renga is pre
 **Release steps**
 
 1. Make and commit all changes with appropriate Conventional Commit messages.
-2. Generate the changelog for the new version and append the legacy history:
+2. Generate the changelog for the new version:
    ```sh
-   git cliff v0.(x-1).0..HEAD --tag v0.x.0 -o CHANGELOG.md
-   cat CHANGELOG-legacy.md >> CHANGELOG.md
+   just changelog v0.x.0
    ```
-   Review the output and edit for clarity before committing. To regenerate, repeat the same two commands.
+   Review the output and edit for clarity before committing. To regenerate, repeat the same command.
 3. Bump the version in `Cargo.toml` (and run `cargo build` to update `Cargo.lock`).
 4. Commit the changelog and version bump:
    ```sh
