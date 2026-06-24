@@ -445,27 +445,29 @@ pub fn next_id(issues_dir: &Path) -> Result<String> {
     Ok(format!("{}", max + 1))
 }
 
-/// Generate a URL-safe kebab-case slug from a title (max 30 ASCII characters).
+/// Generate a kebab-case slug from a title (max 30 characters).
+///
+/// Unicode alphanumeric characters are preserved, so Japanese and other
+/// non-ASCII titles produce meaningful slugs.
 ///
 /// # Examples
 ///
 /// ```
 /// use renga::issue::make_slug;
 /// assert_eq!(make_slug("Hello World"), "hello-world");
-/// assert_eq!(make_slug("Rust への書き直し"), "rust");
+/// assert_eq!(make_slug("Rust への書き直し"), "rust-への書き直し");
 /// assert_eq!(make_slug(""), "issue");
 /// ```
 pub fn make_slug(title: &str) -> String {
     let lower = title.to_lowercase();
-    let slug = replace_non_ascii_alnum_runs(&lower);
+    let slug = replace_non_alnum_runs(&lower);
     let slug = slug.trim_matches('-');
-    // slug is ASCII-only after replacement, so byte slicing is safe
-    let slug = if slug.len() > 30 { &slug[..30] } else { slug };
-    let slug = slug.trim_end_matches('-');
+    let slug: String = slug.chars().take(30).collect();
+    let slug = slug.trim_end_matches('-').to_string();
     if slug.is_empty() {
         "issue".to_string()
     } else {
-        slug.to_string()
+        slug
     }
 }
 
@@ -674,11 +676,11 @@ fn id_prefix(s: &str) -> Option<&str> {
     Some(id)
 }
 
-fn replace_non_ascii_alnum_runs(s: &str) -> String {
+fn replace_non_alnum_runs(s: &str) -> String {
     let mut out = String::with_capacity(s.len());
     let mut last_was_separator = false;
     for ch in s.chars() {
-        if ch.is_ascii_alphanumeric() {
+        if ch.is_alphanumeric() {
             out.push(ch);
             last_was_separator = false;
         } else if !last_was_separator {
@@ -869,9 +871,21 @@ mod tests {
     }
 
     #[test]
+    fn make_slug_preserves_japanese() {
+        assert_eq!(make_slug("Rust への書き直し"), "rust-への書き直し");
+        assert_eq!(make_slug("日本語タイトル"), "日本語タイトル");
+    }
+
+    #[test]
     fn make_slug_truncates_at_30_chars() {
         let long = "abcdefghijklmnopqrstuvwxyz12345";
-        assert_eq!(make_slug(long).len(), 30);
+        assert_eq!(make_slug(long).chars().count(), 30);
+    }
+
+    #[test]
+    fn make_slug_truncates_japanese_at_30_chars() {
+        let long = "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみ";
+        assert_eq!(make_slug(long).chars().count(), 30);
     }
 
     #[test]
