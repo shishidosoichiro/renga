@@ -874,6 +874,10 @@ mod tests {
     fn make_slug_preserves_japanese() {
         assert_eq!(make_slug("Rust への書き直し"), "rust-への書き直し");
         assert_eq!(make_slug("日本語タイトル"), "日本語タイトル");
+        assert_eq!(make_slug("ADR: 日本語タイトルの設計判断"), "adr-日本語タイトルの設計判断");
+        assert_eq!(make_slug("実装 (implementation) の話"), "実装-implementation-の話");
+        // 全角記号・中黒・全角スペースは区切り文字として扱われる
+        assert_eq!(make_slug("foo・bar　baz"), "foo-bar-baz");
     }
 
     #[test]
