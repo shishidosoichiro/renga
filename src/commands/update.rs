@@ -1,6 +1,6 @@
 //! `renga update` command handler.
 
-use std::io::Read;
+use std::{io::Read, path::Path};
 
 use anyhow::{Context as _, Result};
 use serde::Deserialize;
@@ -8,8 +8,9 @@ use serde::Deserialize;
 use crate::{
     cli::UpdateArgs,
     issue::{
-        find_active_issue, remove_frontmatter_field, replace_or_prepend_heading,
-        set_frontmatter_field, split_frontmatter, validate_label, Issue,
+        find_active_issue, is_dir_based, issue_root, remove_frontmatter_field,
+        replace_or_prepend_heading, set_frontmatter_field, split_frontmatter, validate_label,
+        Issue,
     },
     readme, Context, FbimError,
 };
@@ -43,6 +44,7 @@ struct UpdateInput {
     add_labels: Vec<String>,
     remove_labels: Vec<String>,
     body: Option<String>,
+    dir: Option<bool>,
 }
 
 /// Run the update command.
@@ -58,6 +60,15 @@ pub fn run(args: UpdateArgs, ctx: &Context) -> Result<()> {
         warning.warn();
     }
     let path = active.path;
+
+    if let Some(use_dir) = input.dir {
+        ensure_no_other_fields_with_dir(&input)?;
+        return if use_dir {
+            convert_to_dir(&path, ctx)
+        } else {
+            convert_to_file(&path, ctx)
+        };
+    }
 
     let mut content = std::fs::read_to_string(&path)?;
     Issue::parse(&path, &content)?;
@@ -149,32 +160,43 @@ pub fn run(args: UpdateArgs, ctx: &Context) -> Result<()> {
         content = format!("---\n{fm_str}\n---\n\n{body_with_title}\n");
     }
 
-    // If --status was given, move the file to the matching status directory.
-    let dest = if let Some(new_status) = &input.status {
+    // If --status was given, move the issue to the matching status directory.
+    if let Some(new_status) = &input.status {
         let dest_dir = ctx.status_dir(new_status);
         std::fs::create_dir_all(&dest_dir)?;
-        let file_name = path
+        let entry_name = issue_root(&path)
             .file_name()
             .with_context(|| format!("invalid path: {}", path.display()))?;
-        dest_dir.join(file_name)
-    } else {
-        path.clone()
-    };
 
-    if dest != path {
-        let tmp = dest.with_extension("tmp");
-        std::fs::write(&tmp, &content)?;
-        if let Err(e) = std::fs::rename(&tmp, &dest) {
-            let _ = std::fs::remove_file(&tmp);
-            return Err(e.into());
+        if is_dir_based(&path) {
+            std::fs::write(&path, &content)?;
+            let src_root = issue_root(&path);
+            let dst_root = dest_dir.join(entry_name);
+            std::fs::rename(src_root, &dst_root)?;
+            let printed = dst_root.join("README.md");
+            readme::write_readme(&ctx.issues_dir, &ctx.config)?;
+            println!("{}", printed.display());
+        } else {
+            let dest = dest_dir.join(entry_name);
+            if dest != path {
+                let tmp = dest.with_extension("tmp");
+                std::fs::write(&tmp, &content)?;
+                if let Err(e) = std::fs::rename(&tmp, &dest) {
+                    let _ = std::fs::remove_file(&tmp);
+                    return Err(e.into());
+                }
+                std::fs::remove_file(&path)?;
+            } else {
+                std::fs::write(&dest, &content)?;
+            }
+            readme::write_readme(&ctx.issues_dir, &ctx.config)?;
+            println!("{}", dest.display());
         }
-        std::fs::remove_file(&path)?;
     } else {
-        std::fs::write(&dest, &content)?;
+        std::fs::write(&path, &content)?;
+        readme::write_readme(&ctx.issues_dir, &ctx.config)?;
+        println!("{}", path.display());
     }
-
-    readme::write_readme(&ctx.issues_dir, &ctx.config)?;
-    println!("{}", dest.display());
 
     Ok(())
 }
@@ -200,6 +222,7 @@ fn read_input(args: UpdateArgs) -> Result<UpdateInput> {
             add_labels: json.add_labels,
             remove_labels: json.remove_labels,
             body: json.body,
+            dir: None,
         });
     }
 
@@ -234,6 +257,7 @@ fn read_input(args: UpdateArgs) -> Result<UpdateInput> {
         add_labels: args.add_label,
         remove_labels: args.remove_label,
         body,
+        dir: args.dir,
     })
 }
 
@@ -248,9 +272,81 @@ fn ensure_no_cli_fields_with_json(args: &UpdateArgs) -> Result<()> {
         || !args.add_label.is_empty()
         || !args.remove_label.is_empty()
         || args.body.is_some()
+        || args.dir.is_some()
     {
         anyhow::bail!("--json cannot be combined with update field arguments");
     }
+    Ok(())
+}
+
+fn ensure_no_other_fields_with_dir(input: &UpdateInput) -> Result<()> {
+    if input.title.is_some()
+        || input.priority.is_some()
+        || input.area.is_some()
+        || input.status.is_some()
+        || input.milestone.is_some()
+        || input.assignee.is_some()
+        || input.labels.is_some()
+        || !input.add_labels.is_empty()
+        || !input.remove_labels.is_empty()
+        || input.body.is_some()
+    {
+        anyhow::bail!("--dir cannot be combined with other update fields");
+    }
+    Ok(())
+}
+
+fn convert_to_dir(path: &Path, ctx: &Context) -> Result<()> {
+    if is_dir_based(path) {
+        anyhow::bail!("issue is already a directory: {}", path.display());
+    }
+    let stem = path
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .with_context(|| format!("invalid path: {}", path.display()))?;
+    let parent = path
+        .parent()
+        .with_context(|| format!("invalid path: {}", path.display()))?;
+    let dir = parent.join(stem);
+    std::fs::create_dir(&dir).with_context(|| format!("failed to create {}", dir.display()))?;
+    let readme = dir.join("README.md");
+    std::fs::rename(path, &readme)
+        .with_context(|| format!("failed to move {} to {}", path.display(), readme.display()))?;
+    readme::write_readme(&ctx.issues_dir, &ctx.config)?;
+    println!("{}", readme.display());
+    Ok(())
+}
+
+fn convert_to_file(path: &Path, ctx: &Context) -> Result<()> {
+    if !is_dir_based(path) {
+        anyhow::bail!("issue is already a flat file");
+    }
+    let issue_dir = issue_root(path);
+    let entries: Vec<_> = std::fs::read_dir(issue_dir)
+        .with_context(|| format!("failed to read {}", issue_dir.display()))?
+        .collect::<std::io::Result<_>>()?;
+    let only_readme =
+        entries.len() == 1 && entries[0].file_name() == std::ffi::OsStr::new("README.md");
+    if !only_readme {
+        anyhow::bail!(
+            "cannot collapse: {} contains files other than README.md",
+            issue_dir.display()
+        );
+    }
+    let dir_name = issue_dir
+        .file_name()
+        .and_then(|n| n.to_str())
+        .with_context(|| format!("invalid path: {}", issue_dir.display()))?;
+    let parent = issue_dir
+        .parent()
+        .with_context(|| format!("invalid path: {}", issue_dir.display()))?;
+    let dest = parent.join(format!("{dir_name}.md"));
+    std::fs::rename(path, &dest)
+        .with_context(|| format!("failed to move {} to {}", path.display(), dest.display()))?;
+    std::fs::remove_dir(issue_dir)
+        .with_context(|| format!("failed to remove {}", issue_dir.display()))?;
+    readme::write_readme(&ctx.issues_dir, &ctx.config)?;
+    println!("{}", dest.display());
     Ok(())
 }
 

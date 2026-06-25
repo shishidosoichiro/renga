@@ -1818,3 +1818,199 @@ fn update_json_clears_milestone() {
     let content = fs::read_to_string(dir.path().join("issues/open/1-task.md")).unwrap();
     assert!(!content.contains("milestone:"));
 }
+
+// ── directory-based issues ────────────────────────────────────────────────────
+
+#[test]
+fn create_dir_creates_directory_with_readme() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "My Issue", "--dir=true"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("1-my-issue/README.md"));
+
+    let readme = dir.path().join("issues/open/1-my-issue/README.md");
+    assert!(readme.exists());
+    let content = fs::read_to_string(&readme).unwrap();
+    assert!(content.contains("status: open"));
+    assert!(content.contains("# My Issue"));
+}
+
+#[test]
+fn create_dir_next_id_counts_directory_issues() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "First", "--dir=true"])
+        .assert()
+        .success();
+    renga(&dir)
+        .args(["create", "Second"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("2-second.md"));
+}
+
+#[test]
+fn update_dir_true_expands_file_to_directory() {
+    let dir = setup();
+    renga(&dir).args(["create", "Task"]).assert().success();
+    renga(&dir)
+        .args(["update", "1", "--dir=true"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("1-task/README.md"));
+
+    assert!(!dir.path().join("issues/open/1-task.md").exists());
+    assert!(dir.path().join("issues/open/1-task/README.md").exists());
+}
+
+#[test]
+fn update_dir_false_collapses_directory_to_file() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "Task", "--dir=true"])
+        .assert()
+        .success();
+    renga(&dir)
+        .args(["update", "1", "--dir=false"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("1-task.md"));
+
+    assert!(!dir.path().join("issues/open/1-task").exists());
+    assert!(dir.path().join("issues/open/1-task.md").exists());
+}
+
+#[test]
+fn update_dir_false_fails_when_extra_files_present() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "Task", "--dir=true"])
+        .assert()
+        .success();
+    fs::write(dir.path().join("issues/open/1-task/notes.md"), "extra file").unwrap();
+    renga(&dir)
+        .args(["update", "1", "--dir=false"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("README.md"));
+}
+
+#[test]
+fn done_moves_directory_issue_to_done() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "Task", "--dir=true"])
+        .assert()
+        .success();
+    renga(&dir)
+        .args(["done", "1"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("done/1-task/README.md"));
+
+    assert!(!dir.path().join("issues/open/1-task").exists());
+    let readme = dir.path().join("issues/done/1-task/README.md");
+    assert!(readme.exists());
+    let content = fs::read_to_string(&readme).unwrap();
+    assert!(content.contains("status: done"));
+}
+
+#[test]
+fn list_includes_directory_issues() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "Dir Issue", "--dir=true"])
+        .assert()
+        .success();
+    renga(&dir)
+        .args(["list"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Dir Issue"));
+}
+
+#[test]
+fn show_works_for_directory_issue() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "Dir Task", "--dir=true"])
+        .assert()
+        .success();
+    renga(&dir)
+        .args(["show", "1"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Dir Task"));
+}
+
+#[test]
+fn update_status_moves_directory_issue() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "Task", "--dir=true"])
+        .assert()
+        .success();
+    renga(&dir)
+        .args(["update", "1", "--status", "pending"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("pending/1-task/README.md"));
+
+    assert!(!dir.path().join("issues/open/1-task").exists());
+    assert!(dir.path().join("issues/pending/1-task/README.md").exists());
+}
+
+#[test]
+fn update_dir_cannot_be_combined_with_other_fields() {
+    let dir = setup();
+    renga(&dir).args(["create", "Task"]).assert().success();
+    renga(&dir)
+        .args(["update", "1", "--dir=true", "--priority", "high"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("--dir"));
+}
+
+#[test]
+fn update_dir_true_already_dir_fails() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "Task", "--dir=true"])
+        .assert()
+        .success();
+    renga(&dir)
+        .args(["update", "1", "--dir=true"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("already a directory"));
+}
+
+#[test]
+fn validate_auto_correct_moves_directory_issue_to_correct_status() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "Task", "--dir=true"])
+        .assert()
+        .success();
+    // Manually place the directory in the wrong status folder
+    let open_dir = dir.path().join("issues/open/1-task");
+    let done_dir = dir.path().join("issues/done/1-task");
+    fs::create_dir_all(&done_dir).unwrap();
+    fs::rename(&open_dir, &done_dir).unwrap();
+    // But frontmatter still says open — validate should correct it
+    let readme = done_dir.join("README.md");
+    let content = fs::read_to_string(&readme).unwrap();
+    // leave frontmatter status as "open" (it was created as open)
+    assert!(content.contains("status: open"));
+
+    renga(&dir)
+        .args(["validate", "--auto-correct"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("corrected:"));
+
+    assert!(dir.path().join("issues/open/1-task/README.md").exists());
+    assert!(!dir.path().join("issues/done/1-task").exists());
+}

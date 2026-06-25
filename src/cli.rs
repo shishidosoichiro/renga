@@ -117,6 +117,12 @@ pub struct CreateArgs {
     /// Labels to attach (repeatable: `--label bug --label urgent`).
     #[arg(long)]
     pub label: Vec<String>,
+    /// Store the issue as a directory (`true`) or a flat file (`false`, default).
+    ///
+    /// When `true`, creates `N-title/README.md` instead of `N-title.md`,
+    /// allowing additional files to be placed inside the directory.
+    #[arg(long)]
+    pub dir: Option<bool>,
 }
 
 /// Arguments for `renga done`.
@@ -237,6 +243,14 @@ pub struct UpdateArgs {
     /// Replace body text. Use `-` to read from stdin.
     #[arg(long)]
     pub body: Option<String>,
+    /// Convert issue storage format.
+    ///
+    /// `--dir=true` expands a flat-file issue to a directory (`N-title/README.md`).
+    /// `--dir=false` collapses a directory issue back to a flat file; fails if the
+    /// directory contains files other than `README.md`.
+    /// Cannot be combined with other update fields.
+    #[arg(long)]
+    pub dir: Option<bool>,
 }
 
 /// Arguments for `renga validate`.

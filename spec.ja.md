@@ -23,16 +23,28 @@ issues/
 
 ## ファイル命名規則
 
+2種類のレイアウトを混在して使用できる。
+
+**フラットファイル**（デフォルト）:
 ```
 N-short-name.md
+```
+
+**ディレクトリ形式**（`--dir=true` で作成。添付ファイルやメモを issue と同じ場所に置ける）:
+```
+N-short-name/
+  README.md     issue の本文（フラットファイルと同じ形式）
+  ...           その他のファイル
 ```
 
 - `N`: 正の整数（ゼロ埋めなし）。`renga create` が既存ファイルの最大番号 + 1 を割り当てる
 - `short-name`: ケバブケースの短い説明（英数字・ハイフンのみ、30文字以内）
 
-**ID はファイル名から取得する。** frontmatter や本文には ID を持たない。
+**ID はファイル名またはディレクトリ名から取得する。** frontmatter や本文には ID を持たない。
 
 **後方互換**: 旧来の4桁・5桁ゼロ埋め ID（`0042-*.md`, `00042-*.md`）は引き続き読み込める。新規 issue は常にゼロ埋めなしで作成する。
+
+`renga update <ID> --dir=true` でフラットファイルをディレクトリに展開、`--dir=false` でディレクトリをフラットファイルに畳み込む（`README.md` 以外のファイルがある場合はエラー）。
 
 ## frontmatter
 
@@ -101,7 +113,7 @@ labels: []
 
 ```
 renga init
-renga create <title> [--id <N>] [--slug <slug>] [--priority high|medium|low] [--area <area>] [--body <text|-\>] [--milestone <milestone>] [--assignee <assignee>] [--label <label>]...
+renga create <title> [--id <N>] [--slug <slug>] [--priority high|medium|low] [--area <area>] [--body <text|-\>] [--milestone <milestone>] [--assignee <assignee>] [--label <label>]... [--dir=true|false]
 renga create --json
 renga done <ID>...
 renga pending <ID>...
@@ -111,6 +123,7 @@ renga list [--status open|pending|in-progress|done|unknown] [--area <area>] [--l
 renga show <ID> [--json]
 renga edit <ID>
 renga update <ID> [<title>] [--priority high|medium|low] [--area <area>] [--status open|pending|in-progress] [--milestone <milestone>] [--assignee <assignee>] [--label <label>]... [--add-label <label>]... [--remove-label <label>]... [--body <text|->]
+renga update <ID> --dir=true|false
 renga update <ID> --json
 renga info
 renga migrate

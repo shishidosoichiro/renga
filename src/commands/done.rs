@@ -6,7 +6,7 @@ use anyhow::{Context as _, Result};
 
 use crate::{
     cli::DoneArgs,
-    issue::{find_active_issue, set_frontmatter_field},
+    issue::{find_active_issue, is_dir_based, issue_root, set_frontmatter_field},
     readme, Context, FbimError,
 };
 
@@ -44,23 +44,31 @@ fn move_one(id: &str, done_dir: &Path, ctx: &Context) -> Result<PathBuf> {
     }
     let path = active.path;
 
-    let file_name = path
-        .file_name()
-        .with_context(|| format!("invalid path: {}", path.display()))?;
-    let dest = done_dir.join(file_name);
-
     let content = std::fs::read_to_string(&path)?;
     let updated = set_frontmatter_field(&content, "status", "done");
 
-    let tmp = dest.with_extension("tmp");
-    std::fs::write(&tmp, &updated)?;
-    if let Err(e) = std::fs::rename(&tmp, &dest) {
-        let _ = std::fs::remove_file(&tmp);
-        return Err(e.into());
+    if is_dir_based(&path) {
+        let entry_name = issue_root(&path)
+            .file_name()
+            .with_context(|| format!("invalid path: {}", path.display()))?;
+        let dest_dir = done_dir.join(entry_name);
+        std::fs::write(&path, &updated)?;
+        std::fs::rename(issue_root(&path), &dest_dir)?;
+        Ok(dest_dir.join("README.md"))
+    } else {
+        let file_name = path
+            .file_name()
+            .with_context(|| format!("invalid path: {}", path.display()))?;
+        let dest = done_dir.join(file_name);
+        let tmp = dest.with_extension("tmp");
+        std::fs::write(&tmp, &updated)?;
+        if let Err(e) = std::fs::rename(&tmp, &dest) {
+            let _ = std::fs::remove_file(&tmp);
+            return Err(e.into());
+        }
+        if path != dest {
+            std::fs::remove_file(&path)?;
+        }
+        Ok(dest)
     }
-    if path != dest {
-        std::fs::remove_file(&path)?;
-    }
-
-    Ok(dest)
 }

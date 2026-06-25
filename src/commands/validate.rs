@@ -9,7 +9,10 @@ use walkdir::WalkDir;
 
 use crate::{
     cli::ValidateArgs,
-    issue::{is_issue_file_name, issue_file_id, split_frontmatter, Issue, Status},
+    issue::{
+        id_prefix, is_dir_based, is_issue_file_name, issue_file_id, issue_root, split_frontmatter,
+        Issue, Status,
+    },
     readme, Context,
 };
 
@@ -171,9 +174,21 @@ fn collect_issue_files(issues_dir: &Path) -> Vec<PathBuf> {
         .min_depth(1)
         .into_iter()
         .filter_map(|e| e.ok())
-        .filter(|e| e.file_type().is_file())
-        .filter(|e| is_issue_file_name(&e.file_name().to_string_lossy()))
-        .map(|e| e.path().to_path_buf())
+        .filter_map(|e| {
+            let name = e.file_name().to_string_lossy().into_owned();
+            if e.file_type().is_file() && is_issue_file_name(&name) {
+                Some(e.path().to_path_buf())
+            } else if e.file_type().is_dir() && id_prefix(&name).is_some() {
+                let readme = e.path().join("README.md");
+                if readme.exists() {
+                    Some(readme)
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        })
         .collect()
 }
 
@@ -202,10 +217,18 @@ fn path_id_matches(path: &Path, ids: &HashSet<u64>) -> bool {
 }
 
 fn path_id(path: &Path) -> Option<u64> {
-    path.file_name()
-        .and_then(|s| s.to_str())
-        .and_then(issue_file_id)
-        .and_then(|id| id.parse::<u64>().ok())
+    if is_dir_based(path) {
+        path.parent()
+            .and_then(|p| p.file_name())
+            .and_then(|s| s.to_str())
+            .and_then(id_prefix)
+            .and_then(|id| id.parse::<u64>().ok())
+    } else {
+        path.file_name()
+            .and_then(|s| s.to_str())
+            .and_then(issue_file_id)
+            .and_then(|id| id.parse::<u64>().ok())
+    }
 }
 
 fn frontmatter_declares_status(content: &str) -> bool {
@@ -251,19 +274,35 @@ fn correct_status_directory(
 ) -> Result<Correction> {
     let dest_dir = ctx.status_dir(expected_dir);
     std::fs::create_dir_all(&dest_dir)?;
-    let file_name = issue
-        .path
-        .file_name()
-        .with_context(|| format!("invalid path: {}", issue.path.display()))?;
-    let dest = dest_dir.join(file_name);
-    if dest.exists() {
-        anyhow::bail!("{} already exists", dest.display());
-    }
 
-    let from = rel_path(&issue.path, &ctx.issues_dir);
-    std::fs::rename(&issue.path, &dest)?;
-    let to = rel_path(&dest, &ctx.issues_dir);
-    Ok(Correction { from, to })
+    if is_dir_based(&issue.path) {
+        let src_root = issue_root(&issue.path);
+        let entry_name = src_root
+            .file_name()
+            .with_context(|| format!("invalid path: {}", issue.path.display()))?;
+        let dest_root = dest_dir.join(entry_name);
+        if dest_root.exists() {
+            anyhow::bail!("{} already exists", dest_root.display());
+        }
+        let from = rel_path(&issue.path, &ctx.issues_dir);
+        std::fs::rename(src_root, &dest_root)?;
+        let dest_readme = dest_root.join("README.md");
+        let to = rel_path(&dest_readme, &ctx.issues_dir);
+        Ok(Correction { from, to })
+    } else {
+        let file_name = issue
+            .path
+            .file_name()
+            .with_context(|| format!("invalid path: {}", issue.path.display()))?;
+        let dest = dest_dir.join(file_name);
+        if dest.exists() {
+            anyhow::bail!("{} already exists", dest.display());
+        }
+        let from = rel_path(&issue.path, &ctx.issues_dir);
+        std::fs::rename(&issue.path, &dest)?;
+        let to = rel_path(&dest, &ctx.issues_dir);
+        Ok(Correction { from, to })
+    }
 }
 
 /// Run the validate command.

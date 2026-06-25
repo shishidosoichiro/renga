@@ -23,16 +23,28 @@ issues/
 
 ## File naming
 
+Two storage layouts are supported and may be mixed freely:
+
+**Flat file** (default):
 ```
 N-short-name.md
+```
+
+**Directory** (use `--dir=true` to create; allows placing attachments or notes alongside the issue):
+```
+N-short-name/
+  README.md     Issue content (same format as the flat file)
+  ...           Any additional files
 ```
 
 - `N`: Plain positive integer, no zero-padding. Assigned by `renga create` as max existing number + 1.
 - `short-name`: Kebab-case short description (ASCII alphanumeric and hyphens only, up to 30 characters).
 
-**The ID lives only in the filename — not in frontmatter or body.**
+**The ID lives only in the filename / directory name — not in frontmatter or body.**
 
 **Backward compatibility**: Legacy zero-padded IDs (`0042-*.md`, `00042-*.md`) are supported. All tools read them; new issues are always created without padding.
+
+Use `renga update <ID> --dir=true` to expand a flat file to a directory, and `--dir=false` to collapse it back (fails if the directory contains files other than `README.md`).
 
 ## Frontmatter
 
@@ -101,7 +113,7 @@ Brief description of what needs to be done.
 
 ```
 renga init
-renga create <title> [--id <N>] [--slug <slug>] [--priority high|medium|low] [--area <area>] [--body <text|-\>] [--milestone <milestone>] [--assignee <assignee>] [--label <label>]...
+renga create <title> [--id <N>] [--slug <slug>] [--priority high|medium|low] [--area <area>] [--body <text|-\>] [--milestone <milestone>] [--assignee <assignee>] [--label <label>]... [--dir=true|false]
 renga create --json
 renga done <ID>...
 renga pending <ID>...
@@ -111,6 +123,7 @@ renga list [--status open|pending|in-progress|done|unknown] [--area <area>] [--l
 renga show <ID> [--json]
 renga edit <ID>
 renga update <ID> [<title>] [--priority high|medium|low] [--area <area>] [--status open|pending|in-progress] [--milestone <milestone>] [--assignee <assignee>] [--label <label>]... [--add-label <label>]... [--remove-label <label>]... [--body <text|->]
+renga update <ID> --dir=true|false
 renga update <ID> --json
 renga info
 renga migrate

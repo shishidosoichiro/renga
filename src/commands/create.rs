@@ -44,6 +44,7 @@ struct CreateInput {
 pub fn run(args: CreateArgs, ctx: &Context) -> Result<()> {
     ctx.check_issues_dir()?;
 
+    let use_dir = args.dir == Some(true);
     let input = read_input(args)?;
 
     validate_priority(&input.priority)?;
@@ -66,7 +67,13 @@ pub fn run(args: CreateArgs, ctx: &Context) -> Result<()> {
     };
     let open_dir = ctx.status_dir("open");
     std::fs::create_dir_all(&open_dir)?;
-    let path = open_dir.join(format!("{id}-{slug}.md"));
+    let path = if use_dir {
+        let dir = open_dir.join(format!("{id}-{slug}"));
+        std::fs::create_dir(&dir).with_context(|| format!("failed to create {}", dir.display()))?;
+        dir.join("README.md")
+    } else {
+        open_dir.join(format!("{id}-{slug}.md"))
+    };
 
     let body_section = match input.body.as_deref() {
         Some(b) if !b.is_empty() => format!("\n{b}\n"),
@@ -170,6 +177,7 @@ fn ensure_no_cli_fields_with_json(args: &CreateArgs) -> Result<()> {
         || args.milestone.is_some()
         || args.assignee.is_some()
         || !args.label.is_empty()
+        || args.dir.is_some()
     {
         anyhow::bail!("--json cannot be combined with create field arguments");
     }

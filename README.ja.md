@@ -118,7 +118,7 @@ cargo install renga
 | コマンド | 動作 |
 |---|---|
 | `renga init` | issues ディレクトリを初期化する |
-| `renga create <タイトル> [--id <N>] [--slug <slug>] [--priority high\|medium\|low] [--area <area>] [--body <テキスト\|-\>] [--milestone <milestone>] [--assignee <assignee>] [--label <label>]...` | issue を作成する（`--body -` で標準入力から本文を読む） |
+| `renga create <タイトル> [--id <N>] [--slug <slug>] [--priority high\|medium\|low] [--area <area>] [--body <テキスト\|-\>] [--milestone <milestone>] [--assignee <assignee>] [--label <label>]... [--dir=true\|false]` | issue を作成する（`--body -` で標準入力から本文を読む。`--dir=true` でディレクトリ形式） |
 | `renga create --json` | 標準入力の JSON object から issue を作成する |
 | `renga done <ID>...` | issue を完了にする |
 | `renga pending <ID>...` | issue を保留にする |
@@ -128,6 +128,7 @@ cargo install renga
 | `renga show <ID> [--json]` | issue の詳細を表示する |
 | `renga edit <ID>` | `$EDITOR` で issue を開く（人間向け） |
 | `renga update <ID> [<タイトル>] [--priority ...] [--area ...] [--status ...] [--milestone ...] [--assignee ...] [--label ...]... [--add-label ...]... [--remove-label ...]... [--body <テキスト\|->]` | issue のフィールドを更新する（AI・スクリプト向け） |
+| `renga update <ID> --dir=true\|false` | issue をフラットファイルとディレクトリ形式の間で変換する |
 | `renga update <ID> --json` | 標準入力の JSON object から issue のフィールドを更新する |
 | `renga info` | プロジェクトルート・issues ディレクトリ・設定ファイルの場所と現在の設定を表示する |
 

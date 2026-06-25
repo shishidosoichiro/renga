@@ -268,10 +268,33 @@ pub fn find_issue(issues_dir: &Path, id: &str, include_done: bool) -> Result<Opt
         .with_context(|| format!("invalid issue ID: {id}"))?;
     for entry in WalkDir::new(issues_dir).min_depth(1) {
         let entry = entry?;
+        let name = entry.file_name().to_string_lossy();
+
+        if entry.file_type().is_dir() {
+            let Some(entry_id) = id_prefix(&name) else {
+                continue;
+            };
+            if !include_done {
+                let rel = entry
+                    .path()
+                    .strip_prefix(issues_dir)
+                    .unwrap_or(entry.path());
+                if rel.starts_with("done") {
+                    continue;
+                }
+            }
+            if entry_id.parse::<u64>().unwrap_or(0) == num {
+                let readme = entry.path().join("README.md");
+                if readme.exists() {
+                    return Ok(Some(readme));
+                }
+            }
+            continue;
+        }
+
         if !entry.file_type().is_file() {
             continue;
         }
-        let name = entry.file_name().to_string_lossy();
         if issue_file_id(&name).is_none() {
             continue;
         }
@@ -352,18 +375,24 @@ pub fn all_issues(
         .min_depth(1)
         .into_iter()
         .filter_map(|e| e.ok())
-        .filter(|e| e.file_type().is_file())
-        .filter(|e| is_issue_file_name(&e.file_name().to_string_lossy()))
-        .map(|e| e.path().to_path_buf())
+        .filter_map(|e| {
+            let name = e.file_name().to_string_lossy().into_owned();
+            if e.file_type().is_file() && is_issue_file_name(&name) {
+                Some(e.path().to_path_buf())
+            } else if e.file_type().is_dir() && id_prefix(&name).is_some() {
+                let readme = e.path().join("README.md");
+                if readme.exists() {
+                    Some(readme)
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        })
         .collect();
 
-    files.sort_by_key(|p| {
-        p.file_name()
-            .and_then(|n| n.to_str())
-            .and_then(|n| n.split('-').next())
-            .and_then(|n| n.parse::<u64>().ok())
-            .unwrap_or(0)
-    });
+    files.sort_by_key(|p| extract_id(p).parse::<u64>().unwrap_or(0));
 
     let mut results = Vec::new();
     for path in files {
@@ -431,11 +460,13 @@ pub fn next_id(issues_dir: &Path) -> Result<String> {
 
     for entry in WalkDir::new(issues_dir) {
         let entry = entry?;
-        if !entry.file_type().is_file() {
-            continue;
-        }
         let name = entry.file_name().to_string_lossy();
-        if let Some(id) = id_prefix(&name) {
+        let id_str = if entry.file_type().is_dir() {
+            id_prefix(&name)
+        } else {
+            issue_file_id(&name)
+        };
+        if let Some(id) = id_str {
             if let Ok(n) = id.parse::<u64>() {
                 max = max.max(n);
             }
@@ -641,7 +672,34 @@ pub(crate) fn split_frontmatter(content: &str) -> Option<(&str, &str)> {
     }
 }
 
+/// Returns `true` if the issue is stored as `N-title/README.md`.
+pub fn is_dir_based(path: &Path) -> bool {
+    path.file_name().map(|n| n == "README.md").unwrap_or(false)
+}
+
+/// Returns the filesystem entry that represents this issue.
+///
+/// For directory-based issues (`N-title/README.md`) this is the parent
+/// directory. For flat-file issues this is the file itself. Use this when
+/// you need the path to rename or remove the issue as a whole.
+pub fn issue_root(path: &Path) -> &Path {
+    if is_dir_based(path) {
+        path.parent().unwrap_or(path)
+    } else {
+        path
+    }
+}
+
 fn extract_id(path: &Path) -> String {
+    if is_dir_based(path) {
+        return path
+            .parent()
+            .and_then(|p| p.file_name())
+            .and_then(|n| n.to_str())
+            .and_then(id_prefix)
+            .map(str::to_string)
+            .unwrap_or_default();
+    }
     path.file_stem()
         .and_then(|s| s.to_str())
         .and_then(id_prefix)
@@ -668,7 +726,7 @@ pub(crate) fn issue_file_id(name: &str) -> Option<&str> {
     id_prefix(stem)
 }
 
-fn id_prefix(s: &str) -> Option<&str> {
+pub(crate) fn id_prefix(s: &str) -> Option<&str> {
     let (id, _) = s.split_once('-')?;
     if id.is_empty() || !id.bytes().all(|b| b.is_ascii_digit()) {
         return None;
@@ -724,7 +782,13 @@ fn explicit_frontmatter_status(path: &Path) -> Result<Option<Status>> {
 fn title_or_stem(body: &str, path: &Path) -> String {
     let t = extract_title(body);
     if t.is_empty() {
-        path.file_stem()
+        let stem_path = if is_dir_based(path) {
+            path.parent().unwrap_or(path)
+        } else {
+            path
+        };
+        stem_path
+            .file_stem()
             .and_then(|s| s.to_str())
             .unwrap_or_default()
             .to_string()
@@ -874,8 +938,14 @@ mod tests {
     fn make_slug_preserves_japanese() {
         assert_eq!(make_slug("Rust への書き直し"), "rust-への書き直し");
         assert_eq!(make_slug("日本語タイトル"), "日本語タイトル");
-        assert_eq!(make_slug("ADR: 日本語タイトルの設計判断"), "adr-日本語タイトルの設計判断");
-        assert_eq!(make_slug("実装 (implementation) の話"), "実装-implementation-の話");
+        assert_eq!(
+            make_slug("ADR: 日本語タイトルの設計判断"),
+            "adr-日本語タイトルの設計判断"
+        );
+        assert_eq!(
+            make_slug("実装 (implementation) の話"),
+            "実装-implementation-の話"
+        );
         // 全角記号・中黒・全角スペースは区切り文字として扱われる
         assert_eq!(make_slug("foo・bar　baz"), "foo-bar-baz");
     }
