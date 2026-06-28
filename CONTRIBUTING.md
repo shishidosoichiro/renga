@@ -54,6 +54,14 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/). The type is
 
 **Breaking changes** — add `!` after the type (`feat!:`) or add a `BREAKING CHANGE:` footer. Include migration steps in the commit body.
 
+**Fixup commits for unreleased work** — when you need to touch up a commit that was added since the last tag but isn't part of the change you're currently committing, don't reach for `fix:`. A `fix:` entry lands in the changelog even though the code it corrects has never shipped. Instead, stack a fixup commit onto its target:
+
+```sh
+git commit --fixup <target-SHA>
+```
+
+Fixups are squashed into their targets before the release tag (see [Releasing](#releasing)). Reserve `fix:` for bugs in code that was already released in a previous tag. Bugs introduced earlier than the last tag stay as ordinary `fix:` commits.
+
 Use English for the description.
 
 **Write for the reader of the changelog, not the implementer.** The `description` is the exact text that appears in `CHANGELOG.md` via git-cliff. Write it so a user upgrading between versions understands what changed and why it matters — not what internal work was done.
@@ -86,22 +94,30 @@ Releases follow [Semantic Versioning](https://semver.org/). Because Renga is pre
 **Release steps**
 
 1. Make and commit all changes with appropriate Conventional Commit messages.
-2. Generate the changelog for the new version:
+2. Integrate any fixup commits stacked since the last tag, so the changelog and history reflect the final state:
+   ```sh
+   # with a previous tag
+   GIT_SEQUENCE_EDITOR=true git rebase -i --autosquash $(git describe --tags --abbrev=0)
+   # first release (no previous tag)
+   GIT_SEQUENCE_EDITOR=true git rebase -i --autosquash $(git rev-list --max-parents=0 HEAD)
+   ```
+   Only autosquash local, unpushed commits — never rebase commits that are already pushed, as that requires a force push and rewrites shared history.
+3. Generate the changelog for the new version:
    ```sh
    just changelog v0.x.0
    ```
    Review the output and edit for clarity before committing. To regenerate, repeat the same command.
-3. Bump the version in `Cargo.toml` (and run `cargo build` to update `Cargo.lock`).
-4. Commit the changelog and version bump:
+4. Bump the version in `Cargo.toml` (and run `cargo build` to update `Cargo.lock`).
+5. Commit the changelog and version bump:
    ```sh
    git add CHANGELOG.md Cargo.toml Cargo.lock
    git commit -m "chore(release): prepare for v0.x.0"
    ```
-5. Tag the commit:
+6. Tag the commit:
    ```sh
    git tag v0.x.0
    ```
-6. Push with tags:
+7. Push with tags:
    ```sh
    git push && git push --tags
    ```
