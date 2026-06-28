@@ -63,7 +63,7 @@ These rules apply whenever an AI agent works with renga issues.
 If `$ARGUMENTS` starts with `create`, strip it and use the rest as the title. Otherwise use `$ARGUMENTS` as-is.
 
 ```
-renga create "<title>" [--id <id>] [--slug <slug>] [--priority high|medium|low] [--area <area>] [--milestone <milestone>] [--label <label>]... [--body <text|->]
+renga create "<title>" [--id <id>] [--slug <slug>] [--priority high|medium|low] [--area <area>] [--milestone <milestone>] [--label <label>]... [--body <text|->] [--dir=true|false]
 renga create --json
 ```
 
@@ -72,6 +72,7 @@ renga create --json
 - `--priority`: Default is `medium`. Use `high` for correctness issues, `low` for suggestions.
 - `--label`: Labels to attach (repeatable: `--label bug --label urgent`).
 - `--body`: **Always include.** Write a brief description of what needs to be done and why. The title alone is not sufficient.
+- `--dir`: Pass `--dir=true` to store the issue as a directory (`N-slug/README.md`) so attachments or notes can live alongside it. Defaults to the flat `N-slug.md` file.
 - `--json`: Read one JSON object from stdin. Supported fields are `title`, `id`, `slug`, `priority`, `area`, `body`, `milestone`, and `labels`. Do not combine with field arguments.
 - Report the created file path to the user.
 
@@ -164,6 +165,7 @@ Opens the issue file in `$EDITOR`. For human use only — AI agents cannot inter
 
 ```
 renga update <ID> [<title>] [--priority high|medium|low] [--area <area>] [--status open|pending|in-progress] [--milestone <milestone>] [--label <label>]... [--add-label <label>]... [--remove-label <label>]... [--body <text|->]
+renga update <ID> --dir=true|false
 renga update <ID> --json
 ```
 
@@ -175,6 +177,7 @@ Updates issue fields without opening an editor. Designed for AI agents and scrip
 - `--label` is repeatable and **replaces** all existing labels
 - `--add-label` adds a label without removing others (repeatable, deduplicates automatically)
 - `--remove-label` removes a specific label (repeatable)
+- `--dir` converts the issue between layouts. `--dir=true` expands a flat `N-slug.md` file into a `N-slug/README.md` directory; `--dir=false` collapses it back (fails if the directory holds files other than `README.md`)
 - `--json` reads one JSON object from stdin. Supported fields are `title`, `priority`, `area`, `status`, `milestone`, `labels`, `add_labels`, `remove_labels`, and `body`. Do not combine with field arguments.
 - Multiple flags can be combined in one call
 
