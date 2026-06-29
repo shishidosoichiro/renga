@@ -1,6 +1,15 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [0.15.0] - 2026-06-29
+
+### 🚀 Features
+
+- [`3450c3e`] Support directory layout for issues (--dir=true|false)
+
+### 🐛 Bug Fixes
+
+- [`876fa39`] Preserve Unicode characters in auto-generated slugs
 ## [0.14.0] - 2026-06-22
 
 ### 🚀 Features
