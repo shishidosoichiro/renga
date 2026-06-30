@@ -1,7 +1,7 @@
 ---
 name: self-improve
 description: セッション後の CLAUDE.md・.claude/・skills/ 改善。retro issue と git log を読み、実績とのギャップを直接編集する。推測的変更は行わない。明示的呼び出しのみ。
-tools: Read, Glob, Grep, Write, Edit, Bash, WebFetch
+tools: Read, Glob, Grep, Write, Edit, Bash, WebFetch, Agent
 ---
 
 # 自己改善モード
@@ -83,6 +83,12 @@ https://code.claude.com/docs/en/sub-agents.md
 ### 対象外にしたもの（根拠なし）
 - yyy の追加を検討したが根拠がないため見送り
 ```
+
+### Step 8: agent-config-reviewer を呼ぶ
+
+`Agent(subagent_type="agent-config-reviewer")` を呼び、自分が加えた変更をレビューさせる。
+呼び出し時に retro issue 番号と変更したファイルの一覧を渡す。
+指摘があれば Step 6 に戻って修正する。
 
 ## やらないこと
 
