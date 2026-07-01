@@ -141,7 +141,10 @@ cargo install renga
 frontmatter の `status` を正とする情報源とする。active issue が誤って
 `done/` 配下にある場合、active issue 用コマンドはその issue を操作し、warning と
 `renga validate <ID> --auto-correct` の推奨を表示する。通常の `status: done`
-issue は reopen するまで active issue 用コマンドでは変更できない。
+issue は、status を変更するコマンド（`done`・`pending`・`in-progress`・
+`reopen`）については reopen するまで実行できない。ただし `update` と `edit` は
+reopen せずに done issue のフィールド（label・assignee・milestone・本文・
+タイトル）を編集できる。
 
 ```sh
 # JSON 出力を jq にパイプする

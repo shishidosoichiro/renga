@@ -184,6 +184,19 @@ fn done_not_found() {
 }
 
 #[test]
+fn done_rejects_normal_done_issue() {
+    let dir = setup();
+    renga(&dir).args(["create", "Task"]).assert().success();
+    renga(&dir).args(["done", "1"]).assert().success();
+
+    renga(&dir)
+        .args(["done", "1"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("not found"));
+}
+
+#[test]
 fn done_operates_on_misplaced_active_issue_with_warning() {
     let dir = setup();
     fs::write(
@@ -250,6 +263,19 @@ fn pending_not_found() {
     let dir = setup();
     renga(&dir)
         .args(["pending", "99"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("not found"));
+}
+
+#[test]
+fn pending_rejects_normal_done_issue() {
+    let dir = setup();
+    renga(&dir).args(["create", "Task"]).assert().success();
+    renga(&dir).args(["done", "1"]).assert().success();
+
+    renga(&dir)
+        .args(["pending", "1"])
         .assert()
         .failure()
         .stderr(predicate::str::contains("not found"));
@@ -340,6 +366,19 @@ fn in_progress_not_found() {
     let dir = setup();
     renga(&dir)
         .args(["in-progress", "99"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("not found"));
+}
+
+#[test]
+fn in_progress_rejects_normal_done_issue() {
+    let dir = setup();
+    renga(&dir).args(["create", "Task"]).assert().success();
+    renga(&dir).args(["done", "1"]).assert().success();
+
+    renga(&dir)
+        .args(["in-progress", "1"])
         .assert()
         .failure()
         .stderr(predicate::str::contains("not found"));
@@ -1474,6 +1513,24 @@ fn update_status_moves_file() {
 }
 
 #[test]
+fn update_status_moves_done_issue_to_pending() {
+    let dir = setup();
+    renga(&dir).args(["create", "Task"]).assert().success();
+    renga(&dir).args(["done", "1"]).assert().success();
+    assert!(dir.path().join("issues/done/1-task.md").exists());
+
+    renga(&dir)
+        .args(["update", "1", "--status", "pending"])
+        .assert()
+        .success();
+
+    assert!(!dir.path().join("issues/done/1-task.md").exists());
+    assert!(dir.path().join("issues/pending/1-task.md").exists());
+    let content = fs::read_to_string(dir.path().join("issues/pending/1-task.md")).unwrap();
+    assert!(content.contains("status: pending"));
+}
+
+#[test]
 fn update_operates_on_misplaced_active_issue_with_warning() {
     let dir = setup();
     fs::write(
@@ -1493,7 +1550,7 @@ fn update_operates_on_misplaced_active_issue_with_warning() {
 }
 
 #[test]
-fn update_keeps_normal_done_issue_out_of_scope() {
+fn update_can_edit_normal_done_issue() {
     let dir = setup();
     renga(&dir).args(["create", "Task"]).assert().success();
     renga(&dir).args(["done", "1"]).assert().success();
@@ -1501,8 +1558,75 @@ fn update_keeps_normal_done_issue_out_of_scope() {
     renga(&dir)
         .args(["update", "1", "--assignee", "alice"])
         .assert()
+        .success();
+
+    let content = fs::read_to_string(dir.path().join("issues/done/1-task.md")).unwrap();
+    assert!(content.contains("assignee: alice"));
+    assert!(content.contains("status: done"));
+}
+
+#[test]
+fn update_can_edit_dir_based_done_issue() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "Task", "--dir=true"])
+        .assert()
+        .success();
+    renga(&dir).args(["done", "1"]).assert().success();
+
+    renga(&dir)
+        .args(["update", "1", "--assignee", "alice"])
+        .assert()
+        .success();
+
+    let content = fs::read_to_string(dir.path().join("issues/done/1-task/README.md")).unwrap();
+    assert!(content.contains("assignee: alice"));
+    assert!(content.contains("status: done"));
+}
+
+#[test]
+fn update_rejects_done_issue_missing_status_field() {
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/done/1-task.md"),
+        "---\nschema_version: 1\npriority: medium\narea: core\nlabels: []\n---\n\n# Task\n",
+    )
+    .unwrap();
+
+    renga(&dir)
+        .args(["update", "1", "--assignee", "alice"])
+        .assert()
         .failure()
         .stderr(predicate::str::contains("not found"));
+}
+
+#[test]
+fn edit_can_edit_normal_done_issue() {
+    let dir = setup();
+    renga(&dir).args(["create", "Task"]).assert().success();
+    renga(&dir).args(["done", "1"]).assert().success();
+
+    renga(&dir)
+        .env("EDITOR", "true")
+        .args(["edit", "1"])
+        .assert()
+        .success();
+}
+
+#[test]
+fn edit_can_edit_dir_based_done_issue() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "Task", "--dir=true"])
+        .assert()
+        .success();
+    renga(&dir).args(["done", "1"]).assert().success();
+
+    renga(&dir)
+        .env("EDITOR", "true")
+        .args(["edit", "1"])
+        .assert()
+        .success();
 }
 
 #[test]

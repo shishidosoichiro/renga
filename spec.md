@@ -155,7 +155,10 @@ If an issue file is stored under `done/` but its frontmatter status is active
 (`open`, `pending`, or `in-progress`), active-issue commands may still operate
 on it because frontmatter status is authoritative. Such commands print a
 warning and recommend `renga validate <ID> --auto-correct`. A normal
-`status: done` issue remains outside active-issue commands unless reopened.
+`status: done` issue remains outside the status-transition commands (`done`,
+`pending`, `in-progress`, `reopen`) unless reopened. `update` and `edit` are
+exceptions: they can edit a done issue's fields directly, since `update` never
+accepts `--status done` and cannot transition an issue to done.
 
 ## `.renga.yml`
 

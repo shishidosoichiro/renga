@@ -358,6 +358,38 @@ pub fn find_active_issue(issues_dir: &Path, id: &str) -> Result<Option<ActiveIss
     }))
 }
 
+/// Search for an issue that `update`/`edit` may modify.
+///
+/// Extends [`find_active_issue`] by also matching a normal `done/` issue
+/// (frontmatter `status: done`, correctly stored under `done/`). This lets
+/// field edits (labels, assignee, milestone, body, title) remain possible on
+/// closed issues without requiring `reopen` first, following GitHub/GitLab/Jira
+/// convention. Status *transition* commands (`done`, `pending`, `in-progress`,
+/// `reopen`) must keep calling [`find_active_issue`] directly so they stay
+/// restricted to active issues.
+///
+/// The misplaced-file warning behavior of [`find_active_issue`] is preserved
+/// unchanged; no warning is emitted for a normal done issue since its directory
+/// and frontmatter status agree.
+pub fn find_editable_issue(issues_dir: &Path, id: &str) -> Result<Option<ActiveIssuePath>> {
+    if let Some(active) = find_active_issue(issues_dir, id)? {
+        return Ok(Some(active));
+    }
+    let Some(path) = find_issue(issues_dir, id, true)? else {
+        return Ok(None);
+    };
+    let Some(frontmatter_status) = explicit_frontmatter_status(&path)? else {
+        return Ok(None);
+    };
+    if frontmatter_status != Status::Done {
+        return Ok(None);
+    }
+    Ok(Some(ActiveIssuePath {
+        path,
+        warning: None,
+    }))
+}
+
 /// Collect issues from `issues_dir` recursively, applying optional filters.
 ///
 /// `status_filter`:
@@ -1055,5 +1087,16 @@ mod tests {
         let found = find_issue(dir.path(), "5", false).unwrap();
         assert!(found.is_some());
         assert!(found.unwrap().ends_with("00005-my-issue.md"));
+    }
+
+    #[test]
+    fn find_editable_issue_matches_normal_done_issue() {
+        let dir = TempDir::new().unwrap();
+        let done = dir.path().join("done");
+        std::fs::create_dir(&done).unwrap();
+        std::fs::write(done.join("1-task.md"), "---\nstatus: done\n---\n\n# Task\n").unwrap();
+        let found = find_editable_issue(dir.path(), "1").unwrap();
+        assert!(found.is_some());
+        assert!(found.unwrap().warning.is_none());
     }
 }

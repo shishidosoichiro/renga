@@ -141,7 +141,10 @@ Pass an empty string to `--milestone` or `--assignee` to remove the field: `reng
 Frontmatter `status` is authoritative. If an active issue is accidentally stored
 under `done/`, active-issue commands still operate on it, print a warning, and
 recommend `renga validate <ID> --auto-correct`. Normal `status: done` issues
-must be reopened before active-issue commands can change them.
+must be reopened before status-transition commands (`done`, `pending`,
+`in-progress`, `reopen`) can change them again — but `update` and `edit` can
+still edit a done issue's fields (labels, assignee, milestone, body, title)
+without reopening it first.
 
 ```sh
 # JSON output can be piped to jq
