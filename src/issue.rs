@@ -508,10 +508,19 @@ pub fn next_id(issues_dir: &Path) -> Result<String> {
     Ok(format!("{}", max + 1))
 }
 
-/// Generate a kebab-case slug from a title (max 30 characters).
+/// Maximum byte length of a slug produced by [`make_slug`] (see issue #214).
+const SLUG_MAX_BYTES: usize = 80;
+
+/// Generate a kebab-case slug from a title (max 80 bytes, see issue #214).
 ///
 /// Unicode alphanumeric characters are preserved, so Japanese and other
-/// non-ASCII titles produce meaningful slugs.
+/// non-ASCII titles produce meaningful slugs. The limit is measured in bytes
+/// rather than characters, since a UTF-8 byte roughly tracks how much
+/// information a character carries regardless of script (e.g. a Japanese
+/// character is ~3 bytes against 1 for ASCII). If the cut lands in the
+/// middle of a multi-byte character, it is rounded down to the previous
+/// character boundary so the slug is never more than `SLUG_MAX_BYTES` and is
+/// always valid UTF-8.
 ///
 /// # Examples
 ///
@@ -525,12 +534,18 @@ pub fn make_slug(title: &str) -> String {
     let lower = title.to_lowercase();
     let slug = replace_non_alnum_runs(&lower);
     let slug = slug.trim_matches('-');
-    let slug: String = slug.chars().take(30).collect();
-    let slug = slug.trim_end_matches('-').to_string();
+
+    let mut cut = slug.len().min(SLUG_MAX_BYTES);
+    while cut > 0 && !slug.is_char_boundary(cut) {
+        cut -= 1;
+    }
+    let slug = &slug[..cut];
+
+    let slug = slug.trim_end_matches('-');
     if slug.is_empty() {
         "issue".to_string()
     } else {
-        slug
+        slug.to_string()
     }
 }
 
@@ -983,23 +998,44 @@ mod tests {
     }
 
     #[test]
-    fn make_slug_truncates_at_30_chars() {
-        let long = "abcdefghijklmnopqrstuvwxyz12345";
-        assert_eq!(make_slug(long).chars().count(), 30);
+    fn make_slug_truncates_ascii_at_80_bytes() {
+        let long = "a".repeat(90);
+        let slug = make_slug(&long);
+        assert_eq!(slug.len(), 80);
+        assert_eq!(slug, "a".repeat(80));
     }
 
     #[test]
-    fn make_slug_truncates_japanese_at_30_chars() {
-        let long = "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみ";
-        assert_eq!(make_slug(long).chars().count(), 30);
+    fn make_slug_truncates_japanese_by_byte_length_not_char_count() {
+        // Each hiragana character is 3 bytes, so an 80-byte budget fits 26
+        // full characters (78 bytes) — the 27th would need 3 more bytes and
+        // is dropped whole rather than emitting a partial/invalid character.
+        let long = "あ".repeat(40);
+        let slug = make_slug(&long);
+        assert_eq!(slug.len(), 78);
+        assert_eq!(slug, "あ".repeat(26));
+    }
+
+    #[test]
+    fn make_slug_rounds_down_when_cut_lands_mid_character() {
+        // No separator between the 79 ASCII bytes and "あ", so the 80-byte
+        // cutoff itself lands on the second byte of "あ"'s 3-byte encoding —
+        // this exercises the is_char_boundary decrement directly, unlike a
+        // dash-separated title where trim_end_matches('-') would do the work.
+        let title = format!("{}あ", "a".repeat(79));
+        let slug = make_slug(&title);
+        assert_eq!(slug.len(), 79);
+        assert_eq!(slug, "a".repeat(79));
     }
 
     #[test]
     fn make_slug_no_trailing_dash_after_truncation() {
-        // 29 word chars + space + more → dash lands at position 29, truncation at 30 exposes it
-        let title = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaa bb";
-        let slug = make_slug(title);
+        // 79 word bytes + the separator lands exactly on the 80-byte cutoff;
+        // trimming must remove that trailing dash rather than leave it dangling.
+        let title = format!("{} bb", "a".repeat(79));
+        let slug = make_slug(&title);
         assert!(!slug.ends_with('-'), "slug must not end with dash: {slug}");
+        assert_eq!(slug, "a".repeat(79));
     }
 
     #[test]

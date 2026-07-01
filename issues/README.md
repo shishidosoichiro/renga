@@ -41,7 +41,6 @@ Closed issues are moved to `done/`.
 | [194](open/194-bulk-update-command.md) | open | medium | area や assignee を条件にした一括更新コマンドがない |
 | [195](open/195-prevent-duplicate-ids.md) | open | medium | issue 作成時に重複 ID を防止できない |
 | [203](open/203-git-worktree-issues.md) | open | medium | git worktree 使用時に issues ディレクトリが分離される |
-| [214](open/214-make-slug-が長い日本語タイトルで単語の途中で途切れ.md) | open | medium | make_slug が長い日本語タイトルで単語の途中で途切れる |
 
 ---
 
@@ -53,6 +52,7 @@ Closed issues are moved to `done/`.
 | [14](pending/14-changelog-keep-a-changelog.md) | pending | medium | CHANGELOG を Keep a Changelog 形式に移行するか検討する |
 | [102](pending/102-code-of-conduct-md.md) | pending | medium | CODE_OF_CONDUCT.md を追加する |
 | [103](pending/103-security-md.md) | pending | medium | SECURITY.md を追加する |
+| [223](open/223-spec-md-spec-ja-md-の-short-name-が-ascii-alphanumeric-only-と書かれてい.md) | open | medium | spec.md/spec.ja.md の short-name が ASCII alphanumeric only と書かれているが実装は Unicode 英数字を許容する |
 
 ---
 
