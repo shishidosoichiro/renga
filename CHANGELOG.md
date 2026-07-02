@@ -1,6 +1,15 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [0.16.0] - 2026-07-02
+
+### 🚀 Features
+
+- [`8df5b9f`] Allow update/edit to modify done issues without reopening
+
+### 🐛 Bug Fixes
+
+- [`3a67de1`] Truncate slugs by byte length instead of character count
 ## [0.15.0] - 2026-06-29
 
 ### 🚀 Features
