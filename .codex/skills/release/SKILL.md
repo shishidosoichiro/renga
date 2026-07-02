@@ -20,18 +20,16 @@ renga の新バージョンをリリースする。バージョン番号（例: 
 4. `Cargo.toml` の `version` フィールドを新バージョンに更新する
 5. `git cliff --tag v<version> -o CHANGELOG.md` で CHANGELOG を生成する（手書き禁止）
 6. 変更内容をユーザーに確認する
-7. ユーザーの承認を得てからコミット・タグ・プッシュ・publish する:
+7. ユーザーの承認を得てからコミット・タグ・プッシュする:
    ```
    git add CHANGELOG.md Cargo.toml
    git commit -m "chore(release): prepare for v<version>"
    git tag v<version>
    git push
    git push origin v<version>
-   cargo publish
    ```
    - `git push` は origin（GitHub）にプッシュする
-   - `git push origin v<version>` で `release.yml` が起動し、GitHub リリースページにリリースノートが自動生成される
-   - `cargo publish` で crates.io に公開する
+   - `git push origin v<version>` で `.github/workflows/release.yml` が起動し、GitHub リリースページにリリースノートが自動生成されるほか、`publish` ジョブが `cargo publish` を自動実行して crates.io に公開する（手動での `cargo publish` は不要。二重実行になる）
 8. install スキルを実行してローカルにインストールする
 9. 今回のリリースで対応した issue をユーザーに確認し、`renga done <N>` で close する
 
