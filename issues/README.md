@@ -52,7 +52,6 @@ Closed issues are moved to `done/`.
 | [14](pending/14-changelog-keep-a-changelog.md) | pending | medium | CHANGELOG を Keep a Changelog 形式に移行するか検討する |
 | [102](pending/102-code-of-conduct-md.md) | pending | medium | CODE_OF_CONDUCT.md を追加する |
 | [103](pending/103-security-md.md) | pending | medium | SECURITY.md を追加する |
-| [223](open/223-spec-md-spec-ja-md-の-short-name-が-ascii-alphanumeric-only-と書かれてい.md) | open | medium | spec.md/spec.ja.md の short-name が ASCII alphanumeric only と書かれているが実装は Unicode 英数字を許容する |
 
 ---
 

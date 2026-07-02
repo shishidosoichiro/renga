@@ -38,7 +38,7 @@ N-short-name/
 ```
 
 - `N`: Plain positive integer, no zero-padding. Assigned by `renga create` as max existing number + 1.
-- `short-name`: Kebab-case short description (ASCII alphanumeric and hyphens only, up to 80 bytes).
+- `short-name`: Kebab-case short description (Unicode alphanumeric and hyphens only, up to 80 bytes).
 
 **The ID lives only in the filename / directory name — not in frontmatter or body.**
 

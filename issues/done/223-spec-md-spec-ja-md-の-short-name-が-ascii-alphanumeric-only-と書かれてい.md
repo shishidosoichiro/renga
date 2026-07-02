@@ -1,9 +1,9 @@
 ---
 schema_version: 1
-status: open
+status: done
 priority: medium
 area: docs
-labels: [found_at:0.15.0]
+labels: [found_at:0.15.0, fixed_at:0.16.0]
 ---
 
 # spec.md/spec.ja.md の short-name が ASCII alphanumeric only と書かれているが実装は Unicode 英数字を許容する
