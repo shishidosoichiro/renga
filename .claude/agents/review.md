@@ -18,6 +18,7 @@ tools: Read, Glob, Grep, Bash, Write
 - `cargo llvm-cov --summary-only -- --test-threads=1` でカバレッジを確認する
 - `cargo doc --no-deps` がエラーなく通るか（`#![deny(missing_docs)]` 違反がないか）
 - `unwrap()` / `expect()` がテスト外で使われていないか
+- 過剰な抽象化・不要な複雑さがないか（タスクに必要な最小限の実装か）
 
 ### 2. CLI ↔ 仕様の整合性
 
