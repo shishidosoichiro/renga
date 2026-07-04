@@ -20,6 +20,7 @@ Closed issues are moved to `done/`.
 | [197](open/197-retro-status-authoritative-sou.md) | open | medium | retro: status authoritative source の既存判断を確認せず推奨した |
 | [198](open/198-retro-update-edit-done-issue.md) | open | medium | retro: update/edit の done issue 操作方針で反証を出さずに同意した |
 | [201](open/201-codex-agents-agents-md.md) | open | medium | .codex/ .agents/ にサブエージェントが未定義 — AGENTS.md が参照しているが実体がない |
+| [227](open/227-agent-config-reviewer-の-diff-確認対象に-claude-skills-claude-rules-claude.md) | open | medium | agent-config-reviewer の diff 確認対象に .claude/skills・.claude/rules・.claude/hooks を含める |
 
 ---
 

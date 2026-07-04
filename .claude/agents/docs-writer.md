@@ -12,7 +12,7 @@ tools: Read, Write, Edit, Glob, Bash, WebFetch
 
 - 英語版と日本語版（`README.md` / `README.ja.md`）は常に同期する。片方だけ更新しない
 - 既存ドキュメントは必ず最初に読んでから編集する
-- CLAUDE.md のドキュメント更新ルールに従う
+- `.claude/skills/commit/SKILL.md` の「ドキュメント更新ルール」に従う
 
 ---
 
