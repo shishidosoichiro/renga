@@ -8,7 +8,7 @@ use serde::Deserialize;
 use crate::{
     cli::UpdateArgs,
     issue::{
-        find_editable_issue, is_dir_based, issue_root, remove_frontmatter_field,
+        find_editable_issue, is_dir_based, issue_root, relocate_issue, remove_frontmatter_field,
         replace_or_prepend_heading, set_frontmatter_field, split_frontmatter, validate_label,
         Issue,
     },
@@ -163,35 +163,9 @@ pub fn run(args: UpdateArgs, ctx: &Context) -> Result<()> {
     // If --status was given, move the issue to the matching status directory.
     if let Some(new_status) = &input.status {
         let dest_dir = ctx.status_dir(new_status);
-        std::fs::create_dir_all(&dest_dir)?;
-        let entry_name = issue_root(&path)
-            .file_name()
-            .with_context(|| format!("invalid path: {}", path.display()))?;
-
-        if is_dir_based(&path) {
-            std::fs::write(&path, &content)?;
-            let src_root = issue_root(&path);
-            let dst_root = dest_dir.join(entry_name);
-            std::fs::rename(src_root, &dst_root)?;
-            let printed = dst_root.join("README.md");
-            readme::write_readme(&ctx.issues_dir, &ctx.config)?;
-            println!("{}", printed.display());
-        } else {
-            let dest = dest_dir.join(entry_name);
-            if dest != path {
-                let tmp = dest.with_extension("tmp");
-                std::fs::write(&tmp, &content)?;
-                if let Err(e) = std::fs::rename(&tmp, &dest) {
-                    let _ = std::fs::remove_file(&tmp);
-                    return Err(e.into());
-                }
-                std::fs::remove_file(&path)?;
-            } else {
-                std::fs::write(&dest, &content)?;
-            }
-            readme::write_readme(&ctx.issues_dir, &ctx.config)?;
-            println!("{}", dest.display());
-        }
+        let dest = relocate_issue(&path, &content, &dest_dir)?;
+        readme::write_readme(&ctx.issues_dir, &ctx.config)?;
+        println!("{}", dest.display());
     } else {
         std::fs::write(&path, &content)?;
         readme::write_readme(&ctx.issues_dir, &ctx.config)?;

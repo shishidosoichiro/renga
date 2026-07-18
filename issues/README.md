@@ -31,6 +31,7 @@ Closed issues are moved to `done/`.
 | [87](open/87-renga-next-priority-area-issue.md) | open | medium | renga next — priority・area から次に着手すべき issue を返す（AI のトークン節約） |
 | [153](open/153-clap-complete-unstable-dynamic.md) | open | low | clap_complete unstable-dynamic が stable になったら __complete と手書きシェルスクリプトを置き換えを検討する |
 | [167](open/167-split-complete-update-test.md) | open | low | complete_update_shows_open_issues_and_flags を2つのテストに分割する |
+| [228](open/228-feat-add-append-to-renga-update-for-appending-text-to-issue-body.md) | open | medium | feat: add --append to renga update for appending text to issue body |
 
 ---
 
@@ -42,6 +43,7 @@ Closed issues are moved to `done/`.
 | [194](open/194-bulk-update-command.md) | open | medium | area や assignee を条件にした一括更新コマンドがない |
 | [195](open/195-prevent-duplicate-ids.md) | open | medium | issue 作成時に重複 ID を防止できない |
 | [203](open/203-git-worktree-issues.md) | open | medium | git worktree 使用時に issues ディレクトリが分離される |
+| [229](open/229-feat-nest-issues-under-area-directory-via-group-by-config.md) | open | medium | feat: nest issues under area directory via group_by config |
 
 ---
 

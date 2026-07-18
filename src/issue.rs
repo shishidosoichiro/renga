@@ -274,14 +274,8 @@ pub fn find_issue(issues_dir: &Path, id: &str, include_done: bool) -> Result<Opt
             let Some(entry_id) = id_prefix(&name) else {
                 continue;
             };
-            if !include_done {
-                let rel = entry
-                    .path()
-                    .strip_prefix(issues_dir)
-                    .unwrap_or(entry.path());
-                if rel.starts_with("done") {
-                    continue;
-                }
+            if !include_done && status_dir_name(entry.path()).as_deref() == Some("done") {
+                continue;
             }
             if entry_id.parse::<u64>().unwrap_or(0) == num {
                 let readme = entry.path().join("README.md");
@@ -298,14 +292,8 @@ pub fn find_issue(issues_dir: &Path, id: &str, include_done: bool) -> Result<Opt
         if issue_file_id(&name).is_none() {
             continue;
         }
-        if !include_done {
-            let rel = entry
-                .path()
-                .strip_prefix(issues_dir)
-                .unwrap_or(entry.path());
-            if rel.starts_with("done") {
-                continue;
-            }
+        if !include_done && status_dir_name(entry.path()).as_deref() == Some("done") {
+            continue;
         }
         if let Some(id) = issue_file_id(&name) {
             if id.parse::<u64>().unwrap_or(0) == num {
@@ -333,7 +321,7 @@ pub fn find_active_issue(issues_dir: &Path, id: &str) -> Result<Option<ActiveIss
     let Some(path) = find_issue(issues_dir, id, true)? else {
         return Ok(None);
     };
-    let actual_dir = status_dir_name(&path, issues_dir);
+    let actual_dir = status_dir_name(&path);
     if actual_dir.as_deref() != Some("done") {
         return Ok(None);
     }
@@ -737,6 +725,47 @@ pub fn issue_root(path: &Path) -> &Path {
     }
 }
 
+/// Move an issue to `dest_dir`, writing `content` first.
+///
+/// Handles both directory-based issues (the whole `N-title/` directory is
+/// renamed atomically) and flat-file issues (content is written to a
+/// temporary file inside `dest_dir` and renamed into place, so the issue is
+/// never briefly missing from disk). If the issue is already located at
+/// `dest_dir`, no rename occurs — only the content is (re)written in place.
+///
+/// Returns the path to the issue's primary file after the operation
+/// (`README.md` for directory-based issues, the file itself otherwise).
+pub fn relocate_issue(path: &Path, content: &str, dest_dir: &Path) -> Result<PathBuf> {
+    std::fs::create_dir_all(dest_dir)?;
+    let entry_name = issue_root(path)
+        .file_name()
+        .with_context(|| format!("invalid path: {}", path.display()))?;
+
+    if is_dir_based(path) {
+        let src_root = issue_root(path);
+        let dst_root = dest_dir.join(entry_name);
+        std::fs::write(path, content)?;
+        if src_root != dst_root {
+            std::fs::rename(src_root, &dst_root)?;
+        }
+        Ok(dst_root.join("README.md"))
+    } else {
+        let dest = dest_dir.join(entry_name);
+        if dest == path {
+            std::fs::write(&dest, content)?;
+        } else {
+            let tmp = dest.with_extension("tmp");
+            std::fs::write(&tmp, content)?;
+            if let Err(e) = std::fs::rename(&tmp, &dest) {
+                let _ = std::fs::remove_file(&tmp);
+                return Err(e.into());
+            }
+            std::fs::remove_file(path)?;
+        }
+        Ok(dest)
+    }
+}
+
 fn extract_id(path: &Path) -> String {
     if is_dir_based(path) {
         return path
@@ -806,12 +835,17 @@ fn strip_linenum_prefix(s: &str) -> &str {
     rest.trim_start()
 }
 
-fn status_dir_name(path: &Path, issues_dir: &Path) -> Option<String> {
-    path.strip_prefix(issues_dir)
-        .ok()?
-        .components()
-        .next()?
-        .as_os_str()
+/// Returns the name of the directory that directly contains this issue.
+///
+/// This is the status directory (e.g. `"open"`, `"done"`) regardless of how
+/// many directory levels sit above it (e.g. under a `group_by` area
+/// nesting), since it is always the issue's immediate parent — `issue_root`
+/// already collapses directory-based vs. flat-file issues to a single
+/// filesystem entry.
+pub(crate) fn status_dir_name(path: &Path) -> Option<String> {
+    issue_root(path)
+        .parent()?
+        .file_name()?
         .to_str()
         .map(str::to_string)
 }
@@ -1134,5 +1168,115 @@ mod tests {
         let found = find_editable_issue(dir.path(), "1").unwrap();
         assert!(found.is_some());
         assert!(found.unwrap().warning.is_none());
+    }
+
+    #[test]
+    fn relocate_issue_flat_file_moves_across_dirs() {
+        let dir = TempDir::new().unwrap();
+        let open_dir = dir.path().join("open");
+        std::fs::create_dir(&open_dir).unwrap();
+        let path = open_dir.join("1-task.md");
+        std::fs::write(&path, "---\nstatus: open\n---\n\n# Task\n").unwrap();
+
+        let done_dir = dir.path().join("done");
+        let updated = "---\nstatus: done\n---\n\n# Task\n";
+        let dest = relocate_issue(&path, updated, &done_dir).unwrap();
+
+        assert_eq!(dest, done_dir.join("1-task.md"));
+        assert!(!path.exists());
+        assert_eq!(std::fs::read_to_string(&dest).unwrap(), updated);
+    }
+
+    #[test]
+    fn relocate_issue_flat_file_same_dir_writes_in_place() {
+        let dir = TempDir::new().unwrap();
+        let open_dir = dir.path().join("open");
+        std::fs::create_dir(&open_dir).unwrap();
+        let path = open_dir.join("1-task.md");
+        std::fs::write(&path, "---\nstatus: open\n---\n\n# Task\n").unwrap();
+
+        let updated = "---\nstatus: open\npriority: high\n---\n\n# Task\n";
+        let dest = relocate_issue(&path, updated, &open_dir).unwrap();
+
+        assert_eq!(dest, path);
+        assert_eq!(std::fs::read_to_string(&path).unwrap(), updated);
+        assert!(!open_dir.join("1-task.tmp").exists());
+    }
+
+    #[test]
+    fn relocate_issue_dir_based_moves_whole_directory() {
+        let dir = TempDir::new().unwrap();
+        let open_dir = dir.path().join("open");
+        let issue_dir = open_dir.join("1-task");
+        std::fs::create_dir_all(&issue_dir).unwrap();
+        let path = issue_dir.join("README.md");
+        std::fs::write(&path, "---\nstatus: open\n---\n\n# Task\n").unwrap();
+        std::fs::write(issue_dir.join("notes.md"), "sibling file").unwrap();
+
+        let done_dir = dir.path().join("done");
+        let updated = "---\nstatus: done\n---\n\n# Task\n";
+        let dest = relocate_issue(&path, updated, &done_dir).unwrap();
+
+        assert_eq!(dest, done_dir.join("1-task").join("README.md"));
+        assert!(!issue_dir.exists());
+        assert_eq!(std::fs::read_to_string(&dest).unwrap(), updated);
+        assert_eq!(
+            std::fs::read_to_string(done_dir.join("1-task").join("notes.md")).unwrap(),
+            "sibling file"
+        );
+    }
+
+    #[test]
+    fn relocate_issue_dir_based_same_dir_no_op_rename() {
+        let dir = TempDir::new().unwrap();
+        let open_dir = dir.path().join("open");
+        let issue_dir = open_dir.join("1-task");
+        std::fs::create_dir_all(&issue_dir).unwrap();
+        let path = issue_dir.join("README.md");
+        std::fs::write(&path, "---\nstatus: open\n---\n\n# Task\n").unwrap();
+        std::fs::write(issue_dir.join("notes.md"), "sibling file").unwrap();
+
+        let updated = "---\nstatus: open\npriority: high\n---\n\n# Task\n";
+        let dest = relocate_issue(&path, updated, &open_dir).unwrap();
+
+        assert_eq!(dest, path);
+        assert!(issue_dir.exists());
+        assert_eq!(std::fs::read_to_string(&path).unwrap(), updated);
+        assert_eq!(
+            std::fs::read_to_string(issue_dir.join("notes.md")).unwrap(),
+            "sibling file"
+        );
+    }
+
+    #[test]
+    fn status_dir_name_reads_immediate_parent_for_flat_file() {
+        let dir = TempDir::new().unwrap();
+        let open_dir = dir.path().join("open");
+        std::fs::create_dir(&open_dir).unwrap();
+        let path = open_dir.join("1-task.md");
+        assert_eq!(status_dir_name(&path).as_deref(), Some("open"));
+    }
+
+    #[test]
+    fn status_dir_name_reads_immediate_parent_for_dir_based_issue() {
+        let dir = TempDir::new().unwrap();
+        let path = dir.path().join("done").join("1-task").join("README.md");
+        assert_eq!(status_dir_name(&path).as_deref(), Some("done"));
+    }
+
+    #[test]
+    fn status_dir_name_ignores_extra_nesting_above_status() {
+        // Regression guard: even with directory levels above the status dir
+        // (e.g. a future group_by area nesting), the immediate parent is
+        // still read as the status directory name.
+        let path = dir_path_buf(&["issues", "core", "done", "1-task.md"]);
+        assert_eq!(status_dir_name(&path).as_deref(), Some("done"));
+
+        let path = dir_path_buf(&["issues", "core", "done", "1-task", "README.md"]);
+        assert_eq!(status_dir_name(&path).as_deref(), Some("done"));
+    }
+
+    fn dir_path_buf(components: &[&str]) -> PathBuf {
+        components.iter().collect()
     }
 }

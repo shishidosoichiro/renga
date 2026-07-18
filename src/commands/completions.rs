@@ -9,7 +9,7 @@ use walkdir::WalkDir;
 use anyhow::Result;
 use clap::CommandFactory;
 
-use crate::{cli::Cli, Context};
+use crate::{cli::Cli, issue::status_dir_name, Context};
 
 // Thin wrapper scripts: all logic lives in `renga __complete`.
 // Tab-separated `CANDIDATE\tDESCRIPTION` output is handled by each shell appropriately.
@@ -265,8 +265,7 @@ fn emit_issues_recursive<W: Write>(
         .filter_map(|e| e.ok())
         .filter(|e| e.file_type().is_file())
         .filter(|e| {
-            let rel = e.path().strip_prefix(issues_dir).unwrap_or(e.path());
-            let in_done = rel.starts_with("done");
+            let in_done = status_dir_name(e.path()).as_deref() == Some("done");
             match only_done {
                 Some(true) => in_done,
                 Some(false) => !in_done,

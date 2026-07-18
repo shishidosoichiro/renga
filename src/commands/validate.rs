@@ -10,8 +10,8 @@ use walkdir::WalkDir;
 use crate::{
     cli::ValidateArgs,
     issue::{
-        id_prefix, is_dir_based, is_issue_file_name, issue_file_id, issue_root, split_frontmatter,
-        Issue, Status,
+        id_prefix, is_dir_based, is_issue_file_name, issue_file_id, issue_root, relocate_issue,
+        split_frontmatter, status_dir_name, Issue, Status,
     },
     readme, Context,
 };
@@ -121,7 +121,7 @@ fn validate_inner(ctx: &Context, ids: &[String], auto_correct: bool) -> Result<V
                 is_error: true,
             });
         } else if let Some(expected_dir) = writable_status_dir(issue.status) {
-            if status_dir_name(&issue.path, &ctx.issues_dir).as_deref() != Some(expected_dir) {
+            if status_dir_name(&issue.path).as_deref() != Some(expected_dir) {
                 if auto_correct {
                     match correct_status_directory(issue, expected_dir, ctx) {
                         Ok(correction) => corrections.push(correction),
@@ -257,16 +257,6 @@ fn writable_status_dir(status: Status) -> Option<&'static str> {
     }
 }
 
-fn status_dir_name(path: &Path, issues_dir: &Path) -> Option<String> {
-    path.strip_prefix(issues_dir)
-        .ok()?
-        .components()
-        .next()?
-        .as_os_str()
-        .to_str()
-        .map(str::to_string)
-}
-
 fn correct_status_directory(
     issue: &Issue,
     expected_dir: &str,
@@ -275,34 +265,18 @@ fn correct_status_directory(
     let dest_dir = ctx.status_dir(expected_dir);
     std::fs::create_dir_all(&dest_dir)?;
 
-    if is_dir_based(&issue.path) {
-        let src_root = issue_root(&issue.path);
-        let entry_name = src_root
-            .file_name()
-            .with_context(|| format!("invalid path: {}", issue.path.display()))?;
-        let dest_root = dest_dir.join(entry_name);
-        if dest_root.exists() {
-            anyhow::bail!("{} already exists", dest_root.display());
-        }
-        let from = rel_path(&issue.path, &ctx.issues_dir);
-        std::fs::rename(src_root, &dest_root)?;
-        let dest_readme = dest_root.join("README.md");
-        let to = rel_path(&dest_readme, &ctx.issues_dir);
-        Ok(Correction { from, to })
-    } else {
-        let file_name = issue
-            .path
-            .file_name()
-            .with_context(|| format!("invalid path: {}", issue.path.display()))?;
-        let dest = dest_dir.join(file_name);
-        if dest.exists() {
-            anyhow::bail!("{} already exists", dest.display());
-        }
-        let from = rel_path(&issue.path, &ctx.issues_dir);
-        std::fs::rename(&issue.path, &dest)?;
-        let to = rel_path(&dest, &ctx.issues_dir);
-        Ok(Correction { from, to })
+    let entry_name = issue_root(&issue.path)
+        .file_name()
+        .with_context(|| format!("invalid path: {}", issue.path.display()))?;
+    let dest_entry = dest_dir.join(entry_name);
+    if dest_entry.exists() {
+        anyhow::bail!("{} already exists", dest_entry.display());
     }
+
+    let from = rel_path(&issue.path, &ctx.issues_dir);
+    let dest_path = relocate_issue(&issue.path, &issue.raw_content, &dest_dir)?;
+    let to = rel_path(&dest_path, &ctx.issues_dir);
+    Ok(Correction { from, to })
 }
 
 /// Run the validate command.
