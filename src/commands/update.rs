@@ -9,8 +9,8 @@ use crate::{
     cli::UpdateArgs,
     issue::{
         find_editable_issue, is_dir_based, issue_root, relocate_issue, remove_frontmatter_field,
-        replace_or_prepend_heading, set_frontmatter_field, split_frontmatter, validate_label,
-        Issue,
+        replace_or_prepend_heading, set_frontmatter_field, split_frontmatter,
+        validate_area_for_group_by, validate_label, Issue,
     },
     readme, Context, FbimError,
 };
@@ -52,7 +52,7 @@ pub fn run(args: UpdateArgs, ctx: &Context) -> Result<()> {
     ctx.check_issues_dir()?;
 
     let input = read_input(args)?;
-    validate_input(&input)?;
+    validate_input(&input, &ctx.config.group_by)?;
 
     let active = find_editable_issue(&ctx.issues_dir, &input.id)?
         .ok_or_else(|| FbimError::IssueNotFound(input.id.clone()))?;
@@ -160,17 +160,15 @@ pub fn run(args: UpdateArgs, ctx: &Context) -> Result<()> {
         content = format!("---\n{fm_str}\n---\n\n{body_with_title}\n");
     }
 
-    // If --status was given, move the issue to the matching status directory.
-    if let Some(new_status) = &input.status {
-        let dest_dir = ctx.status_dir(new_status);
-        let dest = relocate_issue(&path, &content, &dest_dir)?;
-        readme::write_readme(&ctx.issues_dir, &ctx.config)?;
-        println!("{}", dest.display());
-    } else {
-        std::fs::write(&path, &content)?;
-        readme::write_readme(&ctx.issues_dir, &ctx.config)?;
-        println!("{}", path.display());
-    }
+    // Always relocate to the canonical (area, status) directory. This is a
+    // no-op write-in-place when the issue is already there, and also
+    // self-heals a misplaced active issue found via find_editable_issue's
+    // recoverable-mismatch path.
+    let issue = Issue::parse(&path, &content)?;
+    let dest_dir = ctx.canonical_dir(&issue.area, &issue.status.to_string());
+    let dest = relocate_issue(&path, &content, &dest_dir)?;
+    readme::write_readme(&ctx.issues_dir, &ctx.config)?;
+    println!("{}", dest.display());
 
     Ok(())
 }
@@ -324,7 +322,7 @@ fn convert_to_file(path: &Path, ctx: &Context) -> Result<()> {
     Ok(())
 }
 
-fn validate_input(input: &UpdateInput) -> Result<()> {
+fn validate_input(input: &UpdateInput, group_by: &[String]) -> Result<()> {
     if let Some(priority) = &input.priority {
         match priority.as_str() {
             "high" | "medium" | "low" => {}
@@ -342,6 +340,9 @@ fn validate_input(input: &UpdateInput) -> Result<()> {
                 status
             ),
         }
+    }
+    if let Some(area) = &input.area {
+        validate_area_for_group_by(area, group_by)?;
     }
     Ok(())
 }

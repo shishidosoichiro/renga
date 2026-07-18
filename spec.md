@@ -21,6 +21,8 @@ issues/
     N-name.md         Issues with missing or unparseable frontmatter
 ```
 
+Setting `group_by: [area]` in `.renga.yml` adds an area directory level above status (`issues/<area>/<status>/N-name.md`). See "`.renga.yml`" below for details.
+
 ## File naming
 
 Two storage layouts are supported and may be mixed freely:
@@ -176,7 +178,18 @@ area_labels:          # display names for areas (area name used as-is if omitted
   backend: "Backend"
   frontend: "Frontend"
   misc: "Other"
+
+group_by:             # extra directory level(s) nested above status (flat layout if omitted)
+  - area
 ```
+
+`group_by` is a list. Currently only a single `"area"` element is supported (two or more elements, or any value other than `"area"`, is an error).
+
+Setting `group_by: [area]` places issues at `issues/<area>/<status>/N-name.md`. The area is normalized into a directory segment using the same slugification as `renga create` (`make_slug`) — non-alphanumeric characters, including `/`, are collapsed into `-` rather than producing real nested folders. Issues with no `area` set are still placed directly under `issues/<status>/`.
+
+If an area's slug collides with a reserved status directory name (`open`, `pending`, `in-progress`, `done`, `unknown`), `create` and `update` reject it. If existing data already has this collision, `migrate` skips the affected issue with a warning, and `validate` reports it as an error without auto-correcting.
+
+Changing `area` or `status` (via `update`, `done`, `pending`, `in-progress`, or `reopen`) automatically relocates the file to the correct directory. `update` in fact always relocates an issue to its canonical directory as a side effect of every edit, not only when `area`/`status` change — so it also self-heals an issue that was already misplaced (e.g. found via the recoverable status-directory-mismatch path) even when the edit itself (`--assignee`, `--label`, etc.) doesn't touch `area` or `status`. `renga validate --auto-correct` detects and fixes issues whose location doesn't match the current `group_by` setting — in either direction (enabling or disabling `group_by`). To migrate existing issues in bulk after enabling `group_by`, run `renga migrate`.
 
 ## Project root discovery
 

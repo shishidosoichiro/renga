@@ -5,13 +5,12 @@ use std::{
     collections::{HashMap, HashSet},
     path::{Path, PathBuf},
 };
-use walkdir::WalkDir;
 
 use crate::{
     cli::ValidateArgs,
     issue::{
-        id_prefix, is_dir_based, is_issue_file_name, issue_file_id, issue_root, relocate_issue,
-        split_frontmatter, status_dir_name, Issue, Status,
+        canonical_status_dir, collect_issue_files, id_prefix, is_dir_based, issue_file_id,
+        issue_root, relocate_issue, split_frontmatter, validate_area_for_group_by, Issue, Status,
     },
     readme, Context,
 };
@@ -120,23 +119,38 @@ fn validate_inner(ctx: &Context, ids: &[String], auto_correct: bool) -> Result<V
                 message: "missing status",
                 is_error: true,
             });
-        } else if let Some(expected_dir) = writable_status_dir(issue.status) {
-            if status_dir_name(&issue.path).as_deref() != Some(expected_dir) {
-                if auto_correct {
-                    match correct_status_directory(issue, expected_dir, ctx) {
-                        Ok(correction) => corrections.push(correction),
-                        Err(_) => findings.push(Finding {
+        } else if let Some(status_str) = writable_status_dir(issue.status) {
+            if validate_area_for_group_by(&issue.area, &ctx.config.group_by).is_err() {
+                findings.push(Finding {
+                    path: rel.clone(),
+                    message: "area collides with a reserved status directory name",
+                    is_error: true,
+                });
+            } else {
+                let expected_dir = canonical_status_dir(
+                    &ctx.issues_dir,
+                    &ctx.config.group_by,
+                    &issue.area,
+                    status_str,
+                );
+                let actual_dir = issue_root(&issue.path).parent();
+                if actual_dir != Some(expected_dir.as_path()) {
+                    if auto_correct {
+                        match correct_status_directory(issue, &expected_dir, ctx) {
+                            Ok(correction) => corrections.push(correction),
+                            Err(_) => findings.push(Finding {
+                                path: rel.clone(),
+                                message: "status directory mismatch (auto-correct failed)",
+                                is_error: true,
+                            }),
+                        }
+                    } else {
+                        findings.push(Finding {
                             path: rel.clone(),
-                            message: "status directory mismatch (auto-correct failed)",
+                            message: "status directory mismatch",
                             is_error: true,
-                        }),
+                        });
                     }
-                } else {
-                    findings.push(Finding {
-                        path: rel.clone(),
-                        message: "status directory mismatch",
-                        is_error: true,
-                    });
                 }
             }
         }
@@ -167,29 +181,6 @@ fn validate_inner(ctx: &Context, ids: &[String], auto_correct: bool) -> Result<V
         findings,
         corrections,
     })
-}
-
-fn collect_issue_files(issues_dir: &Path) -> Vec<PathBuf> {
-    WalkDir::new(issues_dir)
-        .min_depth(1)
-        .into_iter()
-        .filter_map(|e| e.ok())
-        .filter_map(|e| {
-            let name = e.file_name().to_string_lossy().into_owned();
-            if e.file_type().is_file() && is_issue_file_name(&name) {
-                Some(e.path().to_path_buf())
-            } else if e.file_type().is_dir() && id_prefix(&name).is_some() {
-                let readme = e.path().join("README.md");
-                if readme.exists() {
-                    Some(readme)
-                } else {
-                    None
-                }
-            } else {
-                None
-            }
-        })
-        .collect()
 }
 
 fn parse_selected_ids(ids: &[String]) -> Result<Option<HashSet<u64>>> {
@@ -257,13 +248,8 @@ fn writable_status_dir(status: Status) -> Option<&'static str> {
     }
 }
 
-fn correct_status_directory(
-    issue: &Issue,
-    expected_dir: &str,
-    ctx: &Context,
-) -> Result<Correction> {
-    let dest_dir = ctx.status_dir(expected_dir);
-    std::fs::create_dir_all(&dest_dir)?;
+fn correct_status_directory(issue: &Issue, dest_dir: &Path, ctx: &Context) -> Result<Correction> {
+    std::fs::create_dir_all(dest_dir)?;
 
     let entry_name = issue_root(&issue.path)
         .file_name()
@@ -274,7 +260,7 @@ fn correct_status_directory(
     }
 
     let from = rel_path(&issue.path, &ctx.issues_dir);
-    let dest_path = relocate_issue(&issue.path, &issue.raw_content, &dest_dir)?;
+    let dest_path = relocate_issue(&issue.path, &issue.raw_content, dest_dir)?;
     let to = rel_path(&dest_path, &ctx.issues_dir);
     Ok(Correction { from, to })
 }

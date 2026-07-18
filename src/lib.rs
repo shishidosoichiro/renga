@@ -54,6 +54,14 @@ impl Context {
     pub fn status_dir(&self, status: &str) -> PathBuf {
         self.issues_dir.join(status)
     }
+
+    /// Return the canonical directory for an issue with the given `area` and
+    /// `status`, honoring the project's `group_by` config.
+    ///
+    /// See [`issue::canonical_status_dir`] for the exact placement rules.
+    pub fn canonical_dir(&self, area: &str, status: &str) -> PathBuf {
+        issue::canonical_status_dir(&self.issues_dir, &self.config.group_by, area, status)
+    }
 }
 
 /// Parse CLI arguments and dispatch to the appropriate command handler.

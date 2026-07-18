@@ -204,7 +204,12 @@ area_labels:          # area の表示名
   frontend: "フロントエンド"
   infra: "インフラ"
   misc: "その他"
+
+group_by:             # issue を area ディレクトリ配下にネストする（issues/<area>/<status>/...）
+  - area
 ```
+
+`group_by: [area]` を設定すると status の上に area のディレクトリ階層が加わり、1つのプロジェクトの area で作業する際にファイルシステム上で他 area のファイルと混ざらなくなる。詳細（既存 issue を `renga migrate` で移行する方法を含む）は [spec.ja.md](spec.ja.md) を参照。
 
 ## 開発
 

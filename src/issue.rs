@@ -378,20 +378,11 @@ pub fn find_editable_issue(issues_dir: &Path, id: &str) -> Result<Option<ActiveI
     }))
 }
 
-/// Collect issues from `issues_dir` recursively, applying optional filters.
-///
-/// `status_filter`:
-/// - `None` — return all issues regardless of status
-/// - `Some(statuses)` — return only issues whose status is in the slice
-pub fn all_issues(
-    issues_dir: &Path,
-    status_filter: Option<&[Status]>,
-    area_filter: Option<&str>,
-    label_filter: Option<&str>,
-    milestone_filter: Option<&str>,
-    assignee_filter: Option<&str>,
-) -> Result<Vec<Issue>> {
-    let mut files: Vec<PathBuf> = WalkDir::new(issues_dir)
+/// Recursively collect the primary file path of every issue under `issues_dir`
+/// (flat `N-slug.md` files and `N-slug/README.md` for directory-based issues),
+/// regardless of nesting depth above the status directory.
+pub(crate) fn collect_issue_files(issues_dir: &Path) -> Vec<PathBuf> {
+    WalkDir::new(issues_dir)
         .min_depth(1)
         .into_iter()
         .filter_map(|e| e.ok())
@@ -410,7 +401,23 @@ pub fn all_issues(
                 None
             }
         })
-        .collect();
+        .collect()
+}
+
+/// Collect issues from `issues_dir` recursively, applying optional filters.
+///
+/// `status_filter`:
+/// - `None` — return all issues regardless of status
+/// - `Some(statuses)` — return only issues whose status is in the slice
+pub fn all_issues(
+    issues_dir: &Path,
+    status_filter: Option<&[Status]>,
+    area_filter: Option<&str>,
+    label_filter: Option<&str>,
+    milestone_filter: Option<&str>,
+    assignee_filter: Option<&str>,
+) -> Result<Vec<Issue>> {
+    let mut files = collect_issue_files(issues_dir);
 
     files.sort_by_key(|p| extract_id(p).parse::<u64>().unwrap_or(0));
 
@@ -565,6 +572,34 @@ pub fn validate_label(label: &str) -> Result<()> {
                 ch
             );
         }
+    }
+    Ok(())
+}
+
+/// Reject an `area` value that would collide with a reserved status
+/// directory name once nested under `group_by`.
+///
+/// A no-op when `group_by` is empty or `area` is empty — the collision only
+/// matters once the area is actually used as a directory segment.
+///
+/// # Examples
+///
+/// ```
+/// use renga::issue::validate_area_for_group_by;
+///
+/// assert!(validate_area_for_group_by("core", &["area".to_string()]).is_ok());
+/// assert!(validate_area_for_group_by("done", &["area".to_string()]).is_err());
+/// assert!(validate_area_for_group_by("done", &[]).is_ok());
+/// ```
+pub fn validate_area_for_group_by(area: &str, group_by: &[String]) -> Result<()> {
+    if group_by.is_empty() || area.is_empty() {
+        return Ok(());
+    }
+    let slug = make_slug(area);
+    if Status::all_values().iter().any(|s| s.to_string() == slug) {
+        anyhow::bail!(
+            "area '{area}' is not allowed: its slug '{slug}' collides with a reserved status directory name"
+        );
     }
     Ok(())
 }
@@ -763,6 +798,48 @@ pub fn relocate_issue(path: &Path, content: &str, dest_dir: &Path) -> Result<Pat
             std::fs::remove_file(path)?;
         }
         Ok(dest)
+    }
+}
+
+/// Compute the canonical directory for an issue's status file, honoring the
+/// `group_by` project config.
+///
+/// When `group_by` is non-empty and `area` is non-empty, the area is
+/// slugified (via [`make_slug`]) and nested above the status directory:
+/// `<issues_dir>/<area-slug>/<status>`. Otherwise (no `group_by`, or an
+/// issue with no `area`), this is `<issues_dir>/<status>`, matching the
+/// classic flat layout.
+///
+/// # Examples
+///
+/// ```
+/// use renga::issue::canonical_status_dir;
+/// use std::path::Path;
+///
+/// let issues_dir = Path::new("issues");
+/// assert_eq!(
+///     canonical_status_dir(issues_dir, &[], "core", "open"),
+///     issues_dir.join("open")
+/// );
+/// assert_eq!(
+///     canonical_status_dir(issues_dir, &["area".to_string()], "core", "open"),
+///     issues_dir.join("core").join("open")
+/// );
+/// assert_eq!(
+///     canonical_status_dir(issues_dir, &["area".to_string()], "", "open"),
+///     issues_dir.join("open")
+/// );
+/// ```
+pub fn canonical_status_dir(
+    issues_dir: &Path,
+    group_by: &[String],
+    area: &str,
+    status: &str,
+) -> PathBuf {
+    if !group_by.is_empty() && !area.is_empty() {
+        issues_dir.join(make_slug(area)).join(status)
+    } else {
+        issues_dir.join(status)
     }
 }
 
@@ -1278,5 +1355,43 @@ mod tests {
 
     fn dir_path_buf(components: &[&str]) -> PathBuf {
         components.iter().collect()
+    }
+
+    #[test]
+    fn canonical_status_dir_flattens_slashes_in_area() {
+        let issues_dir = Path::new("issues");
+        let group_by = ["area".to_string()];
+        assert_eq!(
+            canonical_status_dir(issues_dir, &group_by, "Core/Backend", "open"),
+            issues_dir.join("core-backend").join("open")
+        );
+    }
+
+    #[test]
+    fn canonical_status_dir_area_empty_falls_back_to_flat() {
+        let issues_dir = Path::new("issues");
+        let group_by = ["area".to_string()];
+        assert_eq!(
+            canonical_status_dir(issues_dir, &group_by, "", "open"),
+            issues_dir.join("open")
+        );
+    }
+
+    #[test]
+    fn validate_area_for_group_by_allows_reserved_word_when_group_by_off() {
+        assert!(validate_area_for_group_by("done", &[]).is_ok());
+        assert!(validate_area_for_group_by("", &["area".to_string()]).is_ok());
+    }
+
+    #[test]
+    fn validate_area_for_group_by_rejects_all_reserved_status_names() {
+        let group_by = ["area".to_string()];
+        for status in Status::all_values() {
+            let name = status.to_string();
+            assert!(
+                validate_area_for_group_by(&name, &group_by).is_err(),
+                "expected '{name}' to be rejected"
+            );
+        }
     }
 }

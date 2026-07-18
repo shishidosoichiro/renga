@@ -204,7 +204,12 @@ area_labels:          # display names for areas
   frontend: "Frontend"
   infra: "Infrastructure"
   misc: "Other"
+
+group_by:             # nest issues under an area directory (issues/<area>/<status>/...)
+  - area
 ```
+
+`group_by: [area]` adds an area directory level above status, so working in a single project's area doesn't mix files from other areas on disk. See [spec.md](spec.md) for details, including how to migrate existing issues with `renga migrate`.
 
 ## Development
 

@@ -17,6 +17,13 @@ pub struct Config {
     /// Display labels for each area (e.g. `core` → `"Core"`).
     #[serde(default)]
     pub area_labels: HashMap<String, String>,
+    /// Directory nesting level(s) to add above the status directory (e.g.
+    /// `issues/<area>/<status>/...` instead of `issues/<status>/...`).
+    ///
+    /// Currently only a single `"area"` element is supported. An empty list
+    /// (the default) keeps the classic flat-under-status layout.
+    #[serde(default)]
+    pub group_by: Vec<String>,
 }
 
 fn default_issues_dir() -> String {
@@ -29,6 +36,7 @@ impl Default for Config {
             issues_dir: "issues".to_string(),
             area_order: Vec::new(),
             area_labels: std::collections::HashMap::new(),
+            group_by: Vec::new(),
         }
     }
 }
@@ -44,9 +52,21 @@ impl Config {
             return Ok(Config::default());
         }
         let content = std::fs::read_to_string(&path)?;
-        let config = serde_yaml::from_str(&content)
+        let config: Config = serde_yaml::from_str(&content)
             .with_context(|| format!("invalid YAML in {}", path.display()))?;
+        config.validate_group_by()?;
         Ok(config)
+    }
+
+    fn validate_group_by(&self) -> Result<()> {
+        match self.group_by.as_slice() {
+            [] => Ok(()),
+            [only] if only == "area" => Ok(()),
+            _ => anyhow::bail!(
+                "invalid group_by {:?}: only a single \"area\" element is supported",
+                self.group_by
+            ),
+        }
     }
 }
 
@@ -81,5 +101,36 @@ mod tests {
         .unwrap();
         let config = Config::load(dir.path()).unwrap();
         assert_eq!(config.area_order, ["core", "cli", "docs"]);
+    }
+
+    #[test]
+    fn group_by_empty_by_default() {
+        let dir = TempDir::new().unwrap();
+        let config = Config::load(dir.path()).unwrap();
+        assert!(config.group_by.is_empty());
+    }
+
+    #[test]
+    fn loads_group_by_area_from_yml() {
+        let dir = TempDir::new().unwrap();
+        std::fs::write(dir.path().join(".renga.yml"), "group_by: [area]\n").unwrap();
+        let config = Config::load(dir.path()).unwrap();
+        assert_eq!(config.group_by, ["area"]);
+    }
+
+    #[test]
+    fn group_by_rejects_multiple_elements() {
+        let dir = TempDir::new().unwrap();
+        std::fs::write(dir.path().join(".renga.yml"), "group_by: [area, label]\n").unwrap();
+        let err = Config::load(dir.path()).unwrap_err();
+        assert!(err.to_string().contains("group_by"), "{err}");
+    }
+
+    #[test]
+    fn group_by_rejects_non_area_value() {
+        let dir = TempDir::new().unwrap();
+        std::fs::write(dir.path().join(".renga.yml"), "group_by: [label]\n").unwrap();
+        let err = Config::load(dir.path()).unwrap_err();
+        assert!(err.to_string().contains("group_by"), "{err}");
     }
 }

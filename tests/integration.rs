@@ -1545,7 +1545,10 @@ fn update_operates_on_misplaced_active_issue_with_warning() {
         .success()
         .stderr(predicate::str::contains("stored in done/"));
 
-    let content = fs::read_to_string(dir.path().join("issues/done/1-misplaced.md")).unwrap();
+    // update relocates to the canonical directory for the frontmatter status
+    // as a side effect (self-healing), so the file no longer sits under done/.
+    assert!(!dir.path().join("issues/done/1-misplaced.md").exists());
+    let content = fs::read_to_string(dir.path().join("issues/open/1-misplaced.md")).unwrap();
     assert!(content.contains("assignee: alice"));
 }
 
@@ -2137,4 +2140,435 @@ fn validate_auto_correct_moves_directory_issue_to_correct_status() {
 
     assert!(dir.path().join("issues/open/1-task/README.md").exists());
     assert!(!dir.path().join("issues/done/1-task").exists());
+}
+
+// ── group_by ──────────────────────────────────────────────────────────────────
+
+#[test]
+fn create_places_issue_under_area_when_group_by_configured() {
+    let dir = setup();
+    fs::write(dir.path().join(".renga.yml"), "group_by: [area]\n").unwrap();
+    renga(&dir)
+        .args(["create", "Task", "--area", "core"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("issues/core/open/1-task.md"));
+    assert!(dir.path().join("issues/core/open/1-task.md").exists());
+    assert!(!dir.path().join("issues/open/1-task.md").exists());
+}
+
+#[test]
+fn create_falls_back_to_flat_when_area_empty_under_group_by() {
+    let dir = setup();
+    fs::write(dir.path().join(".renga.yml"), "group_by: [area]\n").unwrap();
+    renga(&dir).args(["create", "Task"]).assert().success();
+    assert!(dir.path().join("issues/open/1-task.md").exists());
+}
+
+#[test]
+fn create_rejects_reserved_area_name_under_group_by() {
+    let dir = setup();
+    fs::write(dir.path().join(".renga.yml"), "group_by: [area]\n").unwrap();
+    renga(&dir)
+        .args(["create", "Task", "--area", "Done"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("reserved"));
+}
+
+#[test]
+fn update_status_change_relocates_across_area_bucket() {
+    let dir = setup();
+    fs::write(dir.path().join(".renga.yml"), "group_by: [area]\n").unwrap();
+    renga(&dir)
+        .args(["create", "Task", "--area", "core"])
+        .assert()
+        .success();
+    renga(&dir)
+        .args(["update", "1", "--status", "pending"])
+        .assert()
+        .success();
+    assert!(dir.path().join("issues/core/pending/1-task.md").exists());
+    assert!(!dir.path().join("issues/core/open/1-task.md").exists());
+}
+
+#[test]
+fn update_area_change_relocates_file() {
+    let dir = setup();
+    fs::write(dir.path().join(".renga.yml"), "group_by: [area]\n").unwrap();
+    renga(&dir)
+        .args(["create", "Task", "--area", "core"])
+        .assert()
+        .success();
+    renga(&dir)
+        .args(["update", "1", "--area", "backend"])
+        .assert()
+        .success();
+    assert!(dir.path().join("issues/backend/open/1-task.md").exists());
+    assert!(!dir.path().join("issues/core/open/1-task.md").exists());
+}
+
+#[test]
+fn update_rejects_reserved_area_name_under_group_by() {
+    let dir = setup();
+    fs::write(dir.path().join(".renga.yml"), "group_by: [area]\n").unwrap();
+    renga(&dir)
+        .args(["create", "Task", "--area", "core"])
+        .assert()
+        .success();
+    renga(&dir)
+        .args(["update", "1", "--area", "Open"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("reserved"));
+}
+
+#[test]
+fn done_moves_within_area_bucket() {
+    let dir = setup();
+    fs::write(dir.path().join(".renga.yml"), "group_by: [area]\n").unwrap();
+    renga(&dir)
+        .args(["create", "Task", "--area", "core"])
+        .assert()
+        .success();
+    renga(&dir).args(["done", "1"]).assert().success();
+    assert!(dir.path().join("issues/core/done/1-task.md").exists());
+}
+
+#[test]
+fn pending_moves_within_area_bucket() {
+    let dir = setup();
+    fs::write(dir.path().join(".renga.yml"), "group_by: [area]\n").unwrap();
+    renga(&dir)
+        .args(["create", "Task", "--area", "core"])
+        .assert()
+        .success();
+    renga(&dir).args(["pending", "1"]).assert().success();
+    assert!(dir.path().join("issues/core/pending/1-task.md").exists());
+}
+
+#[test]
+fn in_progress_moves_within_area_bucket() {
+    let dir = setup();
+    fs::write(dir.path().join(".renga.yml"), "group_by: [area]\n").unwrap();
+    renga(&dir)
+        .args(["create", "Task", "--area", "core"])
+        .assert()
+        .success();
+    renga(&dir).args(["in-progress", "1"]).assert().success();
+    assert!(dir
+        .path()
+        .join("issues/core/in-progress/1-task.md")
+        .exists());
+}
+
+#[test]
+fn done_multiple_ids_across_different_areas() {
+    // Regression guard: the per-status commands used to compute their
+    // destination directory once outside the per-id loop. Under group_by
+    // each issue's destination depends on its own area, so passing multiple
+    // ids from different areas in one invocation must place each correctly.
+    let dir = setup();
+    fs::write(dir.path().join(".renga.yml"), "group_by: [area]\n").unwrap();
+    renga(&dir)
+        .args(["create", "First", "--area", "core"])
+        .assert()
+        .success();
+    renga(&dir)
+        .args(["create", "Second", "--area", "backend"])
+        .assert()
+        .success();
+
+    renga(&dir).args(["done", "1", "2"]).assert().success();
+
+    assert!(dir.path().join("issues/core/done/1-first.md").exists());
+    assert!(dir.path().join("issues/backend/done/2-second.md").exists());
+}
+
+#[test]
+fn reopen_relocates_within_area_bucket() {
+    let dir = setup();
+    fs::write(dir.path().join(".renga.yml"), "group_by: [area]\n").unwrap();
+    renga(&dir)
+        .args(["create", "Task", "--area", "core"])
+        .assert()
+        .success();
+    renga(&dir).args(["done", "1"]).assert().success();
+    renga(&dir).args(["reopen", "1"]).assert().success();
+    assert!(dir.path().join("issues/core/open/1-task.md").exists());
+    assert!(!dir.path().join("issues/core/done/1-task.md").exists());
+}
+
+#[test]
+fn reopen_rejects_collision_within_area_bucket() {
+    let dir = setup();
+    fs::write(dir.path().join(".renga.yml"), "group_by: [area]\n").unwrap();
+    renga(&dir)
+        .args(["create", "Foo", "--area", "core"])
+        .assert()
+        .success();
+    renga(&dir).args(["done", "1"]).assert().success();
+    fs::create_dir_all(dir.path().join("issues/core/open")).unwrap();
+    fs::write(
+        dir.path().join("issues/core/open/1-foo.md"),
+        "---\nstatus: open\n---\n\n# Foo\n",
+    )
+    .unwrap();
+    renga(&dir)
+        .args(["reopen", "1"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("already exists"));
+}
+
+#[test]
+fn validate_detects_and_corrects_group_by_mismatch() {
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/open/1-task.md"),
+        "---\nschema_version: 1\nstatus: open\npriority: medium\narea: core\nlabels: []\n---\n\n# Task\n",
+    )
+    .unwrap();
+    fs::write(dir.path().join(".renga.yml"), "group_by: [area]\n").unwrap();
+
+    renga(&dir)
+        .args(["validate"])
+        .assert()
+        .failure()
+        .stdout(predicate::str::contains("status directory mismatch"));
+
+    renga(&dir)
+        .args(["validate", "--auto-correct"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("corrected:"));
+
+    assert!(dir.path().join("issues/core/open/1-task.md").exists());
+    assert!(!dir.path().join("issues/open/1-task.md").exists());
+}
+
+#[test]
+fn validate_auto_correct_ungroups_when_group_by_disabled() {
+    let dir = setup();
+    fs::create_dir_all(dir.path().join("issues/core/open")).unwrap();
+    fs::write(
+        dir.path().join("issues/core/open/1-task.md"),
+        "---\nschema_version: 1\nstatus: open\npriority: medium\narea: core\nlabels: []\n---\n\n# Task\n",
+    )
+    .unwrap();
+    // no .renga.yml — group_by is off, so the canonical location is flat.
+
+    renga(&dir)
+        .args(["validate", "--auto-correct"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("corrected:"));
+
+    assert!(dir.path().join("issues/open/1-task.md").exists());
+    assert!(!dir.path().join("issues/core/open/1-task.md").exists());
+}
+
+#[test]
+fn validate_flags_reserved_area_collision_without_correcting() {
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/open/1-task.md"),
+        "---\nschema_version: 1\nstatus: open\npriority: medium\narea: done\nlabels: []\n---\n\n# Task\n",
+    )
+    .unwrap();
+    fs::write(dir.path().join(".renga.yml"), "group_by: [area]\n").unwrap();
+
+    renga(&dir)
+        .args(["validate", "--auto-correct"])
+        .assert()
+        .failure()
+        .stdout(predicate::str::contains("reserved status directory name"));
+
+    assert!(dir.path().join("issues/open/1-task.md").exists());
+}
+
+#[test]
+fn migrate_relocates_existing_issues_under_new_group_by() {
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/open/1-task.md"),
+        "---\nschema_version: 1\nstatus: open\npriority: medium\narea: core\nlabels: []\n---\n\n# Task\n",
+    )
+    .unwrap();
+    fs::write(dir.path().join(".renga.yml"), "group_by: [area]\n").unwrap();
+
+    renga(&dir)
+        .args(["migrate"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Migrated 1 issue(s)."));
+
+    assert!(dir.path().join("issues/core/open/1-task.md").exists());
+    assert!(!dir.path().join("issues/open/1-task.md").exists());
+}
+
+#[test]
+fn migrate_skips_reserved_collision_area_with_warning() {
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/open/1-task.md"),
+        "---\nschema_version: 1\nstatus: open\npriority: medium\narea: done\nlabels: []\n---\n\n# Task\n",
+    )
+    .unwrap();
+    fs::write(dir.path().join(".renga.yml"), "group_by: [area]\n").unwrap();
+
+    renga(&dir)
+        .args(["migrate"])
+        .assert()
+        .success()
+        .stderr(predicate::str::contains("skipping"));
+
+    assert!(dir.path().join("issues/open/1-task.md").exists());
+}
+
+#[test]
+fn migrate_prints_nothing_to_migrate_when_group_by_already_canonical() {
+    let dir = setup();
+    fs::write(dir.path().join(".renga.yml"), "group_by: [area]\n").unwrap();
+    renga(&dir)
+        .args(["create", "Task", "--area", "core"])
+        .assert()
+        .success();
+
+    renga(&dir)
+        .args(["migrate"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Nothing to migrate."));
+}
+
+#[test]
+fn info_shows_group_by() {
+    let dir = setup();
+    fs::write(dir.path().join(".renga.yml"), "group_by: [area]\n").unwrap();
+    let output = renga(&dir).args(["info"]).assert().success();
+    let stdout = String::from_utf8(output.get_output().stdout.clone()).unwrap();
+    assert!(stdout.contains("group_by"));
+}
+
+// Regression tests for issue #232: done/pending/in-progress/reopen must
+// still operate on issues with unparseable frontmatter (falling back to no
+// area), matching their pre-group_by behavior — group_by doesn't even need
+// to be configured for this, since these commands never required valid
+// frontmatter before.
+
+#[test]
+fn done_tolerates_unparseable_frontmatter() {
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/open/1-bad.md"),
+        "---\nnot: valid: yaml: [\n---\n\n# Bad\n",
+    )
+    .unwrap();
+    renga(&dir).args(["done", "1"]).assert().success();
+    assert!(dir.path().join("issues/done/1-bad.md").exists());
+}
+
+#[test]
+fn pending_tolerates_unparseable_frontmatter() {
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/open/1-bad.md"),
+        "---\nnot: valid: yaml: [\n---\n\n# Bad\n",
+    )
+    .unwrap();
+    renga(&dir).args(["pending", "1"]).assert().success();
+    assert!(dir.path().join("issues/pending/1-bad.md").exists());
+}
+
+#[test]
+fn in_progress_tolerates_unparseable_frontmatter() {
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/open/1-bad.md"),
+        "---\nnot: valid: yaml: [\n---\n\n# Bad\n",
+    )
+    .unwrap();
+    renga(&dir).args(["in-progress", "1"]).assert().success();
+    assert!(dir.path().join("issues/in-progress/1-bad.md").exists());
+}
+
+#[test]
+fn reopen_tolerates_unparseable_frontmatter() {
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/done/1-bad.md"),
+        "---\nnot: valid: yaml: [\n---\n\n# Bad\n",
+    )
+    .unwrap();
+    renga(&dir).args(["reopen", "1"]).assert().success();
+    assert!(dir.path().join("issues/open/1-bad.md").exists());
+}
+
+#[test]
+fn migrate_group_by_step_falls_back_to_unknown_for_unparseable_frontmatter() {
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/open/1-bad.md"),
+        "---\nnot: valid: yaml: [\n---\n\n# Bad\n",
+    )
+    .unwrap();
+    fs::write(dir.path().join(".renga.yml"), "group_by: [area]\n").unwrap();
+
+    renga(&dir)
+        .args(["migrate"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Migrated 1 issue(s)."));
+
+    assert!(dir.path().join("issues/unknown/1-bad.md").exists());
+}
+
+#[test]
+fn migrate_group_by_step_skips_destination_collision() {
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/open/1-task.md"),
+        "---\nschema_version: 1\nstatus: open\npriority: medium\narea: core\nlabels: []\n---\n\n# Task\n",
+    )
+    .unwrap();
+    fs::create_dir_all(dir.path().join("issues/core/open")).unwrap();
+    fs::write(
+        dir.path().join("issues/core/open/1-task.md"),
+        "---\nschema_version: 1\nstatus: open\npriority: high\narea: core\nlabels: []\n---\n\n# Task (existing)\n",
+    )
+    .unwrap();
+    fs::write(dir.path().join(".renga.yml"), "group_by: [area]\n").unwrap();
+
+    renga(&dir)
+        .args(["migrate"])
+        .assert()
+        .success()
+        .stderr(predicate::str::contains("skipping"));
+
+    let content = fs::read_to_string(dir.path().join("issues/core/open/1-task.md")).unwrap();
+    assert!(content.contains("Task (existing)"));
+    assert!(dir.path().join("issues/open/1-task.md").exists());
+}
+
+#[test]
+fn migrate_reports_single_count_for_two_hop_relocation() {
+    // Regression guard for issue #235: a flat top-level file that hops
+    // through both migrate steps (flat -> status -> area/status) must be
+    // counted once, not twice.
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/1-task.md"),
+        "---\nschema_version: 1\nstatus: open\npriority: medium\narea: core\nlabels: []\n---\n\n# Task\n",
+    )
+    .unwrap();
+    fs::write(dir.path().join(".renga.yml"), "group_by: [area]\n").unwrap();
+
+    renga(&dir)
+        .args(["migrate"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Migrated 1 issue(s)."));
+
+    assert!(dir.path().join("issues/core/open/1-task.md").exists());
 }

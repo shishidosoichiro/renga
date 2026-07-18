@@ -1,6 +1,6 @@
 //! `renga reopen` command handler.
 
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use anyhow::{Context as _, Result};
 
@@ -14,12 +14,9 @@ use crate::{
 pub fn run(args: ReopenArgs, ctx: &Context) -> Result<()> {
     ctx.check_issues_dir()?;
 
-    let open_dir = ctx.status_dir("open");
-    std::fs::create_dir_all(&open_dir)?;
-
     let mut had_error = false;
     for id in &args.ids {
-        match reopen_one(id, &open_dir, ctx) {
+        match reopen_one(id, ctx) {
             Ok(dest) => println!("{}", dest.display()),
             Err(e) => {
                 eprintln!("error: {e}");
@@ -36,13 +33,19 @@ pub fn run(args: ReopenArgs, ctx: &Context) -> Result<()> {
     Ok(())
 }
 
-fn reopen_one(id: &str, open_dir: &Path, ctx: &Context) -> Result<PathBuf> {
+fn reopen_one(id: &str, ctx: &Context) -> Result<PathBuf> {
     let path = find_issue(&ctx.issues_dir, id, true)?
         .ok_or_else(|| FbimError::IssueNotFound(id.to_owned()))?;
 
     let content = std::fs::read_to_string(&path)?;
+    // Tolerate unparseable frontmatter here (mirrors the pre-group_by
+    // behavior): fall back to no area, which places the issue at the flat
+    // `issues/open/` directory regardless of group_by.
+    let parsed = Issue::parse(&path, &content).ok();
+    let area = parsed.as_ref().map_or("", |issue| issue.area.as_str());
     let updated = set_frontmatter_field(&content, "status", "open");
 
+    let open_dir = ctx.canonical_dir(area, "open");
     let src_root = issue_root(&path);
     let entry_name = src_root
         .file_name()
@@ -50,7 +53,7 @@ fn reopen_one(id: &str, open_dir: &Path, ctx: &Context) -> Result<PathBuf> {
     let dest_root = open_dir.join(entry_name);
 
     if src_root == dest_root {
-        if let Ok(issue) = Issue::parse(&path, &content) {
+        if let Some(issue) = &parsed {
             if issue.status == Status::Open {
                 anyhow::bail!("issue {} already exists as an open issue", id);
             }
@@ -63,5 +66,5 @@ fn reopen_one(id: &str, open_dir: &Path, ctx: &Context) -> Result<PathBuf> {
         );
     }
 
-    relocate_issue(&path, &updated, open_dir)
+    relocate_issue(&path, &updated, &open_dir)
 }

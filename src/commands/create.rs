@@ -7,7 +7,7 @@ use serde::Deserialize;
 
 use crate::{
     cli::CreateArgs,
-    issue::{find_issue, make_slug, next_id, validate_label},
+    issue::{find_issue, make_slug, next_id, validate_area_for_group_by, validate_label},
     readme, Context,
 };
 
@@ -48,6 +48,7 @@ pub fn run(args: CreateArgs, ctx: &Context) -> Result<()> {
     let input = read_input(args)?;
 
     validate_priority(&input.priority)?;
+    validate_area_for_group_by(&input.area, &ctx.config.group_by)?;
 
     let slug = input.slug.unwrap_or_else(|| make_slug(&input.title));
     let id = match input.id {
@@ -65,7 +66,7 @@ pub fn run(args: CreateArgs, ctx: &Context) -> Result<()> {
         }
         None => next_id(&ctx.issues_dir)?,
     };
-    let open_dir = ctx.status_dir("open");
+    let open_dir = ctx.canonical_dir(&input.area, "open");
     std::fs::create_dir_all(&open_dir)?;
     let path = if use_dir {
         let dir = open_dir.join(format!("{id}-{slug}"));

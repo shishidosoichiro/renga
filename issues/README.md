@@ -43,7 +43,6 @@ Closed issues are moved to `done/`.
 | [194](open/194-bulk-update-command.md) | open | medium | area や assignee を条件にした一括更新コマンドがない |
 | [195](open/195-prevent-duplicate-ids.md) | open | medium | issue 作成時に重複 ID を防止できない |
 | [203](open/203-git-worktree-issues.md) | open | medium | git worktree 使用時に issues ディレクトリが分離される |
-| [229](open/229-feat-nest-issues-under-area-directory-via-group-by-config.md) | open | medium | feat: nest issues under area directory via group_by config |
 
 ---
 

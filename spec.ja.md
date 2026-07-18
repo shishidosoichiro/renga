@@ -21,6 +21,8 @@ issues/
     N-name.md         frontmatter がないか parse できない issue
 ```
 
+`.renga.yml` で `group_by: [area]` を設定すると、status の上に area のディレクトリ階層が加わる（`issues/<area>/<status>/N-name.md`）。詳細は「`.renga.yml` の仕様」を参照。
+
 ## ファイル命名規則
 
 2種類のレイアウトを混在して使用できる。
@@ -165,7 +167,18 @@ area_labels:          # area の表示名（省略時は area 名をそのまま
   backend: "バックエンド"
   frontend: "フロントエンド"
   misc: "その他"
+
+group_by:             # status の上にネストする追加のディレクトリ階層（省略時は従来通りフラット）
+  - area
 ```
+
+`group_by` は list 型。現時点では要素数1・値は `"area"` のみサポートする（2要素以上、または `"area"` 以外の値はエラー）。
+
+`group_by: [area]` を設定すると、issue は `issues/<area>/<status>/N-name.md` に配置される。`area` はディレクトリ名として `renga create` のスラグ化と同じルール（`make_slug`）で正規化され、`/` を含む非英数字は `-` にまとめられる（実際のネストされたフォルダにはならない）。`area` が未設定の issue は従来通り `issues/<status>/` 直下に置かれる。
+
+`area` の値（スラグ化後）が予約済みのステータスディレクトリ名（`open`・`pending`・`in-progress`・`done`・`unknown`）と衝突する場合、`create`・`update` はエラーになる。既存データでこの衝突が見つかった場合、`migrate` は該当 issue を warning 付きでスキップし、`validate` はエラーとして報告する（自動修正はしない）。
+
+`area`・`status` の変更は該当コマンド（`update`・`done`・`pending`・`in-progress`・`reopen`）が自動的にファイルを正しいディレクトリへ移動する。`update` は実際には `area`・`status` を変更しない編集（`--assignee`・`--label` 等）でも、常に編集の副作用として issue を canonical ディレクトリへ再配置する。そのため、もともと配置がずれていた issue（例: recoverable な status ディレクトリ不一致で見つかった issue）は `area`・`status` に触れない編集でも自動的に正しい位置へ自己修復される。`renga validate --auto-correct` は `group_by` の設定（有効・無効どちらへの変更も）と実際の配置がずれている issue を検出・修正する。`group_by` を新たに有効にして既存 issue を一括で移行するには `renga migrate` を使う。
 
 ## issues/ の探索
 

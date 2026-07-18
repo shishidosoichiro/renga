@@ -48,6 +48,15 @@ pub fn run(ctx: &Context) -> Result<()> {
         "  area_labels   {:<20} # display labels per area (e.g. core → \"Core\")",
         area_labels
     );
+    let group_by = if ctx.config.group_by.is_empty() {
+        "(none)".to_string()
+    } else {
+        ctx.config.group_by.join(", ")
+    };
+    println!(
+        "  group_by      {:<20} # extra directory level(s) above status (e.g. area)",
+        group_by
+    );
 
     Ok(())
 }
