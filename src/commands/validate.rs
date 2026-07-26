@@ -76,7 +76,8 @@ fn validate_inner(ctx: &Context, ids: &[String], auto_correct: bool) -> Result<V
             id_map.entry(id).or_default().push(rel.clone());
         }
 
-        let content = std::fs::read_to_string(path)?;
+        let content =
+            std::fs::read_to_string(path).with_context(|| format!("reading {}", path.display()))?;
         let has_status = frontmatter_declares_status(&content);
         match Issue::parse(path, &content) {
             Ok(issue) => {

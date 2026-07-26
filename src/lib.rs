@@ -58,8 +58,14 @@ impl Context {
     /// Return the canonical directory for an issue with the given `area` and
     /// `status`, honoring the project's `group_by` config.
     ///
-    /// See [`issue::canonical_status_dir`] for the exact placement rules.
+    /// Warns when `area` cannot serve as a directory segment, since the issue
+    /// then lands at the flat `issues/<status>/` and silently loses its
+    /// grouping. See [`issue::canonical_status_dir`] for the placement rules.
     pub fn canonical_dir(&self, area: &str, status: &str) -> PathBuf {
+        if let Err(e) = issue::validate_area_for_group_by(area, &self.config.group_by) {
+            eprintln!("warning: {e}");
+            eprintln!("warning: filing under {status}/ without the area grouping");
+        }
         issue::canonical_status_dir(&self.issues_dir, &self.config.group_by, area, status)
     }
 }

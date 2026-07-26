@@ -389,8 +389,14 @@ pub fn find_editable_issue(issues_dir: &Path, id: &str) -> Result<Option<ActiveI
 /// not an issue of its own (see issue #241).
 ///
 /// A `group_by` area directory can carry an ID prefix too — area `2024 Q1`
-/// slugs to `2024-q1` — so the name alone cannot decide this. The two are told
-/// apart by the status directories an area holds: `issues/<area>/<status>/`.
+/// slugs to `2024-q1` — so the name alone cannot decide this. An area is
+/// recognised by its shape instead: it sits directly under the issues root and
+/// holds status subdirectories (`issues/<area>/<status>/`). Requiring both
+/// keeps an issue that merely happens to hold an attachment folder named
+/// `done/` from being read as an area.
+///
+/// Assumes `entry` comes from a walk rooted at the issues directory, so depth 1
+/// means a direct child of it.
 fn is_dir_based_issue(entry: &DirEntry) -> bool {
     if !entry.file_type().is_dir() {
         return false;
@@ -398,15 +404,15 @@ fn is_dir_based_issue(entry: &DirEntry) -> bool {
     if id_prefix(&entry.file_name().to_string_lossy()).is_none() {
         return false;
     }
-    !holds_status_dirs(entry.path())
+    !is_area_dir(entry)
 }
 
-/// Whether `dir` holds a canonical status subdirectory, which makes it a
-/// `group_by` area directory rather than an issue.
-fn holds_status_dirs(dir: &Path) -> bool {
-    Status::all_values()
-        .iter()
-        .any(|status| dir.join(status.to_string()).is_dir())
+/// Whether `entry` is a `group_by` area directory rather than an issue.
+fn is_area_dir(entry: &DirEntry) -> bool {
+    entry.depth() == 1
+        && Status::all_values()
+            .iter()
+            .any(|status| entry.path().join(status.to_string()).is_dir())
 }
 
 /// Recursively collect the primary file path of every issue under `issues_dir`
@@ -451,7 +457,18 @@ pub fn all_issues(
 
     let mut results = Vec::new();
     for path in files {
-        let content = std::fs::read_to_string(&path)?;
+        // A file that cannot be read still exists, so keep going rather than
+        // aborting the whole listing: it falls through to the unknown-status
+        // fallback below. Warn, because an unknown-status issue drops out of
+        // the default `list` filter and would otherwise disappear without a
+        // word. `renga validate` reports the I/O error in full.
+        let content = match std::fs::read_to_string(&path) {
+            Ok(content) => content,
+            Err(e) => {
+                eprintln!("warning: cannot read {}: {e}", path.display());
+                String::new()
+            }
+        };
         let issue = match Issue::parse(&path, &content) {
             Ok(i) => i,
             Err(_) => {
@@ -517,21 +534,25 @@ pub fn next_id(issues_dir: &Path) -> Result<String> {
     while let Some(entry) = it.next() {
         let entry = entry?;
         let name = entry.file_name().to_string_lossy().into_owned();
-        let id_str = if entry.file_type().is_dir() {
-            id_prefix(&name)
-        } else {
-            issue_file_id(&name)
-        };
-        if let Some(id) = id_str {
-            if let Ok(n) = id.parse::<u64>() {
+
+        if entry.file_type().is_dir() {
+            // A `group_by` area directory can carry an ID prefix (area
+            // "2024 Q1" -> `2024-q1/`) without being an issue, so it must not
+            // reserve an ID either.
+            if !is_dir_based_issue(&entry) {
+                continue;
+            }
+            if let Some(n) = id_prefix(&name).and_then(|id| id.parse::<u64>().ok()) {
                 max = max.max(n);
             }
-        }
-        // Count the directory itself (done above), then stop: attachments
-        // inside it must not reserve IDs. Depth 0 is the root — skipping there
-        // would abort the whole walk.
-        if entry.depth() > 0 && is_dir_based_issue(&entry) {
+            // Count the directory itself, then stop: attachments inside it are
+            // not issues and must not reserve IDs.
             it.skip_current_dir();
+            continue;
+        }
+
+        if let Some(n) = issue_file_id(&name).and_then(|id| id.parse::<u64>().ok()) {
+            max = max.max(n);
         }
     }
 
@@ -614,6 +635,11 @@ pub fn validate_label(label: &str) -> Result<()> {
 /// Reject an `area` value that would collide with a reserved status
 /// directory name once nested under `group_by`.
 ///
+/// An area whose slug merely *looks* like an issue ID (`2024 Q1` ->
+/// `2024-q1`) is fine: an area directory is told from an issue directory by
+/// shape — a direct child of the issues root holding status subdirectories —
+/// not by name.
+///
 /// A no-op when `group_by` is empty or `area` is empty — the collision only
 /// matters once the area is actually used as a directory segment.
 ///
@@ -623,6 +649,7 @@ pub fn validate_label(label: &str) -> Result<()> {
 /// use renga::issue::validate_area_for_group_by;
 ///
 /// assert!(validate_area_for_group_by("core", &["area".to_string()]).is_ok());
+/// assert!(validate_area_for_group_by("2024 Q1", &["area".to_string()]).is_ok());
 /// assert!(validate_area_for_group_by("done", &["area".to_string()]).is_err());
 /// assert!(validate_area_for_group_by("done", &[]).is_ok());
 /// ```
@@ -894,6 +921,16 @@ pub(crate) fn convert_flat_to_dir(path: &Path) -> Result<PathBuf> {
 ///     canonical_status_dir(issues_dir, &["area".to_string()], "", "open"),
 ///     issues_dir.join("open")
 /// );
+/// // An area colliding with a reserved status name falls back to flat.
+/// assert_eq!(
+///     canonical_status_dir(issues_dir, &["area".to_string()], "done", "open"),
+///     issues_dir.join("open")
+/// );
+/// // An area that merely looks like an issue ID is nested normally.
+/// assert_eq!(
+///     canonical_status_dir(issues_dir, &["area".to_string()], "2024 Q1", "open"),
+///     issues_dir.join("2024-q1").join("open")
+/// );
 /// ```
 pub fn canonical_status_dir(
     issues_dir: &Path,
@@ -901,7 +938,14 @@ pub fn canonical_status_dir(
     area: &str,
     status: &str,
 ) -> PathBuf {
-    if !group_by.is_empty() && !area.is_empty() {
+    // An area rejected by `validate_area_for_group_by` is treated like no area
+    // at all, the same way an unparseable frontmatter is: renga must never
+    // build the very directory layout its own `create` refuses to produce.
+    // `validate` still reports the area itself as an error.
+    if !group_by.is_empty()
+        && !area.is_empty()
+        && validate_area_for_group_by(area, group_by).is_ok()
+    {
         issues_dir.join(make_slug(area)).join(status)
     } else {
         issues_dir.join(status)
@@ -1251,6 +1295,26 @@ mod tests {
         std::fs::create_dir(&done).unwrap();
         std::fs::write(done.join("10-old.md"), "").unwrap();
         assert_eq!(next_id(dir.path()).unwrap(), "11");
+    }
+
+    #[test]
+    fn all_issues_lists_an_unreadable_file_as_unknown() {
+        let dir = TempDir::new().unwrap();
+        std::fs::write(
+            dir.path().join("1-ok.md"),
+            "---\nstatus: open\n---\n\n# Ok\n",
+        )
+        .unwrap();
+        // A directory-based issue whose README.md is itself a directory: it is
+        // collected, but reading it fails. Stands in for any I/O failure — the
+        // listing must survive it rather than aborting or dropping the issue.
+        std::fs::create_dir_all(dir.path().join("2-broken").join("README.md")).unwrap();
+
+        let issues = all_issues(dir.path(), None, None, None, None, None).unwrap();
+
+        let ids: Vec<&str> = issues.iter().map(|i| i.id.as_str()).collect();
+        assert_eq!(ids, vec!["1", "2"]);
+        assert_eq!(issues[1].status, Status::Unknown);
     }
 
     #[test]

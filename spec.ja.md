@@ -181,7 +181,9 @@ defaults:             # create でフラグを省略したときのデフォル�
 
 `group_by: [area]` を設定すると、issue は `issues/<area>/<status>/N-name.md` に配置される。`area` はディレクトリ名として `renga create` のスラグ化と同じルール（`make_slug`）で正規化され、`/` を含む非英数字は `-` にまとめられる（実際のネストされたフォルダにはならない）。`area` が未設定の issue は従来通り `issues/<status>/` 直下に置かれる。
 
-`area` の値（スラグ化後）が予約済みのステータスディレクトリ名（`open`・`pending`・`in-progress`・`done`・`unknown`）と衝突する場合、`create`・`update` はエラーになる。既存データでこの衝突が見つかった場合、`migrate` は該当 issue を warning 付きでスキップし、`validate` はエラーとして報告する（自動修正はしない）。
+`area` の値（スラグ化後）が予約済みのステータスディレクトリ名（`open`・`pending`・`in-progress`・`done`・`unknown`）と衝突する場合、`create`・`update --area` はエラーになる。既存データでこの衝突が見つかった場合、issue 自体は `list`・`show` から引き続き読め、`migrate` は該当 issue を warning 付きでスキップし、`validate` はエラーとして報告する（自動修正はしない）。issue を再配置するコマンド（`done`・`pending`・`in-progress`・`reopen`、および `--area` を指定しない `update`）は、衝突する area を area 無しとして扱い、warning を出してフラットな `issues/<status>/` に置く。これは frontmatter が壊れている場合と同じフォールバックであり、renga 自身の `create` が拒否するディレクトリ構成を renga が作らないようにするため。
+
+area のスラグが issue ID のように見えるだけなら問題ない。area `2024 Q1` は `2024-q1` にスラグ化され、通常どおり動作する。area ディレクトリとディレクトリ形式 issue は名前ではなく形で区別する（issues ルート直下にあり、かつ status サブディレクトリを持つものが area）。
 
 `area`・`status` の変更は該当コマンド（`update`・`done`・`pending`・`in-progress`・`reopen`）が自動的にファイルを正しいディレクトリへ移動する。`update` は実際には `area`・`status` を変更しない編集（`--assignee`・`--label` 等）でも、常に編集の副作用として issue を canonical ディレクトリへ再配置する。そのため、もともと配置がずれていた issue（例: recoverable な status ディレクトリ不一致で見つかった issue）は `area`・`status` に触れない編集でも自動的に正しい位置へ自己修復される。`renga validate --auto-correct` は `group_by` の設定（有効・無効どちらへの変更も）と実際の配置がずれている issue を検出・修正する。`group_by` を新たに有効にして既存 issue を一括で移行するには `renga migrate` を使う。
 

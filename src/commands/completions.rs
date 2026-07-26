@@ -1,17 +1,13 @@
 //! Shell completion script generation and dynamic candidate output.
 
-use std::fs;
 use std::io::{self, Write};
-use std::path::Path;
-
-use walkdir::WalkDir;
 
 use anyhow::Result;
 use clap::CommandFactory;
 
 use crate::{
     cli::Cli,
-    issue::{issue_file_id, status_dir_name},
+    issue::{all_issues, status_dir_name, Issue, Status},
     Context,
 };
 
@@ -237,66 +233,54 @@ fn emit_subcommands<W: Write>(out: &mut W) -> io::Result<()> {
     Ok(())
 }
 
-fn emit_open_issues<W: Write>(out: &mut W, ctx: &Context) -> io::Result<()> {
-    if !ctx.issues_dir.exists() {
-        return Ok(());
+/// Whether an issue is already done, and so a candidate for `reopen` rather
+/// than for `done`/`pending`/`in-progress`.
+///
+/// Frontmatter status is authoritative, so a file parked in `open/` but marked
+/// `done` counts as done. A file whose frontmatter is missing or unparseable
+/// has no status to read; there the directory decides, which is what the
+/// commands themselves fall back on.
+fn is_done(issue: &Issue) -> bool {
+    match issue.status {
+        Status::Done => true,
+        Status::Unknown => status_dir_name(&issue.path).as_deref() == Some("done"),
+        _ => false,
     }
-    emit_issues_recursive(out, &ctx.issues_dir, Some(false))
+}
+
+fn emit_open_issues<W: Write>(out: &mut W, ctx: &Context) -> io::Result<()> {
+    emit_issues(out, ctx, |issue| !is_done(issue))
 }
 
 fn emit_done_issues<W: Write>(out: &mut W, ctx: &Context) -> io::Result<()> {
-    if !ctx.issues_dir.exists() {
-        return Ok(());
-    }
-    emit_issues_recursive(out, &ctx.issues_dir, Some(true))
+    emit_issues(out, ctx, is_done)
 }
 
 fn emit_all_issues<W: Write>(out: &mut W, ctx: &Context) -> io::Result<()> {
+    emit_issues(out, ctx, |_| true)
+}
+
+/// Write `ID\tTITLE` for every issue matching `keep`.
+///
+/// Candidates come from [`all_issues`] rather than a private directory walk, so
+/// the completion list agrees with what `renga list` reports and with what the
+/// command being completed will actually accept. `emit_open_issues` and
+/// `emit_done_issues` partition the issues exactly, so `show` can concatenate
+/// both without duplicates.
+fn emit_issues<W: Write>(
+    out: &mut W,
+    ctx: &Context,
+    keep: impl Fn(&Issue) -> bool,
+) -> io::Result<()> {
     if !ctx.issues_dir.exists() {
         return Ok(());
     }
-    emit_issues_recursive(out, &ctx.issues_dir, None)
-}
-
-fn emit_issues_recursive<W: Write>(
-    out: &mut W,
-    issues_dir: &Path,
-    only_done: Option<bool>,
-) -> io::Result<()> {
-    let mut entries: Vec<_> = WalkDir::new(issues_dir)
-        .min_depth(1)
-        .into_iter()
-        .filter_map(|e| e.ok())
-        .filter(|e| e.file_type().is_file())
-        .filter(|e| {
-            let in_done = status_dir_name(e.path()).as_deref() == Some("done");
-            match only_done {
-                Some(true) => in_done,
-                Some(false) => !in_done,
-                None => true,
-            }
-        })
-        .filter_map(|e| {
-            let name = e.file_name().to_string_lossy().into_owned();
-            let id = issue_file_id(&name)?.to_string();
-            Some((id, e))
-        })
-        .collect();
-    entries.sort_by(|(_, a), (_, b)| a.file_name().cmp(b.file_name()));
-
-    for (id, entry) in entries {
-        let path = entry.path();
-        let stem = path.file_stem().unwrap_or_default().to_string_lossy();
-        let title = read_title(path).unwrap_or_else(|| stem.to_string());
-        writeln!(out, "{id}\t{title}")?;
+    // Never fail a TAB press over bad data: emit what could be read. Note that
+    // `all_issues` writes its own warning to stderr for a file it cannot read;
+    // the shell wrappers redirect stderr to /dev/null.
+    let issues = all_issues(&ctx.issues_dir, None, None, None, None, None).unwrap_or_default();
+    for issue in issues.iter().filter(|issue| keep(issue)) {
+        writeln!(out, "{}\t{}", issue.id, issue.title)?;
     }
     Ok(())
-}
-
-fn read_title(path: &Path) -> Option<String> {
-    let content = fs::read_to_string(path).ok()?;
-    content
-        .lines()
-        .find(|l| l.starts_with("# "))
-        .map(|l| l.trim_start_matches("# ").to_string())
 }

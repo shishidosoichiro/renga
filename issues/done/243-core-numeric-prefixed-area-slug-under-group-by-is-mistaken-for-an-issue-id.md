@@ -1,6 +1,6 @@
 ---
 schema_version: 1
-status: open
+status: done
 priority: medium
 area: core
 labels: []
@@ -55,3 +55,27 @@ if Status::all_values().iter().any(|s| s.to_string() == slug) {
 - #241 の走査ガードは「`N-slug` ディレクトリのうち、canonical status サブディレクトリを持たないものを issue とみなす」という判定なので、area ディレクトリが誤って issue 扱いされて配下が隠される事故は起きない（`README.md` の有無では判別していない — 当初その案で実装したが、area に README を置くと area 全体が消える穴があったためレビューで差し替えた）
 - `src/issue.rs::validate_area_for_group_by`、`next_id`、`find_issue`
 
+## 解決（2026-07-27）— 当初の修正方針は撤回した
+
+**area 名の拒否はしない。** 一度は `validate_area_for_group_by` で `2024-q1` のような slug を拒否したが、宍戸さんの指摘を受けて撤回した。`2024 Q1` は四半期名として正当な area 名であり、塞ぐべきものではない。
+
+真の原因は入力側ではなく**走査側**だった:
+
+- `next_id` が area ディレクトリ名を採番済み ID として数えていた（#250）
+- `is_dir_based_issue` が area ディレクトリと issue ディレクトリを名前で区別しようとしていた（#254）
+
+この 2 つを直した結果、area 名を拒否しなくても症状が出ないことを実測で確認した:
+
+```sh
+renga create "Q1 planning" --area "2024 Q1"   # -> issues/2024-q1/open/1-q1-planning.md
+renga create "Second"      --area "2024 Q1"   # -> issues/2024-q1/open/2-second.md  （2025 に飛ばない）
+renga show 2024                                # -> error: issue 2024 not found
+renga validate                                 # -> ok
+renga done 1                                   # -> issues/2024-q1/done/1-q1-planning.md（area を保つ）
+```
+
+area ディレクトリと issue ディレクトリは**名前ではなく形**で区別する: 「issues ルート直下にあり、かつ canonical status サブディレクトリを持つ」ものが area。
+
+**教訓**: 症状（ID が飛ぶ）を見て入力バリデーションで塞ごうとしたが、原因は走査ロジックにあった。入力制限はユーザーの正当な使い方を奪う一方で根本原因を残す。先に原因を特定すべきだった。
+
+予約ステータス名（`area: done` 等）の拒否は従来どおり残る。あちらはディレクトリ名が status ディレクトリと本当に衝突するため、形でも区別できない。

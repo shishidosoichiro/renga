@@ -656,6 +656,109 @@ fn complete_skips_files_without_an_id_prefix() {
 }
 
 #[test]
+fn complete_includes_directory_issues() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "Dir Task", "--dir=true"])
+        .assert()
+        .success();
+
+    renga(&dir)
+        .args(["__complete", "renga", "done", ""])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("1\tDir Task"));
+}
+
+#[test]
+fn complete_ignores_files_inside_dir_based_issue() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "Dir Task", "--dir=true"])
+        .assert()
+        .success();
+    fs::write(
+        dir.path().join("issues/open/1-dir-task/9-design.md"),
+        "---\nstatus: open\n---\n\n# Attached design note\n",
+    )
+    .unwrap();
+
+    renga(&dir)
+        .args(["__complete", "renga", "done", ""])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("1\tDir Task"))
+        .stdout(predicate::str::contains("Attached design note").not());
+}
+
+#[test]
+fn complete_done_filters_on_frontmatter_not_directory() {
+    let dir = setup();
+    // Frontmatter status is authoritative; the directory is a synchronized
+    // layout. An issue parked in `open/` but marked done is not a `done`
+    // candidate, and is a `reopen` candidate.
+    fs::write(
+        dir.path().join("issues/open/5-misplaced.md"),
+        "---\nstatus: done\n---\n\n# Misplaced Done\n",
+    )
+    .unwrap();
+
+    renga(&dir)
+        .args(["__complete", "renga", "done", ""])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Misplaced Done").not());
+
+    renga(&dir)
+        .args(["__complete", "renga", "reopen", ""])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("5\tMisplaced Done"));
+}
+
+#[test]
+fn complete_places_frontmatterless_issues_by_directory() {
+    let dir = setup();
+    // With no frontmatter there is no status to read, so the directory decides
+    // — matching what the commands accept: `done 6` succeeds, `done 7` fails.
+    fs::write(
+        dir.path().join("issues/open/6-nofm.md"),
+        "# No frontmatter open\n",
+    )
+    .unwrap();
+    fs::write(
+        dir.path().join("issues/done/7-nofm.md"),
+        "# No frontmatter done\n",
+    )
+    .unwrap();
+
+    renga(&dir)
+        .args(["__complete", "renga", "done", ""])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("6\tNo frontmatter open"))
+        .stdout(predicate::str::contains("No frontmatter done").not());
+
+    renga(&dir).args(["done", "6"]).assert().success();
+}
+
+#[test]
+fn complete_title_matches_list_for_frontmatter_comments_and_legacy_prefix() {
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/open/7-legacy.md"),
+        "---\n# yaml comment here\nstatus: open\n---\n\n# 007: Legacy Titled\n",
+    )
+    .unwrap();
+
+    renga(&dir)
+        .args(["__complete", "renga", "done", ""])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("7\tLegacy Titled\n"));
+}
+
+#[test]
 fn complete_reopen_shows_done_issues() {
     let dir = setup();
     renga(&dir).args(["create", "Old Task"]).assert().success();
@@ -2250,17 +2353,24 @@ fn validate_ignores_files_inside_dir_based_issue() {
     renga(&dir).args(["validate"]).assert().success();
 }
 
-#[test]
-fn list_includes_issues_under_numeric_prefixed_area() {
-    let dir = setup();
+/// Create `issues/2024-q1/open/1-q1-task.md` under `group_by: [area]`. Area
+/// "2024 Q1" slugs to `2024-q1`, which reads as an issue ID prefix — the area
+/// directory must not be confused with directory-based issue 2024.
+fn id_prefixed_area_layout(dir: &TempDir) {
     fs::write(dir.path().join(".renga.yml"), "group_by: [area]\n").unwrap();
-    // Area "2024 Q1" slugs to `2024-q1`, which carries an ID prefix. The area
-    // directory must not be mistaken for a directory-based issue.
-    renga(&dir)
+    renga(dir)
         .args(["create", "Q1 task", "--area", "2024 Q1"])
         .assert()
         .success();
     assert!(dir.path().join("issues/2024-q1/open/1-q1-task.md").exists());
+}
+
+#[test]
+fn list_includes_issues_under_numeric_prefixed_area() {
+    let dir = setup();
+    // `2024-q1` carries an ID prefix; the area directory must not be mistaken
+    // for a directory-based issue, which would hide everything under it.
+    id_prefixed_area_layout(&dir);
 
     renga(&dir)
         .args(["list"])
@@ -2270,15 +2380,62 @@ fn list_includes_issues_under_numeric_prefixed_area() {
 }
 
 #[test]
-fn list_includes_issues_under_area_holding_its_own_readme() {
+fn create_does_not_skip_ids_reserved_by_an_area_directory() {
+    let dir = setup();
+    id_prefixed_area_layout(&dir);
+
+    // `2024-q1/` is an area, not issue 2024 — the next ID is 2, not 2025.
+    renga(&dir).args(["create", "New"]).assert().success();
+
+    assert!(dir.path().join("issues/open/2-new.md").exists());
+}
+
+#[test]
+fn done_keeps_an_id_prefixed_area_grouping() {
+    let dir = setup();
+    id_prefixed_area_layout(&dir);
+
+    renga(&dir).args(["done", "1"]).assert().success();
+
+    assert!(dir.path().join("issues/2024-q1/done/1-q1-task.md").exists());
+}
+
+#[test]
+fn done_does_not_create_a_reserved_name_area_directory() {
     let dir = setup();
     fs::write(dir.path().join(".renga.yml"), "group_by: [area]\n").unwrap();
+    fs::write(
+        dir.path().join("issues/open/1-task.md"),
+        "---\nschema_version: 1\nstatus: open\npriority: medium\narea: done\nlabels: []\n---\n\n# Task\n",
+    )
+    .unwrap();
+
+    renga(&dir).args(["done", "1"]).assert().success();
+
+    assert!(dir.path().join("issues/done/1-task.md").exists());
+    assert!(!dir.path().join("issues/done/done/1-task.md").exists());
+}
+
+#[test]
+fn list_warns_instead_of_silently_dropping_an_unreadable_issue() {
+    let dir = setup();
+    renga(&dir).args(["create", "Readable"]).assert().success();
+    // A directory-based issue whose README.md is a directory cannot be read.
+    fs::create_dir_all(dir.path().join("issues/open/2-broken/README.md")).unwrap();
+
     renga(&dir)
-        .args(["create", "Q1 task", "--area", "2024 Q1"])
+        .args(["list"])
         .assert()
-        .success();
-    // An area README must not make the area look like a directory-based issue
-    // and hide everything filed under it.
+        .success()
+        .stdout(predicate::str::contains("Readable"))
+        .stderr(predicate::str::contains("warning: cannot read"));
+}
+
+#[test]
+fn list_includes_issues_under_area_holding_its_own_readme() {
+    let dir = setup();
+    id_prefixed_area_layout(&dir);
+    // An area README must not make the area look like a directory-based issue.
     fs::write(
         dir.path().join("issues/2024-q1/README.md"),
         "# 2024 Q1 area notes\n",
@@ -2535,6 +2692,93 @@ fn validate_flags_reserved_area_collision_without_correcting() {
         .stdout(predicate::str::contains("reserved status directory name"));
 
     assert!(dir.path().join("issues/open/1-task.md").exists());
+}
+
+#[test]
+fn create_allows_an_area_whose_slug_reads_like_an_issue_id() {
+    let dir = setup();
+    id_prefixed_area_layout(&dir);
+
+    // The area directory must not swallow the ID it looks like, nor answer for
+    // it: the next issue is 2, and there is no issue 2024.
+    renga(&dir)
+        .args(["create", "Second", "--area", "2024 Q1"])
+        .assert()
+        .success();
+    assert!(dir.path().join("issues/2024-q1/open/2-second.md").exists());
+
+    renga(&dir).args(["show", "2024"]).assert().failure();
+    renga(&dir)
+        .args(["list"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Q1 task"))
+        .stdout(predicate::str::contains("Second"));
+}
+
+#[test]
+fn validate_accepts_an_id_prefixed_area_and_leaves_it_in_place() {
+    let dir = setup();
+    id_prefixed_area_layout(&dir);
+
+    renga(&dir)
+        .args(["validate", "--auto-correct"])
+        .assert()
+        .success();
+
+    assert!(dir.path().join("issues/2024-q1/open/1-q1-task.md").exists());
+    assert!(!dir.path().join("issues/open/1-q1-task.md").exists());
+}
+
+#[test]
+fn migrate_leaves_an_id_prefixed_area_in_place() {
+    let dir = setup();
+    id_prefixed_area_layout(&dir);
+
+    renga(&dir).args(["migrate"]).assert().success();
+
+    assert!(dir.path().join("issues/2024-q1/open/1-q1-task.md").exists());
+}
+
+#[test]
+fn update_keeps_an_id_prefixed_area_grouping() {
+    let dir = setup();
+    id_prefixed_area_layout(&dir);
+
+    renga(&dir)
+        .args(["update", "1", "--priority", "high"])
+        .assert()
+        .success();
+
+    assert!(dir.path().join("issues/2024-q1/open/1-q1-task.md").exists());
+}
+
+#[test]
+fn create_reserves_the_id_of_an_issue_dir_holding_a_status_named_folder() {
+    let dir = setup();
+    // `12-refactor/` holds an attachment folder called `done/`. That must not
+    // make it look like a `group_by` area — it would drop out of `list` and
+    // free ID 12 for reuse.
+    fs::create_dir_all(dir.path().join("issues/open/12-refactor/done")).unwrap();
+    fs::write(
+        dir.path().join("issues/open/12-refactor/README.md"),
+        "---\nschema_version: 1\nstatus: open\npriority: medium\n---\n\n# Refactor\n",
+    )
+    .unwrap();
+    fs::write(
+        dir.path().join("issues/open/12-refactor/done/note.md"),
+        "notes\n",
+    )
+    .unwrap();
+
+    renga(&dir)
+        .args(["list"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Refactor"));
+
+    renga(&dir).args(["create", "New"]).assert().success();
+    assert!(dir.path().join("issues/open/13-new.md").exists());
 }
 
 #[test]

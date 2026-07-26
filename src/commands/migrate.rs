@@ -56,7 +56,8 @@ pub fn run(ctx: &Context) -> Result<()> {
     let mut moved: HashSet<String> = HashSet::new();
 
     for path in &flat_files {
-        let content = std::fs::read_to_string(path)?;
+        let content =
+            std::fs::read_to_string(path).with_context(|| format!("reading {}", path.display()))?;
         let status_str = match Issue::parse(path, &content) {
             Ok(issue) => issue.status.to_string(),
             Err(_) => "unknown".to_string(),
@@ -119,17 +120,15 @@ pub fn run(ctx: &Context) -> Result<()> {
         // Re-scan fresh so any moves/conversions from steps 1-2 above are
         // reflected.
         for path in collect_issue_files(&ctx.issues_dir) {
-            let content = std::fs::read_to_string(&path)?;
+            let content = std::fs::read_to_string(&path)
+                .with_context(|| format!("reading {}", path.display()))?;
             let (area, status_str) = match Issue::parse(&path, &content) {
                 Ok(issue) => (issue.area, issue.status.to_string()),
                 Err(_) => (String::new(), "unknown".to_string()),
             };
-            if validate_area_for_group_by(&area, &ctx.config.group_by).is_err() {
+            if let Err(e) = validate_area_for_group_by(&area, &ctx.config.group_by) {
                 area_candidates += 1;
-                eprintln!(
-                    "warning: skipping {} — area '{area}' collides with a reserved status directory name",
-                    path.display()
-                );
+                eprintln!("warning: skipping {} — {e}", path.display());
                 continue;
             }
             let expected_dir =
