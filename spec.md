@@ -39,6 +39,8 @@ N-short-name/
   ...           Any additional files
 ```
 
+A directory-based issue's contents are opaque to renga. Files inside `N-short-name/` are never scanned as separate issues, even when named `N-slug.md`, and their numbers do not reserve IDs. Only `README.md` represents the issue.
+
 - `N`: Plain positive integer, no zero-padding. Assigned by `renga create` as max existing number + 1.
 - `short-name`: Kebab-case short description (Unicode alphanumeric and hyphens only, up to 80 bytes).
 

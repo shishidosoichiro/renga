@@ -2184,6 +2184,114 @@ fn validate_auto_correct_moves_directory_issue_to_correct_status() {
     assert!(!dir.path().join("issues/done/1-task").exists());
 }
 
+/// Create `issues/open/1-task/` holding an attachment named like an issue file
+/// and one without frontmatter. See issue #241.
+fn dir_based_issue_with_attachments(dir: &TempDir) {
+    renga(dir)
+        .args(["create", "Dir Task", "--dir=true"])
+        .assert()
+        .success();
+    fs::write(
+        dir.path().join("issues/open/1-dir-task/9-design.md"),
+        "---\nstatus: open\npriority: high\n---\n\n# Attached design note\n",
+    )
+    .unwrap();
+    fs::write(
+        dir.path().join("issues/open/1-dir-task/3-notes.md"),
+        "just notes, no frontmatter\n",
+    )
+    .unwrap();
+}
+
+#[test]
+fn list_ignores_files_inside_dir_based_issue() {
+    let dir = setup();
+    dir_based_issue_with_attachments(&dir);
+
+    renga(&dir)
+        .args(["list"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Dir Task"))
+        .stdout(predicate::str::contains("Attached design note").not());
+}
+
+#[test]
+fn done_does_not_move_attachment_out_of_dir_based_issue() {
+    let dir = setup();
+    dir_based_issue_with_attachments(&dir);
+
+    renga(&dir).args(["done", "9"]).assert().failure();
+
+    assert!(dir
+        .path()
+        .join("issues/open/1-dir-task/9-design.md")
+        .exists());
+    assert!(!dir.path().join("issues/done/9-design.md").exists());
+    assert!(dir.path().join("issues/open/1-dir-task/README.md").exists());
+}
+
+#[test]
+fn create_does_not_skip_ids_reserved_by_attachments() {
+    let dir = setup();
+    dir_based_issue_with_attachments(&dir);
+
+    renga(&dir).args(["create", "Next"]).assert().success();
+
+    assert!(dir.path().join("issues/open/2-next.md").exists());
+}
+
+#[test]
+fn validate_ignores_files_inside_dir_based_issue() {
+    let dir = setup();
+    dir_based_issue_with_attachments(&dir);
+
+    // `3-notes.md` has no frontmatter; validate must not report it as an error.
+    renga(&dir).args(["validate"]).assert().success();
+}
+
+#[test]
+fn list_includes_issues_under_numeric_prefixed_area() {
+    let dir = setup();
+    fs::write(dir.path().join(".renga.yml"), "group_by: [area]\n").unwrap();
+    // Area "2024 Q1" slugs to `2024-q1`, which carries an ID prefix. The area
+    // directory must not be mistaken for a directory-based issue.
+    renga(&dir)
+        .args(["create", "Q1 task", "--area", "2024 Q1"])
+        .assert()
+        .success();
+    assert!(dir.path().join("issues/2024-q1/open/1-q1-task.md").exists());
+
+    renga(&dir)
+        .args(["list"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Q1 task"));
+}
+
+#[test]
+fn list_includes_issues_under_area_holding_its_own_readme() {
+    let dir = setup();
+    fs::write(dir.path().join(".renga.yml"), "group_by: [area]\n").unwrap();
+    renga(&dir)
+        .args(["create", "Q1 task", "--area", "2024 Q1"])
+        .assert()
+        .success();
+    // An area README must not make the area look like a directory-based issue
+    // and hide everything filed under it.
+    fs::write(
+        dir.path().join("issues/2024-q1/README.md"),
+        "# 2024 Q1 area notes\n",
+    )
+    .unwrap();
+
+    renga(&dir)
+        .args(["list"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Q1 task"));
+}
+
 // ── group_by ──────────────────────────────────────────────────────────────────
 
 #[test]

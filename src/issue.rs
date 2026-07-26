@@ -8,7 +8,7 @@ use std::{
 
 use anyhow::{Context as _, Result};
 use serde::{Deserialize, Serialize};
-use walkdir::WalkDir;
+use walkdir::{DirEntry, WalkDir};
 
 /// Status of an issue.
 ///
@@ -266,18 +266,22 @@ pub fn find_issue(issues_dir: &Path, id: &str, include_done: bool) -> Result<Opt
     let num: u64 = id
         .parse()
         .with_context(|| format!("invalid issue ID: {id}"))?;
-    for entry in WalkDir::new(issues_dir).min_depth(1) {
+    let mut it = WalkDir::new(issues_dir).min_depth(1).into_iter();
+    while let Some(entry) = it.next() {
         let entry = entry?;
-        let name = entry.file_name().to_string_lossy();
+        let name = entry.file_name().to_string_lossy().into_owned();
 
         if entry.file_type().is_dir() {
-            let Some(entry_id) = id_prefix(&name) else {
+            if !is_dir_based_issue(&entry) {
                 continue;
-            };
+            }
+            // The issue's own files are not issues — never descend, even when
+            // this directory is filtered out below.
+            it.skip_current_dir();
             if !include_done && status_dir_name(entry.path()).as_deref() == Some("done") {
                 continue;
             }
-            if entry_id.parse::<u64>().unwrap_or(0) == num {
+            if id_prefix(&name).and_then(|id| id.parse::<u64>().ok()) == Some(num) {
                 let readme = entry.path().join("README.md");
                 if readme.exists() {
                     return Ok(Some(readme));
@@ -378,30 +382,54 @@ pub fn find_editable_issue(issues_dir: &Path, id: &str) -> Result<Option<ActiveI
     }))
 }
 
+/// Whether `entry` is a directory-based issue's own directory.
+///
+/// Callers walking the issues tree must not descend into one: its contents
+/// belong to the issue, so a file inside it named `N-slug.md` is an attachment,
+/// not an issue of its own (see issue #241).
+///
+/// A `group_by` area directory can carry an ID prefix too — area `2024 Q1`
+/// slugs to `2024-q1` — so the name alone cannot decide this. The two are told
+/// apart by the status directories an area holds: `issues/<area>/<status>/`.
+fn is_dir_based_issue(entry: &DirEntry) -> bool {
+    if !entry.file_type().is_dir() {
+        return false;
+    }
+    if id_prefix(&entry.file_name().to_string_lossy()).is_none() {
+        return false;
+    }
+    !holds_status_dirs(entry.path())
+}
+
+/// Whether `dir` holds a canonical status subdirectory, which makes it a
+/// `group_by` area directory rather than an issue.
+fn holds_status_dirs(dir: &Path) -> bool {
+    Status::all_values()
+        .iter()
+        .any(|status| dir.join(status.to_string()).is_dir())
+}
+
 /// Recursively collect the primary file path of every issue under `issues_dir`
 /// (flat `N-slug.md` files and `N-slug/README.md` for directory-based issues),
 /// regardless of nesting depth above the status directory.
 pub(crate) fn collect_issue_files(issues_dir: &Path) -> Vec<PathBuf> {
-    WalkDir::new(issues_dir)
-        .min_depth(1)
-        .into_iter()
-        .filter_map(|e| e.ok())
-        .filter_map(|e| {
-            let name = e.file_name().to_string_lossy().into_owned();
-            if e.file_type().is_file() && is_issue_file_name(&name) {
-                Some(e.path().to_path_buf())
-            } else if e.file_type().is_dir() && id_prefix(&name).is_some() {
-                let readme = e.path().join("README.md");
-                if readme.exists() {
-                    Some(readme)
-                } else {
-                    None
-                }
-            } else {
-                None
+    let mut files = Vec::new();
+    let mut it = WalkDir::new(issues_dir).min_depth(1).into_iter();
+    while let Some(entry) = it.next() {
+        let Ok(entry) = entry else { continue };
+        if is_dir_based_issue(&entry) {
+            let readme = entry.path().join("README.md");
+            if readme.exists() {
+                files.push(readme);
             }
-        })
-        .collect()
+            it.skip_current_dir();
+            continue;
+        }
+        if entry.file_type().is_file() && is_issue_file_name(&entry.file_name().to_string_lossy()) {
+            files.push(entry.path().to_path_buf());
+        }
+    }
+    files
 }
 
 /// Collect issues from `issues_dir` recursively, applying optional filters.
@@ -485,9 +513,10 @@ pub fn all_issues(
 pub fn next_id(issues_dir: &Path) -> Result<String> {
     let mut max: u64 = 0;
 
-    for entry in WalkDir::new(issues_dir) {
+    let mut it = WalkDir::new(issues_dir).into_iter();
+    while let Some(entry) = it.next() {
         let entry = entry?;
-        let name = entry.file_name().to_string_lossy();
+        let name = entry.file_name().to_string_lossy().into_owned();
         let id_str = if entry.file_type().is_dir() {
             id_prefix(&name)
         } else {
@@ -497,6 +526,12 @@ pub fn next_id(issues_dir: &Path) -> Result<String> {
             if let Ok(n) = id.parse::<u64>() {
                 max = max.max(n);
             }
+        }
+        // Count the directory itself (done above), then stop: attachments
+        // inside it must not reserve IDs. Depth 0 is the root — skipping there
+        // would abort the whole walk.
+        if entry.depth() > 0 && is_dir_based_issue(&entry) {
+            it.skip_current_dir();
         }
     }
 
@@ -1224,6 +1259,122 @@ mod tests {
         std::fs::write(dir.path().join("00003-foo.md"), "").unwrap();
         std::fs::write(dir.path().join("5-bar.md"), "").unwrap();
         assert_eq!(next_id(dir.path()).unwrap(), "6");
+    }
+
+    /// Build `<dir>/open/1-task/` as a directory-based issue holding an
+    /// attachment that looks like an issue file. See issue #241.
+    fn dir_based_issue_with_attachment(dir: &TempDir) -> PathBuf {
+        let issue_dir = dir.path().join("open").join("1-task");
+        std::fs::create_dir_all(&issue_dir).unwrap();
+        std::fs::write(
+            issue_dir.join("README.md"),
+            "---\nstatus: open\n---\n\n# Task\n",
+        )
+        .unwrap();
+        std::fs::write(
+            issue_dir.join("9-design.md"),
+            "---\nstatus: open\n---\n\n# Attached design note\n",
+        )
+        .unwrap();
+        issue_dir
+    }
+
+    #[test]
+    fn collect_issue_files_ignores_files_inside_dir_based_issue() {
+        let dir = TempDir::new().unwrap();
+        let issue_dir = dir_based_issue_with_attachment(&dir);
+
+        let files = collect_issue_files(dir.path());
+
+        assert_eq!(files, vec![issue_dir.join("README.md")]);
+    }
+
+    #[test]
+    fn next_id_ignores_files_inside_dir_based_issue() {
+        let dir = TempDir::new().unwrap();
+        dir_based_issue_with_attachment(&dir);
+
+        // The directory itself still counts (ID 1); the 9-design.md attachment
+        // inside it must not reserve ID 9.
+        assert_eq!(next_id(dir.path()).unwrap(), "2");
+    }
+
+    #[test]
+    fn find_issue_ignores_files_inside_dir_based_issue() {
+        let dir = TempDir::new().unwrap();
+        let issue_dir = dir_based_issue_with_attachment(&dir);
+
+        assert_eq!(find_issue(dir.path(), "9", true).unwrap(), None);
+        assert_eq!(
+            find_issue(dir.path(), "1", true).unwrap(),
+            Some(issue_dir.join("README.md"))
+        );
+    }
+
+    #[test]
+    fn find_issue_ignores_attachments_in_done_dir_based_issue() {
+        let dir = TempDir::new().unwrap();
+        let issue_dir = dir.path().join("done").join("1-task");
+        std::fs::create_dir_all(&issue_dir).unwrap();
+        std::fs::write(
+            issue_dir.join("README.md"),
+            "---\nstatus: done\n---\n\n# Task\n",
+        )
+        .unwrap();
+        std::fs::write(
+            issue_dir.join("9-design.md"),
+            "---\nstatus: open\n---\n\n# Attached\n",
+        )
+        .unwrap();
+
+        // The done/ directory is filtered out, but the walk must still not
+        // descend into it and surface the attachment as issue 9.
+        assert_eq!(find_issue(dir.path(), "9", false).unwrap(), None);
+    }
+
+    /// Build `<dir>/2024-q1/open/1-task.md` — a `group_by` area directory whose
+    /// slug carries an ID prefix (area "2024 Q1"). Returns the issue path.
+    fn numeric_prefixed_area_dir(dir: &TempDir) -> PathBuf {
+        let area_open = dir.path().join("2024-q1").join("open");
+        std::fs::create_dir_all(&area_open).unwrap();
+        let path = area_open.join("1-task.md");
+        std::fs::write(&path, "---\nstatus: open\narea: 2024 Q1\n---\n\n# Task\n").unwrap();
+        path
+    }
+
+    #[test]
+    fn collect_issue_files_descends_into_numeric_prefixed_area_dir() {
+        let dir = TempDir::new().unwrap();
+        let issue = numeric_prefixed_area_dir(&dir);
+
+        assert_eq!(collect_issue_files(dir.path()), vec![issue]);
+    }
+
+    #[test]
+    fn collect_issue_files_descends_into_area_dir_holding_a_readme() {
+        let dir = TempDir::new().unwrap();
+        let issue = numeric_prefixed_area_dir(&dir);
+        // An area may carry its own README. It must not turn the area into an
+        // issue and hide everything filed under it.
+        std::fs::write(dir.path().join("2024-q1").join("README.md"), "# Q1 notes\n").unwrap();
+
+        assert_eq!(collect_issue_files(dir.path()), vec![issue]);
+    }
+
+    #[test]
+    fn collect_issue_files_skips_inside_dir_based_issue_missing_its_readme() {
+        let dir = TempDir::new().unwrap();
+        let issue_dir = dir.path().join("open").join("1-task");
+        std::fs::create_dir_all(&issue_dir).unwrap();
+        // No README.md: the directory represents no issue, but its contents are
+        // still the issue's, not issues of their own.
+        std::fs::write(
+            issue_dir.join("9-design.md"),
+            "---\nstatus: open\n---\n\n# Attached\n",
+        )
+        .unwrap();
+
+        assert!(collect_issue_files(dir.path()).is_empty());
     }
 
     #[test]

@@ -32,6 +32,9 @@ Closed issues are moved to `done/`.
 | [153](open/153-clap-complete-unstable-dynamic.md) | open | low | clap_complete unstable-dynamic が stable になったら __complete と手書きシェルスクリプトを置き換えを検討する |
 | [167](open/167-split-complete-update-test.md) | open | low | complete_update_shows_open_issues_and_flags を2つのテストに分割する |
 | [228](open/228-feat-add-append-to-renga-update-for-appending-text-to-issue-body.md) | open | medium | feat: add --append to renga update for appending text to issue body |
+| [244](open/244-cli-reopen-completion-offers-open-issues-that-the-command-rejects.md) | open | low | cli: reopen completion offers open issues that the command rejects |
+| [247](open/247-cli-done-pending-in-progress-completion-candidates-diverge-from-what-the-command.md) | open | low | cli: done/pending/in-progress completion candidates diverge from what the commands accept |
+| [248](open/248-cli-one-unreadable-issue-file-wipes-out-every-shell-completion-candidate.md) | open | low | cli: one unreadable issue file wipes out every shell completion candidate |
 
 ---
 
@@ -44,8 +47,9 @@ Closed issues are moved to `done/`.
 | [195](open/195-prevent-duplicate-ids.md) | open | medium | issue 作成時に重複 ID を防止できない |
 | [203](open/203-git-worktree-issues.md) | open | medium | git worktree 使用時に issues ディレクトリが分離される |
 | [240](open/240-core-shell-completion-omits-directory-based-issues-n-title-readme-md.md) | open | medium | core: shell completion omits directory-based issues (N-title/README.md) |
-| [241](open/241-core-files-named-n-slug-md-inside-a-directory-based-issue-are-treated-as-separat.md) | open | medium | core: files named N-slug.md inside a directory-based issue are treated as separate issues |
 | [242](open/242-core-completion-titles-diverge-from-issue-extract-title-frontmatter-comments-leg.md) | open | low | core: completion titles diverge from issue::extract_title (frontmatter comments, legacy NNN: prefix) |
+| [243](open/243-core-numeric-prefixed-area-slug-under-group-by-is-mistaken-for-an-issue-id.md) | open | medium | core: numeric-prefixed area slug under group_by is mistaken for an issue ID |
+| [249](open/249-core-next-id-counts-the-issues-root-directory-s-own-name-when-assigning-ids.md) | open | low | core: next_id counts the issues root directory's own name when assigning IDs |
 
 ---
 
