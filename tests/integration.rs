@@ -640,6 +640,22 @@ fn complete_done_shows_open_issues() {
 }
 
 #[test]
+fn complete_skips_files_without_an_id_prefix() {
+    let dir = setup();
+    renga(&dir).args(["create", "My Task"]).assert().success();
+    // Digit-led but no `N-slug` hyphen: not a valid issue file name.
+    fs::write(dir.path().join("issues/open/5foo.md"), "# Bogus\n").unwrap();
+
+    renga(&dir)
+        .args(["__complete", "renga", "done", ""])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("1\tMy Task"))
+        .stdout(predicate::str::contains("5foo").not())
+        .stdout(predicate::str::contains("Bogus").not());
+}
+
+#[test]
 fn complete_reopen_shows_done_issues() {
     let dir = setup();
     renga(&dir).args(["create", "Old Task"]).assert().success();

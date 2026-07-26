@@ -9,7 +9,11 @@ use walkdir::WalkDir;
 use anyhow::Result;
 use clap::CommandFactory;
 
-use crate::{cli::Cli, issue::status_dir_name, Context};
+use crate::{
+    cli::Cli,
+    issue::{issue_file_id, status_dir_name},
+    Context,
+};
 
 // Thin wrapper scripts: all logic lives in `renga __complete`.
 // Tab-separated `CANDIDATE\tDESCRIPTION` output is handled by each shell appropriately.
@@ -272,22 +276,17 @@ fn emit_issues_recursive<W: Write>(
                 None => true,
             }
         })
-        .filter(|e| {
+        .filter_map(|e| {
             let name = e.file_name().to_string_lossy().into_owned();
-            name.ends_with(".md")
-                && name
-                    .chars()
-                    .next()
-                    .map(|c| c.is_ascii_digit())
-                    .unwrap_or(false)
+            let id = issue_file_id(&name)?.to_string();
+            Some((id, e))
         })
         .collect();
-    entries.sort_by(|a, b| a.file_name().cmp(b.file_name()));
+    entries.sort_by(|(_, a), (_, b)| a.file_name().cmp(b.file_name()));
 
-    for entry in entries {
+    for (id, entry) in entries {
         let path = entry.path();
         let stem = path.file_stem().unwrap_or_default().to_string_lossy();
-        let id = stem.split('-').next().unwrap_or("").to_string();
         let title = read_title(path).unwrap_or_else(|| stem.to_string());
         writeln!(out, "{id}\t{title}")?;
     }
