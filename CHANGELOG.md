@@ -1,6 +1,24 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [0.17.0] - 2026-07-27
+
+### 🚀 Features
+
+- [`6fe52d7`] *(core)* Nest issues under an area directory via group_by
+- [`edf7865`] *(core)* Add defaults.dir config and apply it in migrate
+
+### 🐛 Bug Fixes
+
+- [`9ac3d7d`] Stop offering malformed filenames as completion candidates
+- [`b95c8a4`] Keep attachments inside a directory-based issue from being read as issues
+- [`052da22`] Offer directory-based issues as shell completion candidates
+- [`33f6113`] Stop offering open issues as `renga reopen` completion candidates
+- [`1eff237`] Stop a custom issues_dir name from reserving an issue ID
+
+### 🚜 Refactor
+
+- [`563e482`] *(core)* Consolidate issue relocation into a shared helper
 ## [0.16.0] - 2026-07-02
 
 ### 🚀 Features
