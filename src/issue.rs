@@ -530,7 +530,9 @@ pub fn all_issues(
 pub fn next_id(issues_dir: &Path) -> Result<String> {
     let mut max: u64 = 0;
 
-    let mut it = WalkDir::new(issues_dir).into_iter();
+    // `min_depth(1)` keeps the issues directory's own name out of the scan —
+    // `issues_dir: 2024-tickets` must not reserve ID 2024.
+    let mut it = WalkDir::new(issues_dir).min_depth(1).into_iter();
     while let Some(entry) = it.next() {
         let entry = entry?;
         let name = entry.file_name().to_string_lossy().into_owned();
@@ -1295,6 +1297,18 @@ mod tests {
         std::fs::create_dir(&done).unwrap();
         std::fs::write(done.join("10-old.md"), "").unwrap();
         assert_eq!(next_id(dir.path()).unwrap(), "11");
+    }
+
+    #[test]
+    fn next_id_ignores_the_issues_directorys_own_name() {
+        let dir = TempDir::new().unwrap();
+        // `.renga.yml` may point `issues_dir` at a directory named like an
+        // issue; that name is not an issue and must not reserve its number.
+        let issues_dir = dir.path().join("2024-tickets");
+        std::fs::create_dir(&issues_dir).unwrap();
+        std::fs::write(issues_dir.join("3-foo.md"), "").unwrap();
+
+        assert_eq!(next_id(&issues_dir).unwrap(), "4");
     }
 
     #[test]
