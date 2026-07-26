@@ -108,10 +108,12 @@ fn write_candidates(args: &[String], ctx: &Context) -> io::Result<()> {
 
     match subcmd {
         "done" | "pending" | "in-progress" | "edit" => emit_open_issues(&mut out, ctx)?,
-        "show" | "reopen" => {
+        "show" => {
             emit_open_issues(&mut out, ctx)?;
             emit_done_issues(&mut out, ctx)?;
         }
+        // `reopen` rejects an issue that is not done, so do not offer one.
+        "reopen" => emit_done_issues(&mut out, ctx)?,
         "update" => {
             let emitted = prev
                 .strip_prefix("--")

@@ -717,6 +717,26 @@ fn complete_done_filters_on_frontmatter_not_directory() {
 }
 
 #[test]
+fn complete_reopen_omits_issues_that_are_not_done() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "Still Open"])
+        .assert()
+        .success();
+    renga(&dir).args(["create", "Closed"]).assert().success();
+    renga(&dir).args(["done", "2"]).assert().success();
+
+    // `reopen 1` fails with "already exists as an open issue", so 1 must not
+    // be offered.
+    renga(&dir)
+        .args(["__complete", "renga", "reopen", ""])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("2\tClosed"))
+        .stdout(predicate::str::contains("Still Open").not());
+}
+
+#[test]
 fn complete_places_frontmatterless_issues_by_directory() {
     let dir = setup();
     // With no frontmatter there is no status to read, so the directory decides
