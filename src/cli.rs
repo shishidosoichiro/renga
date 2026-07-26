@@ -44,7 +44,8 @@ pub enum Command {
     Validate(ValidateArgs),
     /// Show project root, issues directory, config file location, and current settings.
     Info,
-    /// Migrate issues from flat layout to per-status directories.
+    /// Migrate issues to the current layout: into per-status directories, and
+    /// (if configured) into `group_by` area directories and `defaults.dir` shape.
     Migrate,
     /// Show help for a command.
     Help {
@@ -117,10 +118,13 @@ pub struct CreateArgs {
     /// Labels to attach (repeatable: `--label bug --label urgent`).
     #[arg(long)]
     pub label: Vec<String>,
-    /// Store the issue as a directory (`true`) or a flat file (`false`, default).
+    /// Store the issue as a directory (`true`) or a flat file (`false`).
     ///
     /// When `true`, creates `N-title/README.md` instead of `N-title.md`,
     /// allowing additional files to be placed inside the directory.
+    ///
+    /// When omitted, falls back to `defaults.dir` in `.renga.yml` (see
+    /// `renga info` for the configured value); flat file if neither is set.
     #[arg(long)]
     pub dir: Option<bool>,
 }

@@ -57,6 +57,15 @@ pub fn run(ctx: &Context) -> Result<()> {
         "  group_by      {:<20} # extra directory level(s) above status (e.g. area)",
         group_by
     );
+    let defaults_dir = ctx
+        .config
+        .defaults
+        .dir
+        .map_or_else(|| "(none)".to_string(), |v| v.to_string());
+    println!(
+        "  defaults.dir  {:<20} # default for `create --dir` when omitted",
+        defaults_dir
+    );
 
     Ok(())
 }

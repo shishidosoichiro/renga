@@ -1067,6 +1067,32 @@ fn migrate_nothing_to_migrate() {
 }
 
 #[test]
+fn migrate_ignores_digit_led_files_without_a_hyphen() {
+    // Regression guard: migrate's flat-file filter used to accept any
+    // top-level .md file starting with an ASCII digit, without requiring
+    // the `N-slug` hyphen separator that the rest of renga's ID grammar
+    // (id_prefix) requires. Two such malformed files both migrating
+    // successfully but both producing an empty extract_id() collided in
+    // migrate's ID-keyed dedup set and undercounted "Migrated N issue(s).".
+    // The fix is to only ever treat real `N-slug.md` files as candidates,
+    // so malformed files are left untouched (they were never recognized as
+    // issues by the rest of the toolchain anyway).
+    let dir = TempDir::new().unwrap();
+    fs::create_dir_all(dir.path().join("issues")).unwrap();
+    fs::write(dir.path().join("issues/5foo.md"), "# No hyphen\n").unwrap();
+    fs::write(dir.path().join("issues/7bar.md"), "# No hyphen 2\n").unwrap();
+
+    renga(&dir)
+        .args(["migrate"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Nothing to migrate."));
+
+    assert!(dir.path().join("issues/5foo.md").exists());
+    assert!(dir.path().join("issues/7bar.md").exists());
+}
+
+#[test]
 fn migrate_skips_collision() {
     let dir = TempDir::new().unwrap();
     fs::create_dir_all(dir.path().join("issues/open")).unwrap();
@@ -2571,4 +2597,172 @@ fn migrate_reports_single_count_for_two_hop_relocation() {
         .stdout(predicate::str::contains("Migrated 1 issue(s)."));
 
     assert!(dir.path().join("issues/core/open/1-task.md").exists());
+}
+
+// ── defaults.dir ──────────────────────────────────────────────────────────────
+
+#[test]
+fn create_uses_defaults_dir_from_config() {
+    let dir = setup();
+    fs::write(dir.path().join(".renga.yml"), "defaults:\n  dir: true\n").unwrap();
+    renga(&dir)
+        .args(["create", "Task"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("issues/open/1-task/README.md"));
+    assert!(dir.path().join("issues/open/1-task/README.md").exists());
+}
+
+#[test]
+fn create_explicit_dir_false_overrides_defaults_dir_config() {
+    let dir = setup();
+    fs::write(dir.path().join(".renga.yml"), "defaults:\n  dir: true\n").unwrap();
+    renga(&dir)
+        .args(["create", "Task", "--dir=false"])
+        .assert()
+        .success();
+    assert!(dir.path().join("issues/open/1-task.md").exists());
+    assert!(!dir.path().join("issues/open/1-task").exists());
+}
+
+#[test]
+fn create_defaults_dir_unset_is_flat_without_flag() {
+    let dir = setup();
+    renga(&dir).args(["create", "Task"]).assert().success();
+    assert!(dir.path().join("issues/open/1-task.md").exists());
+}
+
+#[test]
+fn create_json_input_also_uses_defaults_dir_config() {
+    // The --json input path has no `dir` field of its own (there was never
+    // a way to request --dir via JSON), so defaults.dir applies uniformly
+    // regardless of which input mode created the issue.
+    let dir = setup();
+    fs::write(dir.path().join(".renga.yml"), "defaults:\n  dir: true\n").unwrap();
+    renga(&dir)
+        .args(["create", "--json"])
+        .write_stdin(r#"{"title":"JSON Task"}"#)
+        .assert()
+        .success();
+    assert!(dir
+        .path()
+        .join("issues/open/1-json-task/README.md")
+        .exists());
+}
+
+#[test]
+fn migrate_converts_flat_issues_to_dir_when_defaults_dir_enabled() {
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/open/1-task.md"),
+        "---\nschema_version: 1\nstatus: open\npriority: medium\narea: core\nlabels: []\n---\n\n# Task\n",
+    )
+    .unwrap();
+    fs::write(dir.path().join(".renga.yml"), "defaults:\n  dir: true\n").unwrap();
+
+    renga(&dir)
+        .args(["migrate"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Migrated 1 issue(s)."));
+
+    assert!(dir.path().join("issues/open/1-task/README.md").exists());
+    assert!(!dir.path().join("issues/open/1-task.md").exists());
+}
+
+#[test]
+fn migrate_dir_conversion_skips_collision_with_warning() {
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/open/1-task.md"),
+        "---\nschema_version: 1\nstatus: open\npriority: medium\narea: core\nlabels: []\n---\n\n# Task\n",
+    )
+    .unwrap();
+    fs::create_dir_all(dir.path().join("issues/open/1-task")).unwrap();
+    fs::write(dir.path().join(".renga.yml"), "defaults:\n  dir: true\n").unwrap();
+
+    renga(&dir)
+        .args(["migrate"])
+        .assert()
+        .success()
+        .stderr(predicate::str::contains("skipping"));
+
+    assert!(dir.path().join("issues/open/1-task.md").exists());
+}
+
+#[test]
+fn migrate_prints_nothing_to_migrate_when_defaults_dir_already_canonical() {
+    let dir = setup();
+    fs::write(dir.path().join(".renga.yml"), "defaults:\n  dir: true\n").unwrap();
+    renga(&dir).args(["create", "Task"]).assert().success();
+
+    renga(&dir)
+        .args(["migrate"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Nothing to migrate."));
+}
+
+#[test]
+fn migrate_defaults_dir_and_group_by_together_relocate_to_nested_path() {
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/open/1-task.md"),
+        "---\nschema_version: 1\nstatus: open\npriority: medium\narea: core\nlabels: []\n---\n\n# Task\n",
+    )
+    .unwrap();
+    fs::write(
+        dir.path().join(".renga.yml"),
+        "defaults:\n  dir: true\ngroup_by: [area]\n",
+    )
+    .unwrap();
+
+    renga(&dir)
+        .args(["migrate"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Migrated 1 issue(s)."));
+
+    assert!(dir
+        .path()
+        .join("issues/core/open/1-task/README.md")
+        .exists());
+}
+
+#[test]
+fn migrate_reports_single_count_for_three_hop_relocation() {
+    // Regression guard for issue #235's bug class: a flat top-level file
+    // that hops through all three migrate steps (flat -> status ->
+    // dir-based -> area/status) must be counted once, not multiple times.
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/1-task.md"),
+        "---\nschema_version: 1\nstatus: open\npriority: medium\narea: core\nlabels: []\n---\n\n# Task\n",
+    )
+    .unwrap();
+    fs::write(
+        dir.path().join(".renga.yml"),
+        "defaults:\n  dir: true\ngroup_by: [area]\n",
+    )
+    .unwrap();
+
+    renga(&dir)
+        .args(["migrate"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Migrated 1 issue(s)."));
+
+    assert!(dir
+        .path()
+        .join("issues/core/open/1-task/README.md")
+        .exists());
+}
+
+#[test]
+fn info_shows_defaults_dir() {
+    let dir = setup();
+    fs::write(dir.path().join(".renga.yml"), "defaults:\n  dir: true\n").unwrap();
+    let output = renga(&dir).args(["info"]).assert().success();
+    let stdout = String::from_utf8(output.get_output().stdout.clone()).unwrap();
+    assert!(stdout.contains("defaults.dir"));
 }

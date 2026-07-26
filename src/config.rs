@@ -24,6 +24,24 @@ pub struct Config {
     /// (the default) keeps the classic flat-under-status layout.
     #[serde(default)]
     pub group_by: Vec<String>,
+    /// Default values applied to `create` when the corresponding flag is
+    /// omitted.
+    #[serde(default)]
+    pub defaults: Defaults,
+}
+
+/// Default values applied to `create` when the corresponding flag is
+/// omitted, configured under the `defaults:` key in `.renga.yml`.
+///
+/// This is a namespace, not a single field, so future defaults (e.g. a
+/// default assignee or priority) can be added here without introducing a
+/// new top-level `.renga.yml` key each time.
+#[derive(Debug, Deserialize, Default)]
+pub struct Defaults {
+    /// Default for `create --dir` when `--dir` is omitted on the CLI.
+    /// `None` means flat, matching pre-existing behavior.
+    #[serde(default)]
+    pub dir: Option<bool>,
 }
 
 fn default_issues_dir() -> String {
@@ -37,6 +55,7 @@ impl Default for Config {
             area_order: Vec::new(),
             area_labels: std::collections::HashMap::new(),
             group_by: Vec::new(),
+            defaults: Defaults::default(),
         }
     }
 }
@@ -132,5 +151,20 @@ mod tests {
         std::fs::write(dir.path().join(".renga.yml"), "group_by: [label]\n").unwrap();
         let err = Config::load(dir.path()).unwrap_err();
         assert!(err.to_string().contains("group_by"), "{err}");
+    }
+
+    #[test]
+    fn defaults_dir_none_by_default() {
+        let dir = TempDir::new().unwrap();
+        let config = Config::load(dir.path()).unwrap();
+        assert_eq!(config.defaults.dir, None);
+    }
+
+    #[test]
+    fn loads_defaults_dir_true_from_yml() {
+        let dir = TempDir::new().unwrap();
+        std::fs::write(dir.path().join(".renga.yml"), "defaults:\n  dir: true\n").unwrap();
+        let config = Config::load(dir.path()).unwrap();
+        assert_eq!(config.defaults.dir, Some(true));
     }
 }

@@ -181,6 +181,9 @@ area_labels:          # display names for areas (area name used as-is if omitted
 
 group_by:             # extra directory level(s) nested above status (flat layout if omitted)
   - area
+
+defaults:             # default values applied to `create` when the flag is omitted
+  dir: false          # default for `create --dir` (omitted key = flat)
 ```
 
 `group_by` is a list. Currently only a single `"area"` element is supported (two or more elements, or any value other than `"area"`, is an error).
@@ -190,6 +193,8 @@ Setting `group_by: [area]` places issues at `issues/<area>/<status>/N-name.md`. 
 If an area's slug collides with a reserved status directory name (`open`, `pending`, `in-progress`, `done`, `unknown`), `create` and `update` reject it. If existing data already has this collision, `migrate` skips the affected issue with a warning, and `validate` reports it as an error without auto-correcting.
 
 Changing `area` or `status` (via `update`, `done`, `pending`, `in-progress`, or `reopen`) automatically relocates the file to the correct directory. `update` in fact always relocates an issue to its canonical directory as a side effect of every edit, not only when `area`/`status` change — so it also self-heals an issue that was already misplaced (e.g. found via the recoverable status-directory-mismatch path) even when the edit itself (`--assignee`, `--label`, etc.) doesn't touch `area` or `status`. `renga validate --auto-correct` detects and fixes issues whose location doesn't match the current `group_by` setting — in either direction (enabling or disabling `group_by`). To migrate existing issues in bulk after enabling `group_by`, run `renga migrate`.
+
+`defaults` is a namespace for values applied to `create` when the corresponding flag is omitted — currently only `defaults.dir` is supported, but the key exists so future defaults (e.g. a default assignee or priority) don't each need a new top-level `.renga.yml` key. Setting `defaults.dir: true` makes `renga create` produce directory-based issues (`N-slug/README.md`) by default; an explicit `--dir=true`/`--dir=false` on the command line always overrides the config default. This applies uniformly to `create --json` as well — JSON input has no `dir` field of its own, so `defaults.dir` is the only way to influence flat-vs-directory shape for JSON-driven creation. `renga migrate` converts existing flat issues to directory-based when `defaults.dir: true` is set — this is one-directional only (it never collapses a directory-based issue back to flat, since `update --dir=false`'s existing rule of refusing to collapse a directory containing files other than `README.md` would make a bulk auto-collapse unreliable for issues with real attachments). Unlike `group_by`, `validate` does **not** check `defaults.dir` — whether an issue is flat or directory-based is a legitimate per-issue choice (e.g. whether it has attachments), not something derived from frontmatter with one correct answer.
 
 ## Project root discovery
 

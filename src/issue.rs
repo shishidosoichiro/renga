@@ -801,6 +801,36 @@ pub fn relocate_issue(path: &Path, content: &str, dest_dir: &Path) -> Result<Pat
     }
 }
 
+/// Convert a flat-file issue (`N-title.md`) into a directory-based issue
+/// (`N-title/README.md`), in place — the containing directory is unchanged.
+///
+/// This is the pure filesystem mechanics shared by `update --dir=true`
+/// and `migrate`'s `defaults.dir` step. Callers own README regeneration and
+/// any user-facing printing.
+///
+/// # Errors
+///
+/// Returns an error if `path` is already directory-based, or if a file or
+/// directory already occupies the destination.
+pub(crate) fn convert_flat_to_dir(path: &Path) -> Result<PathBuf> {
+    if is_dir_based(path) {
+        anyhow::bail!("issue is already a directory: {}", path.display());
+    }
+    let stem = path
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .with_context(|| format!("invalid path: {}", path.display()))?;
+    let parent = path
+        .parent()
+        .with_context(|| format!("invalid path: {}", path.display()))?;
+    let dir = parent.join(stem);
+    std::fs::create_dir(&dir).with_context(|| format!("failed to create {}", dir.display()))?;
+    let readme = dir.join("README.md");
+    std::fs::rename(path, &readme)
+        .with_context(|| format!("failed to move {} to {}", path.display(), readme.display()))?;
+    Ok(readme)
+}
+
 /// Compute the canonical directory for an issue's status file, honoring the
 /// `group_by` project config.
 ///
@@ -843,7 +873,8 @@ pub fn canonical_status_dir(
     }
 }
 
-fn extract_id(path: &Path) -> String {
+/// Extract the numeric ID string from an issue's filename or directory name.
+pub(crate) fn extract_id(path: &Path) -> String {
     if is_dir_based(path) {
         return path
             .parent()
@@ -1393,5 +1424,48 @@ mod tests {
                 "expected '{name}' to be rejected"
             );
         }
+    }
+
+    #[test]
+    fn convert_flat_to_dir_moves_file_into_directory() {
+        let dir = TempDir::new().unwrap();
+        let open_dir = dir.path().join("open");
+        std::fs::create_dir(&open_dir).unwrap();
+        let path = open_dir.join("1-task.md");
+        std::fs::write(&path, "---\nstatus: open\n---\n\n# Task\n").unwrap();
+
+        let readme = convert_flat_to_dir(&path).unwrap();
+
+        assert_eq!(readme, open_dir.join("1-task").join("README.md"));
+        assert!(!path.exists());
+        assert_eq!(
+            std::fs::read_to_string(&readme).unwrap(),
+            "---\nstatus: open\n---\n\n# Task\n"
+        );
+    }
+
+    #[test]
+    fn convert_flat_to_dir_rejects_already_dir_based() {
+        let dir = TempDir::new().unwrap();
+        let issue_dir = dir.path().join("open").join("1-task");
+        std::fs::create_dir_all(&issue_dir).unwrap();
+        let readme = issue_dir.join("README.md");
+        std::fs::write(&readme, "---\nstatus: open\n---\n\n# Task\n").unwrap();
+
+        let err = convert_flat_to_dir(&readme).unwrap_err();
+        assert!(err.to_string().contains("already a directory"), "{err}");
+    }
+
+    #[test]
+    fn convert_flat_to_dir_errors_on_existing_destination() {
+        let dir = TempDir::new().unwrap();
+        let open_dir = dir.path().join("open");
+        std::fs::create_dir(&open_dir).unwrap();
+        let path = open_dir.join("1-task.md");
+        std::fs::write(&path, "---\nstatus: open\n---\n\n# Task\n").unwrap();
+        std::fs::create_dir(open_dir.join("1-task")).unwrap();
+
+        assert!(convert_flat_to_dir(&path).is_err());
+        assert!(path.exists());
     }
 }

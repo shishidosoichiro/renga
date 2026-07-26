@@ -133,7 +133,7 @@ cargo install renga
 | `renga info` | Show project root, issues directory, config location, and current settings |
 
 Pass an empty string to `--milestone` or `--assignee` to remove the field: `renga update 1 --assignee ''`.
-| `renga migrate` | Move issues from flat layout to per-status directories |
+| `renga migrate` | Migrate issues to the current layout (per-status directories, plus `group_by` and `defaults.dir` if configured) |
 | `renga validate [ID]... [--auto-correct]` | Check issues for schema/status errors, duplicate IDs, and status directory mismatches |
 | `renga completions bash\|zsh\|fish` | Print shell completion script |
 | `renga help [command]` | Show help |
@@ -207,9 +207,12 @@ area_labels:          # display names for areas
 
 group_by:             # nest issues under an area directory (issues/<area>/<status>/...)
   - area
+
+defaults:             # default values applied to `create` when the flag is omitted
+  dir: false          # default for `create --dir`
 ```
 
-`group_by: [area]` adds an area directory level above status, so working in a single project's area doesn't mix files from other areas on disk. See [spec.md](spec.md) for details, including how to migrate existing issues with `renga migrate`.
+`group_by: [area]` adds an area directory level above status, so working in a single project's area doesn't mix files from other areas on disk. `defaults.dir: true` makes `create` produce directory-based issues by default (handy if you regularly attach files to issues). See [spec.md](spec.md) for details, including how to migrate existing issues with `renga migrate`.
 
 ## Development
 

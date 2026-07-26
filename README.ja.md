@@ -133,7 +133,7 @@ cargo install renga
 | `renga info` | プロジェクトルート・issues ディレクトリ・設定ファイルの場所と現在の設定を表示する |
 
 `--milestone` または `--assignee` に空文字列を渡すとフィールドを削除できる: `renga update 1 --assignee ''`
-| `renga migrate` | フラット構造のイシューをステータス別ディレクトリに移動する |
+| `renga migrate` | イシューを現在のレイアウトに移行する（ステータス別ディレクトリ、設定があれば `group_by`・`defaults.dir` も） |
 | `renga validate [ID]... [--auto-correct]` | issue のスキーマ・status エラー、ID 重複、status ディレクトリ不整合を検出する |
 | `renga completions bash\|zsh\|fish` | シェル補完スクリプトを表示する |
 | `renga help [コマンド]` | ヘルプを表示する |
@@ -207,9 +207,12 @@ area_labels:          # area の表示名
 
 group_by:             # issue を area ディレクトリ配下にネストする（issues/<area>/<status>/...）
   - area
+
+defaults:             # create でフラグを省略したときのデフォルト値
+  dir: false          # create --dir のデフォルト
 ```
 
-`group_by: [area]` を設定すると status の上に area のディレクトリ階層が加わり、1つのプロジェクトの area で作業する際にファイルシステム上で他 area のファイルと混ざらなくなる。詳細（既存 issue を `renga migrate` で移行する方法を含む）は [spec.ja.md](spec.ja.md) を参照。
+`group_by: [area]` を設定すると status の上に area のディレクトリ階層が加わり、1つのプロジェクトの area で作業する際にファイルシステム上で他 area のファイルと混ざらなくなる。`defaults.dir: true` にすると `create` はデフォルトで dir-based issue を作成する（issue に添付ファイルをよく置く運用で便利）。詳細（既存 issue を `renga migrate` で移行する方法を含む）は [spec.ja.md](spec.ja.md) を参照。
 
 ## 開発
 

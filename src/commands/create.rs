@@ -44,7 +44,7 @@ struct CreateInput {
 pub fn run(args: CreateArgs, ctx: &Context) -> Result<()> {
     ctx.check_issues_dir()?;
 
-    let use_dir = args.dir == Some(true);
+    let use_dir = args.dir.or(ctx.config.defaults.dir).unwrap_or(false);
     let input = read_input(args)?;
 
     validate_priority(&input.priority)?;

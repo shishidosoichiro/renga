@@ -32,6 +32,7 @@ Closed issues are moved to `done/`.
 | [153](open/153-clap-complete-unstable-dynamic.md) | open | low | clap_complete unstable-dynamic が stable になったら __complete と手書きシェルスクリプトを置き換えを検討する |
 | [167](open/167-split-complete-update-test.md) | open | low | complete_update_shows_open_issues_and_flags を2つのテストに分割する |
 | [228](open/228-feat-add-append-to-renga-update-for-appending-text-to-issue-body.md) | open | medium | feat: add --append to renga update for appending text to issue body |
+| [238](open/238-docs-create-dir-help-text-doesn-t-mention-defaults-dir-override.md) | open | low | docs: create --dir help text doesn't mention defaults.dir override |
 
 ---
 
@@ -43,6 +44,7 @@ Closed issues are moved to `done/`.
 | [194](open/194-bulk-update-command.md) | open | medium | area や assignee を条件にした一括更新コマンドがない |
 | [195](open/195-prevent-duplicate-ids.md) | open | medium | issue 作成時に重複 ID を防止できない |
 | [203](open/203-git-worktree-issues.md) | open | medium | git worktree 使用時に issues ディレクトリが分離される |
+| [239](open/239-core-completions-rs-uses-loose-digit-led-filter-instead-of-is-issue-file-name.md) | open | low | core: completions.rs uses loose digit-led filter instead of is_issue_file_name |
 
 ---
 

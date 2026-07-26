@@ -8,9 +8,9 @@ use serde::Deserialize;
 use crate::{
     cli::UpdateArgs,
     issue::{
-        find_editable_issue, is_dir_based, issue_root, relocate_issue, remove_frontmatter_field,
-        replace_or_prepend_heading, set_frontmatter_field, split_frontmatter,
-        validate_area_for_group_by, validate_label, Issue,
+        convert_flat_to_dir, find_editable_issue, is_dir_based, issue_root, relocate_issue,
+        remove_frontmatter_field, replace_or_prepend_heading, set_frontmatter_field,
+        split_frontmatter, validate_area_for_group_by, validate_label, Issue,
     },
     readme, Context, FbimError,
 };
@@ -269,21 +269,7 @@ fn ensure_no_other_fields_with_dir(input: &UpdateInput) -> Result<()> {
 }
 
 fn convert_to_dir(path: &Path, ctx: &Context) -> Result<()> {
-    if is_dir_based(path) {
-        anyhow::bail!("issue is already a directory: {}", path.display());
-    }
-    let stem = path
-        .file_stem()
-        .and_then(|s| s.to_str())
-        .with_context(|| format!("invalid path: {}", path.display()))?;
-    let parent = path
-        .parent()
-        .with_context(|| format!("invalid path: {}", path.display()))?;
-    let dir = parent.join(stem);
-    std::fs::create_dir(&dir).with_context(|| format!("failed to create {}", dir.display()))?;
-    let readme = dir.join("README.md");
-    std::fs::rename(path, &readme)
-        .with_context(|| format!("failed to move {} to {}", path.display(), readme.display()))?;
+    let readme = convert_flat_to_dir(path)?;
     readme::write_readme(&ctx.issues_dir, &ctx.config)?;
     println!("{}", readme.display());
     Ok(())
