@@ -24,6 +24,14 @@ Closed issues are moved to `done/`.
 
 ---
 
+## ci
+
+| # | status | priority | title |
+|---|---|---|---|
+| [260](open/260-ci-release-workflow-s-macos-13-build-job-never-starts-and-times-out-after-24h.md) | open | medium | ci: release workflow's macos-13 build job never starts and times out after 24h |
+
+---
+
 ## cli
 
 | # | status | priority | title |
