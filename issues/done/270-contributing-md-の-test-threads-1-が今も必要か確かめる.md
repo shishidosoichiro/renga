@@ -1,7 +1,7 @@
 ---
 type: Issue
 schema_version: 1
-status: open
+status: done
 priority: low
 area: docs
 labels: []

@@ -11,8 +11,8 @@ description: renga リポジトリでコードをコミットする際の必須�
 コードを変更するときは以下の順序で進める。
 
 1. 実装 + テスト追加
-2. カバレッジ確認（`cargo llvm-cov --summary-only -- --test-threads=1`）
-3. **コミット前に** `Agent(subagent_type="review")` でレビューを受ける（Claude Code のサブエージェント）。レビュー観点にはカバレッジ確認（`cargo llvm-cov --summary-only -- --test-threads=1`）を含める
+2. カバレッジ確認（`cargo llvm-cov --summary-only`）
+3. **コミット前に** `Agent(subagent_type="review")` でレビューを受ける（Claude Code のサブエージェント）。レビュー観点にはカバレッジ確認（`cargo llvm-cov --summary-only`）を含める
 4. レビュー指摘を分類する（判定基準: 「このバグは今回変更したコードに由来するか？」）
    - **今回の実装で入ったバグ**（新規追加ファイルや今回変更した箇所に起因）→ コミット前に修正し feature コミットに含める。issue 化する場合は `found_in_impl` ラベルを付ける
    - **前タグ以降に追加した別コミットのコードへの手直し**（今回のコミットとは別の、まだリリースされていない変更を直す場合）→ `git commit --fixup <SHA>` で積み、リリース前に統合する（後述「リリース前 fixup フロー」）。`fix:` にしない
