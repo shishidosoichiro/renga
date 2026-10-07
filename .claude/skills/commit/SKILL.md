@@ -29,6 +29,8 @@ description: renga リポジトリでコードをコミットする際の必須�
 
 **コミットメッセージの言語**: `type`・`scope`・`description` はすべて英語で書く（`Use English for the description` — CONTRIBUTING.md 参照）。issue ファイルのタイトル・本文、CLAUDE.md、`.claude/agents/` は日本語でよい。
 
+**公開物に書かない名前**: コミットメッセージにも、作業ディレクトリ外の非公開プロジェクトの名前・パス・issue 番号を書かない（`.claude/rules/issue-management.md` の「判断記録の出典」参照）。
+
 ## コミット粒度の規律（retro #134, retro #143）
 
 - `feat:` と `fix:` を同一コミットに混ぜない（ただし「今回の実装で入ったバグ」は feature コミットに含めてよい）

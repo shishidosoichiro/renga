@@ -23,7 +23,6 @@ Closed issues are moved to `done/`.
 | [227](open/227-agent-config-reviewer-の-diff-確認対象に-claude-skills-claude-rules-claude.md) | open | medium | agent-config-reviewer の diff 確認対象に .claude/skills・.claude/rules・.claude/hooks を含める |
 | [261](open/261-retro-を記録専用にし-改善を型単位で回す.md) | open | high | retro を記録専用にし、改善を型単位で回す |
 | [267](open/267-バグラベルの-found-at-を発見版に再定義し-since-を新設する.md) | open | low | バグラベルの found_at を発見版に再定義し since を新設する |
-| [268](open/268-retro-非公開の参考プロジェクト名を公開物の-issue-とコミッ.md) | open | medium | retro: 非公開の参考プロジェクト名を公開物の issue とコミットに書いた |
 
 ---
 
