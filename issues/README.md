@@ -65,6 +65,7 @@ Closed issues are moved to `done/`.
 | [203](open/203-git-worktree-issues.md) | open | medium | git worktree 使用時に issues ディレクトリが分離される |
 | [256](open/256-core-no-bulk-path-repairs-the-area-layout-that-renga-itself-created.md) | open | medium | core: no bulk path repairs the area layout that renga itself created |
 | [263](open/263-issue-frontmatter-に-okf-の-type-キーを入れる.md) | open | medium | issue frontmatter に OKF の type キーを入れる |
+| [269](open/269-update-でラベルを変えると-ブロック形式の-labels-を持つ-issue.md) | open | medium | update でラベルを変えると、ブロック形式の labels を持つ issue が invalid frontmatter で失敗する |
 
 ---
 
@@ -76,6 +77,7 @@ Closed issues are moved to `done/`.
 | [14](pending/14-changelog-keep-a-changelog.md) | pending | medium | CHANGELOG を Keep a Changelog 形式に移行するか検討する |
 | [102](pending/102-code-of-conduct-md.md) | pending | medium | CODE_OF_CONDUCT.md を追加する |
 | [103](pending/103-security-md.md) | pending | medium | SECURITY.md を追加する |
+| [270](open/270-contributing-md-の-test-threads-1-が今も必要か確かめる.md) | open | low | CONTRIBUTING.md の --test-threads=1 が今も必要か確かめる |
 
 ---
 
