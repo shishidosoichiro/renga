@@ -1,5 +1,7 @@
 # Contributing to Renga
 
+Before changing code, read [ARCHITECTURE.md](ARCHITECTURE.md) for where things live and which invariants the code relies on.
+
 ## Development environment
 
 **Prerequisites**

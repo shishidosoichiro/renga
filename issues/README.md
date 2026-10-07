@@ -76,7 +76,6 @@ Closed issues are moved to `done/`.
 | [14](pending/14-changelog-keep-a-changelog.md) | pending | medium | CHANGELOG を Keep a Changelog 形式に移行するか検討する |
 | [102](pending/102-code-of-conduct-md.md) | pending | medium | CODE_OF_CONDUCT.md を追加する |
 | [103](pending/103-security-md.md) | pending | medium | SECURITY.md を追加する |
-| [262](open/262-architecture-md-を追加する.md) | open | medium | ARCHITECTURE.md を追加する |
 
 ---
 
