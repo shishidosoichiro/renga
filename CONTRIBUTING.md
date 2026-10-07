@@ -17,7 +17,6 @@ Before changing code, read [ARCHITECTURE.md](ARCHITECTURE.md) for where things l
 cargo build                      # debug build
 cargo build --release            # release build
 cargo test                       # unit + integration tests
-cargo test -- --test-threads=1   # run tests sequentially (required when tests change CWD)
 cargo test --doc                 # doctests
 cargo clippy -- -D warnings      # lint (must be clean)
 cargo fmt --check                # format check
@@ -27,8 +26,8 @@ cargo doc --no-deps              # verify doc generation
 ## Coverage
 
 ```sh
-cargo llvm-cov --summary-only -- --test-threads=1   # summary (check before committing)
-cargo llvm-cov --html -- --test-threads=1           # HTML report (target/llvm-cov/)
+cargo llvm-cov --summary-only   # summary (check before committing)
+cargo llvm-cov --html           # HTML report (target/llvm-cov/)
 ```
 
 Check coverage both after implementation and after applying review feedback.
