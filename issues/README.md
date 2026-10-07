@@ -53,7 +53,6 @@ Closed issues are moved to `done/`.
 | [203](open/203-git-worktree-issues.md) | open | medium | git worktree 使用時に issues ディレクトリが分離される |
 | [256](open/256-core-no-bulk-path-repairs-the-area-layout-that-renga-itself-created.md) | open | medium | core: no bulk path repairs the area layout that renga itself created |
 | [269](open/269-update-でラベルを変えると-ブロック形式の-labels-を持つ-issue.md) | open | medium | update でラベルを変えると、ブロック形式の labels を持つ issue が invalid frontmatter で失敗する |
-| [272](open/272-ラベルに-や-を含めると-create-が読めない-issue-ファイルを作.md) | open | medium | ラベルに : や # を含めると、create が読めない issue ファイルを作る |
 
 ---
 

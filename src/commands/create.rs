@@ -8,7 +8,8 @@ use serde::Deserialize;
 use crate::{
     cli::CreateArgs,
     issue::{
-        find_issue, make_slug, next_id, validate_area_for_group_by, validate_label, ISSUE_TYPE,
+        find_issue, labels_inline_yaml, make_slug, next_id, validate_area_for_group_by,
+        validate_label, ISSUE_TYPE,
     },
     readme, Context,
 };
@@ -96,11 +97,7 @@ pub fn run(args: CreateArgs, ctx: &Context) -> Result<()> {
         None => String::new(),
     };
 
-    let labels_yaml = if labels.is_empty() {
-        "[]".to_string()
-    } else {
-        format!("[{}]", labels.join(", "))
-    };
+    let labels_yaml = labels_inline_yaml(&labels);
 
     let content = format!(
         "---\ntype: {ISSUE_TYPE}\nschema_version: 1\nstatus: open\npriority: {}\narea: {}\nlabels: {labels_yaml}\n{milestone_line}{assignee_line}---\n\n# {}\n{}",

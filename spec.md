@@ -143,6 +143,8 @@ renga help [command]
 
 `renga list --label` keeps issues that have the label; repeat it to require several labels (all must match). `--not-label` leaves out issues that have the label and can also be repeated; issues without any labels are kept. In both flags, a value ending in `*` matches every label that starts with the text before the `*` (e.g. `--label 'found_at:*'`); quote it so the shell does not expand the `*`. Any other value must match a label exactly. Because of this, a label must not end with `*`: `create` and `update` reject such labels, but `update --remove-label` still removes one that already exists.
 
+Labels are written as a one-line YAML list (`labels: [bug, 'a: b']`). renga quotes a label only when YAML 1.2 (which renga reads) would otherwise misread it, such as `a: b`, `:x`, `#x`, `true`, or an empty string; ordinary labels are written without quotes. A label must not contain `,`, `[`, `]`, `{`, `}`, or a line break.
+
 `renga list --count` prints only the number of matching issues, as a single line. It exits with 0 even when the number is 0, so scripts compare the number rather than the exit code (`[ "$(renga list --label inbox --count)" -eq 0 ]`). It cannot be combined with `--json`.
 
 `renga create --json` reads one JSON object from stdin. Supported fields are

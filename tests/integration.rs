@@ -302,6 +302,49 @@ fn info_shows_default_labels() {
 }
 
 #[test]
+fn labels_with_yaml_syntax_are_quoted_and_stay_readable() {
+    let dir = setup();
+    fs::write(
+        dir.path().join(".renga.yml"),
+        "defaults:\n  labels: ['#triage']\n",
+    )
+    .unwrap();
+    renga(&dir)
+        .args(["create", "Odd", "--label", "a: b"])
+        .assert()
+        .success();
+    renga(&dir)
+        .args(["update", "1", "--add-label", "x #y"])
+        .assert()
+        .success();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-odd.md")).unwrap();
+    assert!(content.contains("labels: ['#triage', 'a: b', 'x #y']"));
+    renga(&dir)
+        .args([
+            "list", "--label", "a: b", "--label", "#triage", "--label", "x #y",
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Odd"));
+    renga(&dir).args(["validate"]).assert().success();
+
+    renga(&dir)
+        .args(["update", "1", "--remove-label", "a: b"])
+        .assert()
+        .success();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-odd.md")).unwrap();
+    assert!(content.contains("labels: ['#triage', 'x #y']"));
+
+    renga(&dir)
+        .args(["update", "1", "--label", ":x", "--label", "plain"])
+        .assert()
+        .success();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-odd.md")).unwrap();
+    assert!(content.contains("labels: [\":x\", plain]"));
+    renga(&dir).args(["validate"]).assert().success();
+}
+
+#[test]
 fn create_rejects_label_ending_with_star() {
     let dir = setup();
     renga(&dir)

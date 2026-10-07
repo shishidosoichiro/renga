@@ -644,8 +644,12 @@ pub fn validate_label(label: &str) -> Result<()> {
 /// Check only the characters that would break the inline YAML label list.
 ///
 /// Used when removing a label, so a label that predates the trailing-`*`
-/// rule can still be removed.
+/// rule can still be removed. Line breaks are rejected because frontmatter
+/// values are edited line by line and must stay on one line.
 pub(crate) fn validate_label_chars(label: &str) -> Result<()> {
+    if label.contains(['\n', '\r']) {
+        anyhow::bail!("label {label:?} contains a line break");
+    }
     for ch in [',', '[', ']', '{', '}'] {
         if label.contains(ch) {
             anyhow::bail!(
@@ -656,6 +660,36 @@ pub(crate) fn validate_label_chars(label: &str) -> Result<()> {
         }
     }
     Ok(())
+}
+
+/// Render labels as a one-line YAML flow sequence, e.g. `[bug, 'a: b']`.
+///
+/// Each label is quoted only when YAML would otherwise read it differently
+/// (`a: b`, `#x`, an empty string, `true`, `123`), so ordinary labels are
+/// written exactly as before.
+///
+/// serde_yaml quotes for block context, which misses a few cases that only
+/// break inside `[ ]` (e.g. `:x`). Each rendered item is therefore parsed back
+/// as a one-item flow sequence; if that does not yield the label, it is
+/// written as a JSON string instead, which is always a valid one-line YAML
+/// double-quoted scalar, even for a label with a line break read from a
+/// hand-edited file.
+pub(crate) fn labels_inline_yaml(labels: &[String]) -> String {
+    let items: Vec<String> = labels.iter().map(|l| label_inline_yaml(l)).collect();
+    format!("[{}]", items.join(", "))
+}
+
+fn label_inline_yaml(label: &str) -> String {
+    let plain = serde_yaml::to_string(label)
+        .map(|s| s.trim_end_matches('\n').to_string())
+        .unwrap_or_default();
+    let round_trips = serde_yaml::from_str::<Vec<String>>(&format!("[{plain}]"))
+        .is_ok_and(|v| v.len() == 1 && v[0] == label);
+    if round_trips && !plain.contains('\n') {
+        plain
+    } else {
+        serde_json::to_string(label).unwrap_or_else(|_| format!("{label:?}"))
+    }
 }
 
 /// Label conditions for `renga list`: labels an issue must have and labels it
@@ -1913,5 +1947,45 @@ mod tests {
     fn validate_label_chars_allows_trailing_star() {
         assert!(validate_label_chars("old*").is_ok());
         assert!(validate_label_chars("a,b").is_err());
+    }
+
+    #[test]
+    fn labels_inline_yaml_quotes_only_when_needed() {
+        let labels: Vec<String> = ["bug", "found_at:0.17.0", "a: b", "#x", "", "true"]
+            .iter()
+            .map(|s| s.to_string())
+            .collect();
+        assert_eq!(
+            labels_inline_yaml(&labels),
+            "[bug, found_at:0.17.0, 'a: b', '#x', '', 'true']"
+        );
+        assert_eq!(labels_inline_yaml(&[]), "[]");
+    }
+
+    #[test]
+    fn labels_inline_yaml_round_trips_through_the_parser() {
+        let labels: Vec<String> = [
+            "a: b",
+            "#x",
+            "x #y",
+            "@me",
+            "it's",
+            "- x",
+            ":x",
+            "say \"hi\"",
+            "a\nb",
+        ]
+        .iter()
+        .map(|s| s.to_string())
+        .collect();
+        let parsed: Vec<String> = serde_yaml::from_str(&labels_inline_yaml(&labels)).unwrap();
+        assert_eq!(parsed, labels);
+    }
+
+    #[test]
+    fn validate_label_rejects_line_breaks() {
+        assert!(validate_label("a\nb").is_err());
+        assert!(validate_label("a\rb").is_err());
+        assert!(validate_label_chars("a\nb").is_err());
     }
 }

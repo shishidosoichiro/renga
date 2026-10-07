@@ -8,9 +8,10 @@ use serde::Deserialize;
 use crate::{
     cli::UpdateArgs,
     issue::{
-        convert_flat_to_dir, find_editable_issue, is_dir_based, issue_root, relocate_issue,
-        remove_frontmatter_field, replace_or_prepend_heading, set_frontmatter_field,
-        split_frontmatter, validate_area_for_group_by, validate_label, validate_label_chars, Issue,
+        convert_flat_to_dir, find_editable_issue, is_dir_based, issue_root, labels_inline_yaml,
+        relocate_issue, remove_frontmatter_field, replace_or_prepend_heading,
+        set_frontmatter_field, split_frontmatter, validate_area_for_group_by, validate_label,
+        validate_label_chars, Issue,
     },
     readme, Context, FbimError,
 };
@@ -100,14 +101,7 @@ pub fn run(args: UpdateArgs, ctx: &Context) -> Result<()> {
         for l in labels {
             validate_label(l)?;
         }
-        let labels_yaml = format!(
-            "[{}]",
-            labels
-                .iter()
-                .map(|l| l.as_str())
-                .collect::<Vec<_>>()
-                .join(", ")
-        );
+        let labels_yaml = labels_inline_yaml(labels);
         content = set_frontmatter_field(&content, "labels", &labels_yaml);
     }
     if !input.add_labels.is_empty() || !input.remove_labels.is_empty() {
@@ -125,14 +119,7 @@ pub fn run(args: UpdateArgs, ctx: &Context) -> Result<()> {
             }
         }
         labels.retain(|l| !input.remove_labels.contains(l));
-        let labels_yaml = format!(
-            "[{}]",
-            labels
-                .iter()
-                .map(|l| l.as_str())
-                .collect::<Vec<_>>()
-                .join(", ")
-        );
+        let labels_yaml = labels_inline_yaml(&labels);
         content = set_frontmatter_field(&content, "labels", &labels_yaml);
     }
     if let Some(new_title) = &input.title {
