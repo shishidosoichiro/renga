@@ -77,7 +77,6 @@ Closed issues are moved to `done/`.
 | [102](pending/102-code-of-conduct-md.md) | pending | medium | CODE_OF_CONDUCT.md を追加する |
 | [103](pending/103-security-md.md) | pending | medium | SECURITY.md を追加する |
 | [270](open/270-contributing-md-の-test-threads-1-が今も必要か確かめる.md) | open | low | CONTRIBUTING.md の --test-threads=1 が今も必要か確かめる |
-| [271](open/271-readme-のコマンド表が途中の段落で途切れ-migrate-以降が表と.md) | open | low | README のコマンド表が途中の段落で途切れ、migrate 以降が表として表示されない |
 
 ---
 

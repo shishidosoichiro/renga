@@ -131,12 +131,12 @@ cargo install renga
 | `renga update <ID> --dir=true\|false` | Convert issue between flat-file and directory layout |
 | `renga update <ID> --json` | Update issue fields from a JSON object on stdin |
 | `renga info` | Show project root, issues directory, config location, and current settings |
-
-Pass an empty string to `--milestone` or `--assignee` to remove the field: `renga update 1 --assignee ''`.
 | `renga migrate` | Migrate issues to the current layout (per-status directories, plus `group_by` and `defaults.dir` if configured) and add `type: Issue` to frontmatter that lacks it |
 | `renga validate [ID]... [--auto-correct]` | Check issues for schema/status errors, duplicate IDs, and status directory mismatches |
 | `renga completions bash\|zsh\|fish` | Print shell completion script |
 | `renga help [command]` | Show help |
+
+Pass an empty string to `--milestone` or `--assignee` to remove the field: `renga update 1 --assignee ''`.
 
 Frontmatter `status` is authoritative. If an active issue is accidentally stored
 under `done/`, active-issue commands still operate on it, print a warning, and

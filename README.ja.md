@@ -131,12 +131,12 @@ cargo install renga
 | `renga update <ID> --dir=true\|false` | issue をフラットファイルとディレクトリ形式の間で変換する |
 | `renga update <ID> --json` | 標準入力の JSON object から issue のフィールドを更新する |
 | `renga info` | プロジェクトルート・issues ディレクトリ・設定ファイルの場所と現在の設定を表示する |
-
-`--milestone` または `--assignee` に空文字列を渡すとフィールドを削除できる: `renga update 1 --assignee ''`
 | `renga migrate` | イシューを現在のレイアウトに移行し（ステータス別ディレクトリ、設定があれば `group_by`・`defaults.dir` も）、frontmatter に `type: Issue` がなければ追加する |
 | `renga validate [ID]... [--auto-correct]` | issue のスキーマ・status エラー、ID 重複、status ディレクトリ不整合を検出する |
 | `renga completions bash\|zsh\|fish` | シェル補完スクリプトを表示する |
 | `renga help [コマンド]` | ヘルプを表示する |
+
+`--milestone` または `--assignee` に空文字列を渡すとフィールドを削除できる: `renga update 1 --assignee ''`
 
 frontmatter の `status` を正とする情報源とする。active issue が誤って
 `done/` 配下にある場合、active issue 用コマンドはその issue を操作し、warning と
