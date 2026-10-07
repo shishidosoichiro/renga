@@ -78,10 +78,6 @@ mode = "limited"
 "postgresql.org" = "allow"
 "*.postgresql.org" = "allow"
 
-# kiwi 仮ドメイン
-"kiwi.io" = "allow"
-"*.kiwi.io" = "allow"
-
 # 自宅開発環境
 "gitlab.home" = "allow"
 "harbor.home" = "allow"
