@@ -23,7 +23,7 @@ jobs:
           tool: cargo-llvm-cov
       - run: cargo fmt --check
       - run: cargo clippy -- -D warnings
-      - run: cargo llvm-cov --lcov --output-path lcov.info -- --test-threads=1
+      - run: cargo llvm-cov --lcov --output-path lcov.info
       - uses: codecov/codecov-action@v4
         with:
           files: lcov.info
