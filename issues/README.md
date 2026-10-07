@@ -21,6 +21,9 @@ Closed issues are moved to `done/`.
 | [198](open/198-retro-update-edit-done-issue.md) | open | medium | retro: update/edit の done issue 操作方針で反証を出さずに同意した |
 | [201](open/201-codex-agents-agents-md.md) | open | medium | .codex/ .agents/ にサブエージェントが未定義 — AGENTS.md が参照しているが実体がない |
 | [227](open/227-agent-config-reviewer-の-diff-確認対象に-claude-skills-claude-rules-claude.md) | open | medium | agent-config-reviewer の diff 確認対象に .claude/skills・.claude/rules・.claude/hooks を含める |
+| [261](open/261-retro-を記録専用にし-改善を型単位で回す.md) | open | high | retro を記録専用にし、改善を型単位で回す |
+| [267](open/267-バグラベルの-found-at-を発見版に再定義し-since-を新設する.md) | open | low | バグラベルの found_at を発見版に再定義し since を新設する |
+| [268](open/268-retro-非公開の参考プロジェクト名を公開物の-issue-とコミッ.md) | open | medium | retro: 非公開の参考プロジェクト名を公開物の issue とコミットに書いた |
 
 ---
 
@@ -40,6 +43,16 @@ Closed issues are moved to `done/`.
 | [153](open/153-clap-complete-unstable-dynamic.md) | open | low | clap_complete unstable-dynamic が stable になったら __complete と手書きシェルスクリプトを置き換えを検討する |
 | [167](open/167-split-complete-update-test.md) | open | low | complete_update_shows_open_issues_and_flags を2つのテストに分割する |
 | [228](open/228-feat-add-append-to-renga-update-for-appending-text-to-issue-body.md) | open | medium | feat: add --append to renga update for appending text to issue body |
+| [264](open/264-list-label-で前方一致-否定-複数指定をできるようにする.md) | open | medium | list --label で前方一致・否定・複数指定をできるようにする |
+| [266](open/266-list-に件数だけを返すオプションを足す.md) | open | low | list に件数だけを返すオプションを足す |
+
+---
+
+## config
+
+| # | status | priority | title |
+|---|---|---|---|
+| [265](open/265-create-時に付ける既定ラベルを-renga-yml-で設定できるように.md) | open | low | create 時に付ける既定ラベルを .renga.yml で設定できるようにする |
 
 ---
 
@@ -52,6 +65,7 @@ Closed issues are moved to `done/`.
 | [195](open/195-prevent-duplicate-ids.md) | open | medium | issue 作成時に重複 ID を防止できない |
 | [203](open/203-git-worktree-issues.md) | open | medium | git worktree 使用時に issues ディレクトリが分離される |
 | [256](open/256-core-no-bulk-path-repairs-the-area-layout-that-renga-itself-created.md) | open | medium | core: no bulk path repairs the area layout that renga itself created |
+| [263](open/263-issue-frontmatter-に-okf-の-type-キーを入れる.md) | open | medium | issue frontmatter に OKF の type キーを入れる |
 
 ---
 
@@ -63,6 +77,7 @@ Closed issues are moved to `done/`.
 | [14](pending/14-changelog-keep-a-changelog.md) | pending | medium | CHANGELOG を Keep a Changelog 形式に移行するか検討する |
 | [102](pending/102-code-of-conduct-md.md) | pending | medium | CODE_OF_CONDUCT.md を追加する |
 | [103](pending/103-security-md.md) | pending | medium | SECURITY.md を追加する |
+| [262](open/262-architecture-md-を追加する.md) | open | medium | ARCHITECTURE.md を追加する |
 
 ---
 
