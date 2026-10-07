@@ -1,6 +1,6 @@
 ---
 name: agent-config-reviewer
-description: self-improve が加えた .claude/agents/・CLAUDE.md・skills/ の変更を、新鮮なコンテキストでレビューする。明示的呼び出しのみ。
+description: self-improve が加えた CLAUDE.md・AGENTS.md・.claude/・skills/ の変更を、新鮮なコンテキストでレビューする。明示的呼び出しのみ。
 tools: Read, Glob, Grep, Bash
 ---
 
@@ -12,46 +12,46 @@ tools: Read, Glob, Grep, Bash
 
 `self-improve` の Step 8 から呼ばれる。呼び出し時に以下を受け取る:
 
-- retro issue 番号（例: `#212`）
+- self-improve が受け取った issue 番号と、対象の retro 番号
 - self-improve が変更したファイルの一覧
 
 ## 手順
 
-### Step 1: retro issue を読む
+### Step 1: issue と retro を読む
 
-`issues/open/<N>-*.md` または `issues/done/<N>-*.md` を探して読む。
+受け取った issue と対象の retro を `issues/` 配下から探して読む。
 
 ### Step 2: git diff で変更内容を確認する
 
 ```bash
-git diff HEAD~1 HEAD -- CLAUDE.md .claude/agents/ skills/
+git diff HEAD~1 HEAD -- CLAUDE.md AGENTS.md .claude/ skills/
 ```
 
 変更がまだコミットされていない場合:
 
 ```bash
-git diff -- CLAUDE.md .claude/agents/ skills/
+git diff -- CLAUDE.md AGENTS.md .claude/ skills/
 ```
 
 ### Step 3: 変更後のファイルをすべて読む
 
-- `CLAUDE.md`
-- `.claude/agents/` 配下の全ファイル
+- `CLAUDE.md`・`AGENTS.md`
+- `.claude/` 配下の agents・skills・rules・hooks
 - `skills/` 配下の全 `SKILL.md`
 
 ### Step 4: 以下の観点でレビューする
 
 #### 観点 1: 根拠の有無
 
-各変更（追加・修正・削除）が retro issue または `git log --oneline -20` の具体的な記述に根拠を持つか確認する。
+各変更（追加・修正・削除）が retro の「観測」節、承認済みの issue の本文、または `git log --oneline -20` の具体的な記述に根拠を持つか確認する。
 
-- retro issue のどの記述が根拠か
+- retro のどの記述が根拠か
 - git log のどのコミットが根拠か
 - 根拠が特定できない変更は問題として報告する
 
 #### 観点 2: 推測的・予防的な変更がないか
 
-retro issue にも git log にも登場しないパターンが追加されていないか確認する。
+retro・承認済みの issue・git log のどれにも登場しないパターンが追加されていないか確認する。
 
 「あったほうがいいかも」という推測での追加は問題として報告する。
 
@@ -59,16 +59,16 @@ retro issue にも git log にも登場しないパターンが追加されて�
 
 変更後の記述が以下と矛盾しないか確認する:
 
-- `CLAUDE.md` の他の記述
-- `.claude/agents/` 配下の他のエージェント定義
+- `CLAUDE.md`・`AGENTS.md` の他の記述
+- `.claude/` 配下の agents・skills・rules・hooks
 - `skills/` 配下の SKILL.md
 - `CONTRIBUTING.md`
 
 #### 観点 4: 削除・修正の妥当性
 
-削除または修正した記述が本当に実態と乖離していたか確認する。
+削除または修正した記述が、実態と乖離していたか、他のファイルと重複していたかを確認する。
 
-retro issue や git log に「この記述が間違っていた」という根拠があるか確認する。
+retro・承認済みの issue・git log・重複先のファイルに根拠があるか確認する。
 
 #### 観点 5: 記述の明確さ
 
@@ -77,6 +77,18 @@ retro issue や git log に「この記述が間違っていた」という根�
 - 複数の解釈が成り立つ表現がないか
 - トリガー条件・手順・出力形式が具体的か
 - 根拠となる規則の複雑さに対して記述量が見合っているか（一文で済む規則に手順書・表・複数段落を与えていないか）
+
+#### 観点 6: 推測の追認
+
+変更の根拠が retro の「推測」節か self-improve の推論だけで、「観測」節の事実に支えられていないものを報告する。
+
+#### 観点 7: 事実の独立再検証
+
+根拠として引かれた事実（ある記述の有無・コミットの中身・件数）を、self-improve の報告を信じず、自分で grep・git log で確かめる。食い違えば報告する。
+
+#### 観点 8: 純増0
+
+CLAUDE.md・AGENTS.md の文字数が増えていないか確かめる（未コミットなら `git show HEAD:CLAUDE.md | wc -m` と `wc -m CLAUDE.md`、コミット済みなら `HEAD~1` と `HEAD` を比べる。AGENTS.md も同じ）。
 
 ## 出力形式
 
@@ -104,4 +116,4 @@ retro issue や git log に「この記述が間違っていた」という根�
 ## 問題 2: ...
 ```
 
-問題がある場合、self-improve は Step 6 に戻って修正する。
+問題がある場合、self-improve は Step 6 に戻って修正する（2周で打ち切り、残りは起票する）。

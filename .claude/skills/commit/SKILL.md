@@ -80,5 +80,6 @@ GIT_SEQUENCE_EDITOR=true git rebase -i --autosquash $(git rev-list --max-parents
 | 公開 struct / enum / fn | `src/` の doc コメント（`///`） |
 | リリース | `CHANGELOG.md`（git-cliff で生成）, `Cargo.toml` のバージョン |
 | 開発フロー・規約 | `CONTRIBUTING.md` |
+| モジュール構成・不変条件・境界 | `ARCHITECTURE.md`（記述と矛盾する変更をしたら同じコミットで直す） |
 
 英語版と日本語版（`README.md` / `README.ja.md`、`spec.md` / `spec.ja.md`）は常に同期する。片方だけ更新しない。

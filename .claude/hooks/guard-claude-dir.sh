@@ -1,7 +1,7 @@
 #!/bin/bash
 # PreToolUse hook (matcher: Edit|Write)
 # このリポジトリの .claude/ 配下と CLAUDE.md の変更を self-improve エージェント以外に許可しない（retro #226）。
-# 正規ルート: /retro スキルで retro issue を起票 → self-improve エージェントが編集する。
+# 正規ルート: area: agent の issue（改善 issue を含む）を起票 → self-improve エージェントが編集する（#261）。
 # 注意: ガード対象はプロジェクトの .claude/ と CLAUDE.md のみ。パス中の ".claude/" だけでマッチさせると
 # ~/.claude/（グローバル領域。memory 等）まで誤ブロックする（実運用で発生した誤検知の修正）。
 set -euo pipefail
@@ -35,7 +35,7 @@ case "$file_path" in
       hookSpecificOutput: {
         hookEventName: "PreToolUse",
         permissionDecision: "deny",
-        permissionDecisionReason: ".claude/ と CLAUDE.md の変更は retro issue 起票 → self-improve エージェント経由で行う（/retro スキル参照）。直接編集は禁止。"
+        permissionDecisionReason: ".claude/ と CLAUDE.md の変更は area: agent の issue を起票し、宍戸さんの承認後に self-improve エージェントに渡して行う。直接編集は禁止。"
       }
     }'
     exit 0

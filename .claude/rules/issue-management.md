@@ -15,7 +15,7 @@ paths:
 | `test` | テストの追加・修正 |
 | `docs` | ドキュメント・README・CONTRIBUTING |
 | `ci` | CI/CD パイプライン |
-| `agent` | CLAUDE.md・`.claude/agents/` の変更・retro issue |
+| `agent` | CLAUDE.md・AGENTS.md・`.claude/` の変更・retro・改善 issue |
 | `misc` | 上記に当てはまらないもの |
 
 ## バグ issue のラベル規約
@@ -34,11 +34,8 @@ Renga は公開リポジトリなので、issue 本文に書く根拠・出典�
 
 ## retro issue の起票ルール
 
-自己改善のための retro issue は以下のフォーマットで起票する。
+retro は `/retro` スキルで記録する（本文の3節・型ラベルの語彙はスキルに従う）。
 
-```sh
-renga create "retro: <内容>" --area agent --label retro
-```
-
-- `area: agent`、`labels: [retro]` を必ず付ける
-- 起票後に `Agent(subagent_type="self-improve")` を呼んで改善を実施する
+- `area: agent`、`labels: [retro, <型>]` を付ける
+- 起票しただけで終える。self-improve は起動しない
+- 振り返りでない変更提案には `retro` を付けない

@@ -7,7 +7,7 @@
 - **ベストプラクティスを先に調べる**: 実装・設計の判断を述べる前に、ウェブ検索等でベストプラクティスを調べる。知っているつもりで進めない。RFC・仕様書・設計パターン・公式ドキュメント等を参照する。
 - **容赦なく指摘・提案・批判する**: 宍戸さんの選択・意見に迎合しない。問題があれば全コンテキストで指摘する。
 - **根本原因を特定する**: エラーや問題を回避するのではなく、根本原因を特定して解決する。`--no-verify`・`#[allow(...)]`・コンパイルエラーを黙らせる回避策は使わない。
-- **ミスや改善を指摘されたら即座に self-improve を起動する**: 宍戸さんにミスや改善を指摘されたとき、または同じ種類のミスがセッション内で 2 回以上起きたとき → その場で retro issue を起票してから、利用可能な self-improve / worker サブエージェントに改善案のレビューを依頼する。利用できる同等のサブエージェントがない場合は、retro issue に理由とセルフ改善案を残す。
+- **ミスや改善を指摘されたら即座に retro を記録する**: 宍戸さんにミスや改善を指摘されたとき、または同じ種類のミスがセッション内で 2 回以上起きたとき → その場で retro issue を起票する。
 
 ## Ambiguity and constraints
 
@@ -35,19 +35,19 @@ Codex でサブエージェントまたは custom agent が利用可能な場合
 | コンテキスト | トリガー | 指示 |
 |---|---|---|
 | コード品質・仕様・ドキュメントのレビュー | コミット前レビュー | review / reviewer 相当のサブエージェントに依頼する |
-| 自己改善 | ミス・改善指摘、または同種ミス 2 回以上 | 事前に retro issue を起票し、self-improve / worker 相当のサブエージェントに依頼する |
+| 自己改善 | 同じ型の open な retro が 2 件たまったとき | 改善 issue を起票し、宍戸さんの承認後に self-improve / worker 相当に依頼する |
 | OSS ポジショニング・ローンチ計画 | マーケティング・公開戦略の相談 | marketing-strategist 相当があれば使う |
 | OSS 公開用ドキュメント執筆・改善 | README・公開文書の大きな改善 | docs-writer 相当があれば使う |
 | OSS ローンチ実行 | 投稿文・公開順序・告知導線の作成 | launch-orchestrator 相当があれば使う |
 
-**エージェント設定ファイルの変更は self-improve 経由**: `AGENTS.md`、`CLAUDE.md`、`.claude/agents/`、`.codex/agents/`、`.agents/` を変更する場合は、必ず retro issue（`area: agent`, `labels: [retro]`）を起票してから self-improve / worker 相当のサブエージェントを呼ぶ。「局所的な変更だから直接やる」という判断は行わない。CLI 仕様変更に伴う `skills/` 配下のドキュメント同期は通常のドキュメント更新として扱い、この retro ルールの対象にしない。
+**エージェント設定ファイルの変更は self-improve 経由**: `AGENTS.md`、`CLAUDE.md`、`.claude/`、`.codex/agents/`、`.agents/` を変更する場合は、必ず `area: agent` の issue を起票し、宍戸さんの承認後に self-improve / worker 相当のサブエージェントを呼ぶ。「局所的な変更だから直接やる」という判断は行わない。CLI 仕様変更に伴う `skills/` 配下のドキュメント同期は通常のドキュメント更新として扱い、この規則の対象にしない。
 
 **明示的な計画を出す条件**:
 - 3 ファイル以上を変更するタスク
 - breaking change を含むタスク
 - 設計判断が複数ある場合（例: API の設計、ディレクトリ構造の変更）
 
-File-Based Issue Management。詳細仕様は `spec.ja.md` を参照。
+File-Based Issue Management。詳細仕様は `spec.ja.md`、コードの地図と不変条件は `ARCHITECTURE.md` を参照。
 `skills/` はエージェントスキルの配布用ディレクトリ（`~/.claude/skills/` または `~/.agents/skills/` にシンボリックリンクして使う）。インストール方法・コマンド一覧は `README.md` の "Claude Code skill" セクションを参照。
 
 ## エラーハンドリング
@@ -82,6 +82,7 @@ File-Based Issue Management。詳細仕様は `spec.ja.md` を参照。
 | 公開 struct / enum / fn | `src/` の doc コメント（`///`） |
 | リリース | `CHANGELOG.md`（git-cliff で生成）, `Cargo.toml` のバージョン |
 | 開発フロー・規約 | `CONTRIBUTING.md` |
+| モジュール構成・不変条件・境界 | `ARCHITECTURE.md`（記述と矛盾する変更をしたら同じコミットで直す） |
 
 英語版と日本語版（`README.md` / `README.ja.md`、`spec.md` / `spec.ja.md`）は常に同期する。片方だけ更新しない。
 
@@ -149,7 +150,7 @@ renga done <N>...
 | `test` | テストの追加・修正 |
 | `docs` | ドキュメント・README・CONTRIBUTING |
 | `ci` | CI/CD パイプライン |
-| `agent` | `AGENTS.md`・`CLAUDE.md`・`.claude/agents/`・`.codex/agents/`・`.agents/` の変更・retro issue |
+| `agent` | `AGENTS.md`・`CLAUDE.md`・`.claude/`・`.codex/agents/`・`.agents/` の変更・retro・改善 issue |
 | `misc` | 上記に当てはまらないもの |
 
 ### バグ issue のラベル規約
@@ -164,12 +165,11 @@ renga done <N>...
 
 ### retro issue の起票ルール
 
-自己改善のための retro issue は以下のフォーマットで起票する。
+retro は記録だけにする。
 
 ```sh
-renga create "retro: <内容>" --area agent --label retro
+renga create "retro: <内容>" --area agent --label retro --label <型>
 ```
 
-- `area: agent`、`labels: [retro]` を必ず付ける
-- 起票後に self-improve / worker 相当のサブエージェントを呼んで改善を実施する
-- 同等のサブエージェントが利用できない場合は、issue 本文に理由とセルフ改善案を残す
+- `area: agent`、`labels: [retro]` と型ラベルを1つ以上付ける。本文は「観測／そのとき何が見えていたか／推測」の3節。型の語彙は `.claude/skills/retro/SKILL.md`
+- 記録だけで終える。同じ型の open な retro が 2 件になったら、改善 issue を起票して宍戸さんに報告する
