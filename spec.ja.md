@@ -54,6 +54,7 @@ N-short-name/
 
 ```markdown
 ---
+type: Issue                 # 省略可能（このフィールドが導入される前に作成したファイルには含まれない）
 schema_version: 1           # 省略可能（このフィールドが導入される前に作成したファイルには含まれない）
 status: open
 priority: high/medium/low   # 省略可能
@@ -69,6 +70,8 @@ assignee: alice             # 省略可能（担当者）
 `status` frontmatter フィールドが issue status の正とする情報源。ステータス別ディレクトリ（`open/`, `pending/`, `in-progress/`, `done/`）は発見性のための同期済みレイアウトである。ファイルが frontmatter の status と異なるディレクトリに置かれている場合、`renga validate` は error として報告する。`renga validate --auto-correct` は frontmatter の status に合わせてファイルを移動する。
 
 `schema_version` は frontmatter のフォーマットバージョンを示す。新規作成ファイルには `schema_version: 1` が含まれる。このフィールドがない旧ファイルは内部的に `None`（不在）として保持され、ツールはバージョン 1 と同等に扱う。
+
+`type` は、[Open Knowledge Format（OKF）](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md) の文書を読むツールに対して、このファイルが issue であることを示す。OKF で必須のキーは `type` だけである。新規作成ファイルには `type: Issue` が含まれる。renga は読み込み時にこのフィールドを必須としない。`renga migrate` は、frontmatter に `type` キーがない issue すべてに、frontmatter の先頭行として `type: Issue` を追加する。すでに `type` を持つファイル（値は問わない）と、frontmatter を parse できないファイルは変更しない。
 
 `area`・`priority`・`milestone`・`assignee` は frontmatter がある場合でも省略可能。`area` を省略すると issue はグループなし扱いになり、`issues/README.md` では見出しなしで表示される。`priority` を省略すると `medium` がデフォルトになる。`milestone` を省略するとどのマイルストーンにも属さない。`assignee` を省略すると担当者なしとなる。
 

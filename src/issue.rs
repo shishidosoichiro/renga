@@ -796,6 +796,39 @@ pub fn remove_frontmatter_field(content: &str, field: &str) -> String {
     result
 }
 
+/// The OKF `type` value renga writes into issue frontmatter.
+pub(crate) const ISSUE_TYPE: &str = "Issue";
+
+/// Whether the frontmatter declares a `type` key.
+///
+/// Returns `None` when the file has no frontmatter or it cannot be parsed, so
+/// callers can leave such files to `validate`. The key is looked up through the
+/// YAML parser rather than by line prefix, so a `type:` line inside a
+/// multi-line value is not mistaken for the key. A key whose value is empty or
+/// `null` still counts as present; adding another `type` line would duplicate
+/// the key.
+pub(crate) fn frontmatter_has_type(content: &str) -> Option<bool> {
+    let (fm_str, _) = split_frontmatter(content)?;
+    match serde_yaml::from_str::<serde_yaml::Value>(fm_str).ok()? {
+        serde_yaml::Value::Mapping(map) => Some(map.contains_key("type")),
+        serde_yaml::Value::Null => Some(false),
+        _ => None,
+    }
+}
+
+/// Insert `type: Issue` as the first frontmatter line, leaving every other
+/// line unchanged.
+///
+/// Callers must check [`frontmatter_has_type`] first: this function does not
+/// look for an existing `type` key, and returns `content` unchanged when it
+/// does not start with a frontmatter fence.
+pub(crate) fn insert_type_field(content: &str) -> String {
+    match content.strip_prefix("---\n") {
+        Some(rest) => format!("---\ntype: {ISSUE_TYPE}\n{rest}"),
+        None => content.to_string(),
+    }
+}
+
 pub(crate) fn split_frontmatter(content: &str) -> Option<(&str, &str)> {
     let rest = content.strip_prefix("---\n")?;
     if let Some(pos) = rest.find("\n---\n") {
@@ -1697,5 +1730,58 @@ mod tests {
 
         assert!(convert_flat_to_dir(&path).is_err());
         assert!(path.exists());
+    }
+
+    #[test]
+    fn frontmatter_has_type_detects_presence_and_absence() {
+        assert_eq!(
+            frontmatter_has_type("---\ntype: Issue\nstatus: open\n---\n\n# T\n"),
+            Some(true)
+        );
+        assert_eq!(
+            frontmatter_has_type("---\nstatus: open\n---\n\n# T\n"),
+            Some(false)
+        );
+    }
+
+    #[test]
+    fn frontmatter_has_type_counts_an_empty_or_null_value_as_present() {
+        assert_eq!(
+            frontmatter_has_type("---\ntype:\nstatus: open\n---\n\n# T\n"),
+            Some(true)
+        );
+        assert_eq!(
+            frontmatter_has_type("---\ntype: null\nstatus: open\n---\n\n# T\n"),
+            Some(true)
+        );
+    }
+
+    #[test]
+    fn frontmatter_has_type_is_none_without_parseable_frontmatter() {
+        assert_eq!(frontmatter_has_type("# T\n"), None);
+        assert_eq!(
+            frontmatter_has_type("---\nnot valid yaml: [\n---\n\n# T\n"),
+            None
+        );
+    }
+
+    #[test]
+    fn frontmatter_has_type_ignores_type_inside_a_multiline_value() {
+        let content = "---\nstatus: open\nnote: |\n  type: not a key\n---\n\n# T\n";
+        assert_eq!(frontmatter_has_type(content), Some(false));
+    }
+
+    #[test]
+    fn insert_type_field_prepends_and_keeps_other_lines() {
+        let content = "---\nstatus: open\nextra: kept # comment\n---\n\n# T\n";
+        assert_eq!(
+            insert_type_field(content),
+            "---\ntype: Issue\nstatus: open\nextra: kept # comment\n---\n\n# T\n"
+        );
+    }
+
+    #[test]
+    fn insert_type_field_leaves_content_without_frontmatter_unchanged() {
+        assert_eq!(insert_type_field("# T\n"), "# T\n");
     }
 }

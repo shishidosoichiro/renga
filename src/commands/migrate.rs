@@ -7,15 +7,16 @@ use walkdir::WalkDir;
 
 use crate::{
     issue::{
-        canonical_status_dir, collect_issue_files, convert_flat_to_dir, extract_id, is_dir_based,
-        is_issue_file_name, issue_root, relocate_issue, validate_area_for_group_by, Issue,
+        canonical_status_dir, collect_issue_files, convert_flat_to_dir, extract_id,
+        frontmatter_has_type, insert_type_field, is_dir_based, is_issue_file_name, issue_root,
+        relocate_issue, validate_area_for_group_by, Issue, ISSUE_TYPE,
     },
     readme, Context,
 };
 
 /// Run the migrate command.
 ///
-/// Three steps, all idempotent (re-running finds nothing left to do):
+/// Four steps, all idempotent (re-running finds nothing left to do):
 /// 1. Move issue files from the legacy flat layout (`issues/N-slug.md`) into
 ///    per-status directories (`issues/<status>/N-slug.md`).
 /// 2. If `defaults.dir` is `true`, convert any still-flat issue to
@@ -24,6 +25,9 @@ use crate::{
 ///    canonical `<area>/<status>` directory — this covers files moved or
 ///    converted by steps 1-2 and files already in place from before
 ///    `group_by` was enabled.
+/// 4. Add `type: Issue` to any issue whose frontmatter has no `type` key.
+///    Files without parseable frontmatter and files that already declare a
+///    `type` (whatever its value) are left alone.
 pub fn run(ctx: &Context) -> Result<()> {
     ctx.check_issues_dir()?;
 
@@ -40,14 +44,6 @@ pub fn run(ctx: &Context) -> Result<()> {
         .filter(|e| is_issue_file_name(&e.file_name().to_string_lossy()))
         .map(|e| e.path().to_path_buf())
         .collect();
-
-    if flat_files.is_empty()
-        && ctx.config.group_by.is_empty()
-        && ctx.config.defaults.dir != Some(true)
-    {
-        println!("Nothing to migrate.");
-        return Ok(());
-    }
 
     // Keyed by the issue's numeric ID (stable across any number of hops —
     // flat -> status in step 1, flat -> dir-based in step 2, status ->
@@ -155,12 +151,31 @@ pub fn run(ctx: &Context) -> Result<()> {
         }
     }
 
-    if flat_files.is_empty() && dir_candidates == 0 && area_candidates == 0 {
+    // Re-scan fresh so issues moved by steps 1-3 are found at their new paths.
+    let mut typed = 0usize;
+    for path in collect_issue_files(&ctx.issues_dir) {
+        let content = std::fs::read_to_string(&path)
+            .with_context(|| format!("reading {}", path.display()))?;
+        if frontmatter_has_type(&content) != Some(false) {
+            continue;
+        }
+        std::fs::write(&path, insert_type_field(&content))
+            .with_context(|| format!("writing {}", path.display()))?;
+        typed += 1;
+    }
+
+    let relocated = !flat_files.is_empty() || dir_candidates > 0 || area_candidates > 0;
+    if !relocated && typed == 0 {
         println!("Nothing to migrate.");
         return Ok(());
     }
 
     readme::write_readme(&ctx.issues_dir, &ctx.config)?;
-    println!("Migrated {} issue(s).", moved.len());
+    if relocated {
+        println!("Migrated {} issue(s).", moved.len());
+    }
+    if typed > 0 {
+        println!("Added type: {ISSUE_TYPE} to {typed} issue(s).");
+    }
     Ok(())
 }

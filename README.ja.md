@@ -133,7 +133,7 @@ cargo install renga
 | `renga info` | プロジェクトルート・issues ディレクトリ・設定ファイルの場所と現在の設定を表示する |
 
 `--milestone` または `--assignee` に空文字列を渡すとフィールドを削除できる: `renga update 1 --assignee ''`
-| `renga migrate` | イシューを現在のレイアウトに移行する（ステータス別ディレクトリ、設定があれば `group_by`・`defaults.dir` も） |
+| `renga migrate` | イシューを現在のレイアウトに移行し（ステータス別ディレクトリ、設定があれば `group_by`・`defaults.dir` も）、frontmatter に `type: Issue` がなければ追加する |
 | `renga validate [ID]... [--auto-correct]` | issue のスキーマ・status エラー、ID 重複、status ディレクトリ不整合を検出する |
 | `renga completions bash\|zsh\|fish` | シェル補完スクリプトを表示する |
 | `renga help [コマンド]` | ヘルプを表示する |

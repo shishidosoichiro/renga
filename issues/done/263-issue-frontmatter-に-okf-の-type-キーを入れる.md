@@ -1,6 +1,6 @@
 ---
 schema_version: 1
-status: open
+status: done
 priority: medium
 area: core
 labels: []
@@ -44,4 +44,26 @@ ADR を OKF・MADR（https://adr.github.io/madr/）互換の書式で書く運�
 代わりに `type` だけを先に入れ、OKF との互換に備える（宍戸さんの提案、2026-10-07）。
 
 再検討の条件: OKF の status 語彙が改訂されたら見直す。Renga で issue 以外の文書種別を扱う要望が出たときも見直す。
+
+
+## 決定と実装（2026-10-07）
+
+- **値**: `type: Issue` にした。OKF の例（`Playbook`・`Metric` など）が Title Case のため
+- **新規の issue**: create は frontmatter の先頭行に書く
+- **既存の issue**: `renga migrate` の4段目で足す
+  - 対象: frontmatter に `type` キーが無い issue
+  - 足し方: 先頭行に挿入し、ほかの行は変えない
+- **migrate が触らないもの**
+  - すでに `type` を持つファイル。値は問わず、空や `null` でも触らない。足すとキーが重複するため
+  - frontmatter が無いか、parse できないファイル
+- **schema_version**: 据え置き。キーを足しただけで、既存の読み込みは変わらないため
+- **読み込み**: `type` は必須にしない
+
+### 今回やらなかったこと（再検討の条件付き）
+
+- **validate で `type` の欠落を警告すること**: migrate していないリポジトリでは、全件に警告が出るため見送った。再検討するのは、`type` で文書の種類を分ける機能を入れるとき
+- **`type` が `Issue` 以外のファイルの読み方**: 今は issue として読む。再検討するのは、issue 以外の文書を同じ木に置く要望が出たとき
+- **OKF の `status` 語彙（`draft | stable | deprecated`）との衝突**: 未解決のまま残した。再検討するのは、OKF を読むツールとの実際の連携を考えるとき
+- **OKF の予約ファイル名 `index.md` と、`issues/README.md` の関係**: 上と同じ条件で再検討する
+- **`list --json` への `type` の出力**: 再検討するのは、要望が出たとき
 

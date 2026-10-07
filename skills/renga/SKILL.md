@@ -185,7 +185,7 @@ Updates issue fields without opening an editor. Designed for AI agents and scrip
 
 ## migrate
 
-Migrate issues from flat layout (`issues/N-name.md`) to per-status directories (`issues/open/`, `issues/pending/`, etc.). Run once on existing repos.
+Migrate issues from flat layout (`issues/N-name.md`) to per-status directories (`issues/open/`, `issues/pending/`, etc.), and add `type: Issue` to any issue frontmatter that has no `type` key. Run once on existing repos; re-running is safe.
 
 ```
 renga migrate

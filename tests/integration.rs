@@ -1196,6 +1196,110 @@ fn migrate_moves_flat_files_to_status_dirs() {
 }
 
 #[test]
+fn create_writes_type_as_first_frontmatter_key() {
+    let dir = setup();
+    renga(&dir).args(["create", "Typed"]).assert().success();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-typed.md")).unwrap();
+    assert!(content.starts_with("---\ntype: Issue\nschema_version: 1\n"));
+}
+
+#[test]
+fn migrate_adds_type_to_issues_without_it() {
+    let dir = setup();
+    let original =
+        "---\nschema_version: 1\nstatus: open\narea: core # note\nlabels: []\n---\n\n# Old\n";
+    fs::write(dir.path().join("issues/open/1-old.md"), original).unwrap();
+
+    renga(&dir)
+        .args(["migrate"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Added type: Issue to 1 issue(s)."))
+        .stdout(predicate::str::contains("Migrated").not());
+
+    let content = fs::read_to_string(dir.path().join("issues/open/1-old.md")).unwrap();
+    assert_eq!(content, format!("---\ntype: Issue\n{}", &original[4..]));
+
+    renga(&dir)
+        .args(["migrate"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Nothing to migrate."));
+}
+
+#[test]
+fn migrate_leaves_existing_type_and_missing_frontmatter_alone() {
+    let dir = setup();
+    let note = "---\ntype: Note\nstatus: open\n---\n\n# Note\n";
+    let bare = "# No Frontmatter\n";
+    fs::write(dir.path().join("issues/open/1-note.md"), note).unwrap();
+    fs::write(dir.path().join("issues/unknown/2-bare.md"), bare).unwrap();
+
+    renga(&dir)
+        .args(["migrate"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Nothing to migrate."));
+
+    assert_eq!(
+        fs::read_to_string(dir.path().join("issues/open/1-note.md")).unwrap(),
+        note
+    );
+    assert_eq!(
+        fs::read_to_string(dir.path().join("issues/unknown/2-bare.md")).unwrap(),
+        bare
+    );
+}
+
+#[test]
+fn migrate_adds_type_to_dir_based_issue_but_not_its_attachments() {
+    let dir = setup();
+    let issue_dir = dir.path().join("issues/open/5-bundle");
+    fs::create_dir_all(&issue_dir).unwrap();
+    fs::write(
+        issue_dir.join("README.md"),
+        "---\nstatus: open\n---\n\n# Bundle\n",
+    )
+    .unwrap();
+    let attachment = "---\nstatus: open\n---\n\n# Attachment\n";
+    fs::write(issue_dir.join("6-attach.md"), attachment).unwrap();
+
+    renga(&dir)
+        .args(["migrate"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Added type: Issue to 1 issue(s)."));
+
+    let readme = fs::read_to_string(issue_dir.join("README.md")).unwrap();
+    assert!(readme.starts_with("---\ntype: Issue\nstatus: open\n"));
+    assert_eq!(
+        fs::read_to_string(issue_dir.join("6-attach.md")).unwrap(),
+        attachment
+    );
+}
+
+#[test]
+fn migrate_relocates_and_adds_type_in_one_run() {
+    let dir = TempDir::new().unwrap();
+    fs::create_dir_all(dir.path().join("issues")).unwrap();
+    fs::write(
+        dir.path().join("issues/1-flat.md"),
+        "---\nstatus: pending\n---\n\n# Flat\n",
+    )
+    .unwrap();
+
+    renga(&dir)
+        .args(["migrate"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Migrated 1 issue(s)."))
+        .stdout(predicate::str::contains("Added type: Issue to 1 issue(s)."));
+
+    let content = fs::read_to_string(dir.path().join("issues/pending/1-flat.md")).unwrap();
+    assert!(content.starts_with("---\ntype: Issue\nstatus: pending\n"));
+}
+
+#[test]
 fn migrate_nothing_to_migrate() {
     let dir = setup();
     renga(&dir)

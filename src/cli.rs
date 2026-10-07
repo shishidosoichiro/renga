@@ -46,6 +46,7 @@ pub enum Command {
     Info,
     /// Migrate issues to the current layout: into per-status directories, and
     /// (if configured) into `group_by` area directories and `defaults.dir` shape.
+    /// Also adds `type: Issue` to frontmatter that has no `type` key.
     Migrate,
     /// Show help for a command.
     Help {

@@ -54,6 +54,7 @@ Use `renga update <ID> --dir=true` to expand a flat file to a directory, and `--
 
 ```markdown
 ---
+type: Issue                 # optional (absent in files created before this field was introduced)
 schema_version: 1           # optional (absent in files created before this field was introduced)
 status: open
 priority: high|medium|low   # optional
@@ -69,6 +70,8 @@ Frontmatter is optional for normal read/list operations. When absent, `status` i
 The `status` frontmatter field is the authoritative source of issue status. Per-status directories (`open/`, `pending/`, `in-progress/`, `done/`) are a synchronized layout for discoverability. `renga validate` reports an error when a file is stored outside the directory named by its frontmatter status. `renga validate --auto-correct` moves mismatched files to the directory declared by frontmatter.
 
 `schema_version` identifies the frontmatter format version. New files include `schema_version: 1`. Files without this field (created before the field was introduced) are treated as absent (`None` internally); tools handle them the same as version 1.
+
+`type` marks the file as an issue for tools that read [Open Knowledge Format (OKF)](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md) documents, where `type` is the only required key. New files include `type: Issue`. renga does not require the field when reading. `renga migrate` adds `type: Issue` as the first frontmatter line of every issue whose frontmatter has no `type` key; it leaves files with an existing `type` (whatever its value) and files without parseable frontmatter unchanged.
 
 `area`, `priority`, `milestone`, and `assignee` fields are optional even when frontmatter is present. Omitting `area` places the issue in no group (shown without a heading in `issues/README.md`). Omitting `priority` defaults to `medium`. Omitting `milestone` means the issue belongs to no milestone. Omitting `assignee` means no one is assigned.
 
