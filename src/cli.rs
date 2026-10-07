@@ -117,8 +117,13 @@ pub struct CreateArgs {
     #[arg(long)]
     pub assignee: Option<String>,
     /// Labels to attach (repeatable: `--label bug --label urgent`).
+    ///
+    /// These are added to `defaults.labels` from `.renga.yml`.
     #[arg(long)]
     pub label: Vec<String>,
+    /// Do not attach `defaults.labels` from `.renga.yml` to this issue.
+    #[arg(long)]
+    pub no_default_labels: bool,
     /// Store the issue as a directory (`true`) or a flat file (`false`).
     ///
     /// When `true`, creates `N-title/README.md` instead of `N-title.md`,

@@ -42,6 +42,10 @@ pub struct Defaults {
     /// `None` means flat, matching pre-existing behavior.
     #[serde(default)]
     pub dir: Option<bool>,
+    /// Labels that `create` attaches to every new issue, in addition to any
+    /// `--label` values, unless `--no-default-labels` is given.
+    #[serde(default)]
+    pub labels: Vec<String>,
 }
 
 fn default_issues_dir() -> String {
@@ -166,5 +170,28 @@ mod tests {
         std::fs::write(dir.path().join(".renga.yml"), "defaults:\n  dir: true\n").unwrap();
         let config = Config::load(dir.path()).unwrap();
         assert_eq!(config.defaults.dir, Some(true));
+    }
+
+    #[test]
+    fn loads_defaults_labels_from_yml() {
+        let dir = TempDir::new().unwrap();
+        std::fs::write(
+            dir.path().join(".renga.yml"),
+            "defaults:\n  labels: [inbox, triage]\n",
+        )
+        .unwrap();
+        let config = Config::load(dir.path()).unwrap();
+        assert_eq!(config.defaults.labels, vec!["inbox", "triage"]);
+    }
+
+    #[test]
+    fn rejects_defaults_labels_that_are_not_a_list() {
+        let dir = TempDir::new().unwrap();
+        std::fs::write(
+            dir.path().join(".renga.yml"),
+            "defaults:\n  labels: inbox\n",
+        )
+        .unwrap();
+        assert!(Config::load(dir.path()).is_err());
     }
 }

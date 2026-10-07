@@ -120,7 +120,7 @@ labels: []
 
 ```
 renga init
-renga create <title> [--id <N>] [--slug <slug>] [--priority high|medium|low] [--area <area>] [--body <text|-\>] [--milestone <milestone>] [--assignee <assignee>] [--label <label>]... [--dir=true|false]
+renga create <title> [--id <N>] [--slug <slug>] [--priority high|medium|low] [--area <area>] [--body <text|-\>] [--milestone <milestone>] [--assignee <assignee>] [--label <label>]... [--no-default-labels] [--dir=true|false]
 renga create --json
 renga done <ID>...
 renga pending <ID>...
@@ -146,7 +146,7 @@ renga help [command]
 `renga list --count` は、条件に合う issue の件数だけを1行で出す。件数が0でも終了コードは 0 である。そのため、スクリプトでは終了コードではなく件数を比べる（`[ "$(renga list --label inbox --count)" -eq 0 ]`）。`--json` とは同時に指定できない。
 
 `renga create --json` は標準入力から 1 つの JSON object を読む。対応フィールドは
-`title`（必須）、`id`、`slug`、`priority`、`area`、`body`、`milestone`、`assignee`、`labels`。
+`title`（必須）、`id`、`slug`、`priority`、`area`、`body`、`milestone`、`assignee`、`labels`、`no_default_labels`。
 positional 引数やフィールド指定フラグとは併用できない。
 
 `renga update <ID> --json` は標準入力から 1 つの JSON object を読む。対応フィールドは
@@ -180,8 +180,9 @@ area_labels:          # area の表示名（省略時は area 名をそのまま
 group_by:             # status の上にネストする追加のディレクトリ階層（省略時は従来通りフラット）
   - area
 
-defaults:             # create でフラグを省略したときのデフォルト値
+defaults:             # create に適用する既定値
   dir: false          # create --dir のデフォルト（キー省略時は flat）
+  labels: [inbox]     # 新しい issue すべてに付けるラベル（キー省略時はなし）
 ```
 
 `group_by` は list 型。現時点では要素数1・値は `"area"` のみサポートする（2要素以上、または `"area"` 以外の値はエラー）。
@@ -194,7 +195,9 @@ area のスラグが issue ID のように見えるだけなら問題ない。ar
 
 `area`・`status` の変更は該当コマンド（`update`・`done`・`pending`・`in-progress`・`reopen`）が自動的にファイルを正しいディレクトリへ移動する。`update` は実際には `area`・`status` を変更しない編集（`--assignee`・`--label` 等）でも、常に編集の副作用として issue を canonical ディレクトリへ再配置する。そのため、もともと配置がずれていた issue（例: recoverable な status ディレクトリ不一致で見つかった issue）は `area`・`status` に触れない編集でも自動的に正しい位置へ自己修復される。`renga validate --auto-correct` は `group_by` の設定（有効・無効どちらへの変更も）と実際の配置がずれている issue を検出・修正する。`group_by` を新たに有効にして既存 issue を一括で移行するには `renga migrate` を使う。
 
-`defaults` は `create` でフラグを省略したときのデフォルト値の名前空間で、現時点では `defaults.dir` のみサポートする。将来 assignee・priority 等のデフォルトが必要になっても、新しいトップレベルキーを増やさずこの名前空間に足せる。`defaults.dir: true` を設定すると `renga create` はデフォルトで dir-based issue（`N-slug/README.md`）を作成する。コマンドラインで明示的に指定した `--dir=true`/`--dir=false` は常に config のデフォルトより優先される。`create --json` にも同様に適用される — JSON 入力には `dir` フィールド自体が存在しないため、JSON 経由での作成時に flat/dir-based を制御する唯一の手段は `defaults.dir` になる。`renga migrate` は `defaults.dir: true` のとき既存の flat issue を dir-based に変換するが、これは一方向のみである（`update --dir=false` が `README.md` 以外のファイルを含むディレクトリの畳み込みを拒否する既存仕様があるため、添付ファイルのある issue に対する一括畳み込みは信頼できず実装しない）。`group_by` と異なり、`validate` は `defaults.dir` を検査**しない** — issue が flat か dir-based かは（添付ファイルの有無等による）issue ごとの正当な選択であり、frontmatter から一意に導出される「唯一の正解」ではないため。
+`defaults` は `create` に適用する既定値の名前空間で、現時点では `defaults.dir` と `defaults.labels` をサポートする。将来 assignee・priority 等のデフォルトが必要になっても、新しいトップレベルキーを増やさずこの名前空間に足せる。`defaults.dir: true` を設定すると `renga create` はデフォルトで dir-based issue（`N-slug/README.md`）を作成する。コマンドラインで明示的に指定した `--dir=true`/`--dir=false` は常に config のデフォルトより優先される。`create --json` にも同様に適用される — JSON 入力には `dir` フィールド自体が存在しないため、JSON 経由での作成時に flat/dir-based を制御する唯一の手段は `defaults.dir` になる。`renga migrate` は `defaults.dir: true` のとき既存の flat issue を dir-based に変換するが、これは一方向のみである（`update --dir=false` が `README.md` 以外のファイルを含むディレクトリの畳み込みを拒否する既存仕様があるため、添付ファイルのある issue に対する一括畳み込みは信頼できず実装しない）。`group_by` と異なり、`validate` は `defaults.dir` を検査**しない** — issue が flat か dir-based かは（添付ファイルの有無等による）issue ごとの正当な選択であり、frontmatter から一意に導出される「唯一の正解」ではないため。
+
+`defaults.labels` は、`create` が新しい issue すべてに付けるラベルの一覧である。`--label` の値で置き換えるのではなく、両方を合わせて付ける。既定ラベルが先に並び、重複は除く。`--no-default-labels` を指定すると、その issue には既定ラベルを付けない。`create --json` にも適用する。`--json` はほかの引数と組み合わせられないので、JSON では `"no_default_labels": true` を指定する。既定ラベルも `--label` の値と同じ規則を満たす必要があり、満たさなければ `create` はファイルを書く前に失敗する。
 
 ## issues/ の探索
 

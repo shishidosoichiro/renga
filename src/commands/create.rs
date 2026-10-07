@@ -28,6 +28,8 @@ struct CreateJsonInput {
     assignee: Option<String>,
     #[serde(default)]
     labels: Vec<String>,
+    #[serde(default)]
+    no_default_labels: bool,
 }
 
 struct CreateInput {
@@ -40,6 +42,7 @@ struct CreateInput {
     milestone: Option<String>,
     assignee: Option<String>,
     labels: Vec<String>,
+    no_default_labels: bool,
 }
 
 /// Run the create command.
@@ -48,6 +51,7 @@ pub fn run(args: CreateArgs, ctx: &Context) -> Result<()> {
 
     let use_dir = args.dir.or(ctx.config.defaults.dir).unwrap_or(false);
     let input = read_input(args)?;
+    let labels = merge_default_labels(&ctx.config.defaults.labels, &input)?;
 
     validate_priority(&input.priority)?;
     validate_area_for_group_by(&input.area, &ctx.config.group_by)?;
@@ -92,13 +96,10 @@ pub fn run(args: CreateArgs, ctx: &Context) -> Result<()> {
         None => String::new(),
     };
 
-    for l in &input.labels {
-        validate_label(l)?;
-    }
-    let labels_yaml = if input.labels.is_empty() {
+    let labels_yaml = if labels.is_empty() {
         "[]".to_string()
     } else {
-        format!("[{}]", input.labels.join(", "))
+        format!("[{}]", labels.join(", "))
     };
 
     let content = format!(
@@ -143,6 +144,7 @@ fn read_input(args: CreateArgs) -> Result<CreateInput> {
             milestone: json.milestone,
             assignee: json.assignee,
             labels: json.labels,
+            no_default_labels: json.no_default_labels,
         });
     }
 
@@ -167,7 +169,31 @@ fn read_input(args: CreateArgs) -> Result<CreateInput> {
         milestone: args.milestone,
         assignee: args.assignee,
         labels: args.label,
+        no_default_labels: args.no_default_labels,
     })
+}
+
+/// Combine `defaults.labels` with the labels given for this issue.
+///
+/// Default labels come first and duplicates are dropped. Every resulting label
+/// is validated, so a bad entry in `.renga.yml` fails here before any file is
+/// created.
+fn merge_default_labels(defaults: &[String], input: &CreateInput) -> Result<Vec<String>> {
+    let defaults = if input.no_default_labels {
+        &[][..]
+    } else {
+        defaults
+    };
+    let mut labels: Vec<String> = Vec::new();
+    for l in defaults.iter().chain(&input.labels) {
+        if !labels.contains(l) {
+            labels.push(l.clone());
+        }
+    }
+    for l in &labels {
+        validate_label(l)?;
+    }
+    Ok(labels)
 }
 
 fn ensure_no_cli_fields_with_json(args: &CreateArgs) -> Result<()> {
@@ -180,6 +206,7 @@ fn ensure_no_cli_fields_with_json(args: &CreateArgs) -> Result<()> {
         || args.milestone.is_some()
         || args.assignee.is_some()
         || !args.label.is_empty()
+        || args.no_default_labels
         || args.dir.is_some()
     {
         anyhow::bail!("--json cannot be combined with create field arguments");

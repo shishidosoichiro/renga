@@ -118,7 +118,7 @@ cargo install renga
 | コマンド | 動作 |
 |---|---|
 | `renga init` | issues ディレクトリを初期化する |
-| `renga create <タイトル> [--id <N>] [--slug <slug>] [--priority high\|medium\|low] [--area <area>] [--body <テキスト\|-\>] [--milestone <milestone>] [--assignee <assignee>] [--label <label>]... [--dir=true\|false]` | issue を作成する（`--body -` で標準入力から本文を読む。`--dir=true` でディレクトリ形式） |
+| `renga create <タイトル> [--id <N>] [--slug <slug>] [--priority high\|medium\|low] [--area <area>] [--body <テキスト\|-\>] [--milestone <milestone>] [--assignee <assignee>] [--label <label>]... [--no-default-labels] [--dir=true\|false]` | issue を作成する（`--body -` で標準入力から本文を読む。`--dir=true` でディレクトリ形式） |
 | `renga create --json` | 標準入力の JSON object から issue を作成する |
 | `renga done <ID>...` | issue を完了にする |
 | `renga pending <ID>...` | issue を保留にする |
@@ -208,8 +208,9 @@ area_labels:          # area の表示名
 group_by:             # issue を area ディレクトリ配下にネストする（issues/<area>/<status>/...）
   - area
 
-defaults:             # create でフラグを省略したときのデフォルト値
+defaults:             # create に適用する既定値
   dir: false          # create --dir のデフォルト
+  labels: [inbox]     # 新しい issue すべてに付けるラベル（--no-default-labels で外す）
 ```
 
 `group_by: [area]` を設定すると status の上に area のディレクトリ階層が加わり、1つのプロジェクトの area で作業する際にファイルシステム上で他 area のファイルと混ざらなくなる。`defaults.dir: true` にすると `create` はデフォルトで dir-based issue を作成する（issue に添付ファイルをよく置く運用で便利）。詳細（既存 issue を `renga migrate` で移行する方法を含む）は [spec.ja.md](spec.ja.md) を参照。

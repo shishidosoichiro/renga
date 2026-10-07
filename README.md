@@ -118,7 +118,7 @@ cargo install renga
 | Command | Description |
 |---|---|
 | `renga init` | Initialize the issues directory |
-| `renga create <title> [--id <N>] [--slug <slug>] [--priority high\|medium\|low] [--area <area>] [--body <text\|-\>] [--milestone <milestone>] [--assignee <assignee>] [--label <label>]... [--dir=true\|false]` | Create an issue (`--body -` reads from stdin; `--dir=true` uses directory layout) |
+| `renga create <title> [--id <N>] [--slug <slug>] [--priority high\|medium\|low] [--area <area>] [--body <text\|-\>] [--milestone <milestone>] [--assignee <assignee>] [--label <label>]... [--no-default-labels] [--dir=true\|false]` | Create an issue (`--body -` reads from stdin; `--dir=true` uses directory layout) |
 | `renga create --json` | Create an issue from a JSON object on stdin |
 | `renga done <ID>...` | Mark an issue as done |
 | `renga pending <ID>...` | Put an issue on hold |
@@ -208,8 +208,9 @@ area_labels:          # display names for areas
 group_by:             # nest issues under an area directory (issues/<area>/<status>/...)
   - area
 
-defaults:             # default values applied to `create` when the flag is omitted
+defaults:             # default values applied to `create`
   dir: false          # default for `create --dir`
+  labels: [inbox]     # labels added to every new issue (skip with --no-default-labels)
 ```
 
 `group_by: [area]` adds an area directory level above status, so working in a single project's area doesn't mix files from other areas on disk. `defaults.dir: true` makes `create` produce directory-based issues by default (handy if you regularly attach files to issues). See [spec.md](spec.md) for details, including how to migrate existing issues with `renga migrate`.

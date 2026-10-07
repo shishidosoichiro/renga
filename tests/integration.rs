@@ -201,6 +201,107 @@ fn list_combines_label_and_not_label() {
 }
 
 #[test]
+fn create_adds_default_labels_before_given_labels_without_duplicates() {
+    let dir = setup();
+    fs::write(
+        dir.path().join(".renga.yml"),
+        "defaults:\n  labels: [inbox, triage, inbox]\n",
+    )
+    .unwrap();
+    renga(&dir)
+        .args(["create", "Defaulted", "--label", "bug", "--label", "inbox"])
+        .assert()
+        .success();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-defaulted.md")).unwrap();
+    assert!(content.contains("labels: [inbox, triage, bug]"));
+}
+
+#[test]
+fn create_no_default_labels_skips_defaults() {
+    let dir = setup();
+    fs::write(
+        dir.path().join(".renga.yml"),
+        "defaults:\n  labels: [inbox]\n",
+    )
+    .unwrap();
+    renga(&dir)
+        .args(["create", "Plain", "--no-default-labels", "--label", "bug"])
+        .assert()
+        .success();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-plain.md")).unwrap();
+    assert!(content.contains("labels: [bug]"));
+}
+
+#[test]
+fn create_json_applies_default_labels_unless_no_default_labels() {
+    let dir = setup();
+    fs::write(
+        dir.path().join(".renga.yml"),
+        "defaults:\n  labels: [inbox]\n",
+    )
+    .unwrap();
+    renga(&dir)
+        .args(["create", "--json"])
+        .write_stdin(r#"{"title": "With", "labels": ["bug"]}"#)
+        .assert()
+        .success();
+    renga(&dir)
+        .args(["create", "--json"])
+        .write_stdin(r#"{"title": "Without", "no_default_labels": true}"#)
+        .assert()
+        .success();
+    let with = fs::read_to_string(dir.path().join("issues/open/1-with.md")).unwrap();
+    let without = fs::read_to_string(dir.path().join("issues/open/2-without.md")).unwrap();
+    assert!(with.contains("labels: [inbox, bug]"));
+    assert!(without.contains("labels: []"));
+}
+
+#[test]
+fn create_json_rejects_no_default_labels_flag() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "--json", "--no-default-labels"])
+        .write_stdin(r#"{"title": "X"}"#)
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("--json cannot be combined"));
+}
+
+#[test]
+fn create_rejects_invalid_default_label_before_creating_files() {
+    let dir = setup();
+    fs::write(
+        dir.path().join(".renga.yml"),
+        "defaults:\n  labels: [\"x*\"]\n",
+    )
+    .unwrap();
+    renga(&dir)
+        .args(["create", "Bad", "--dir=true"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("ends with '*'"));
+    assert!(fs::read_dir(dir.path().join("issues/open"))
+        .unwrap()
+        .next()
+        .is_none());
+}
+
+#[test]
+fn info_shows_default_labels() {
+    let dir = setup();
+    fs::write(
+        dir.path().join(".renga.yml"),
+        "defaults:\n  labels: [inbox, triage]\n",
+    )
+    .unwrap();
+    renga(&dir)
+        .args(["info"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("defaults.labels inbox, triage"));
+}
+
+#[test]
 fn create_rejects_label_ending_with_star() {
     let dir = setup();
     renga(&dir)

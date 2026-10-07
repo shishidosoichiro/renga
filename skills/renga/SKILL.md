@@ -70,10 +70,11 @@ renga create --json
 - `--slug`: Kebab-case English slug derived from the title (max 30 chars). Auto-generated from title if omitted.
 - `--area`: Infer from context. Use `misc` if unclear.
 - `--priority`: Default is `medium`. Use `high` for correctness issues, `low` for suggestions.
-- `--label`: Labels to attach (repeatable: `--label bug --label urgent`). A label must not end with `*`.
+- `--label`: Labels to attach (repeatable: `--label bug --label urgent`). A label must not end with `*`. They are added to any `defaults.labels` from `.renga.yml`.
+- `--no-default-labels`: Do not attach `defaults.labels` to this issue.
 - `--body`: **Always include.** Write a brief description of what needs to be done and why. The title alone is not sufficient.
 - `--dir`: Pass `--dir=true` to store the issue as a directory (`N-slug/README.md`) so attachments or notes can live alongside it. Defaults to the flat `N-slug.md` file.
-- `--json`: Read one JSON object from stdin. Supported fields are `title`, `id`, `slug`, `priority`, `area`, `body`, `milestone`, and `labels`. Do not combine with field arguments.
+- `--json`: Read one JSON object from stdin. Supported fields are `title`, `id`, `slug`, `priority`, `area`, `body`, `milestone`, `assignee`, `labels`, and `no_default_labels`. Do not combine with field arguments.
 - Report the created file path to the user.
 
 ---

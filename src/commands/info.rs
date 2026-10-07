@@ -37,15 +37,15 @@ pub fn run(ctx: &Context) -> Result<()> {
     println!();
     println!("configuration:");
     println!(
-        "  issues_dir    {:<20} # path to the issues directory",
+        "  issues_dir      {:<20} # path to the issues directory",
         ctx.config.issues_dir
     );
     println!(
-        "  area_order    {:<20} # ordered area list for README grouping",
+        "  area_order      {:<20} # ordered area list for README grouping",
         area_order
     );
     println!(
-        "  area_labels   {:<20} # display labels per area (e.g. core → \"Core\")",
+        "  area_labels     {:<20} # display labels per area (e.g. core → \"Core\")",
         area_labels
     );
     let group_by = if ctx.config.group_by.is_empty() {
@@ -54,7 +54,7 @@ pub fn run(ctx: &Context) -> Result<()> {
         ctx.config.group_by.join(", ")
     };
     println!(
-        "  group_by      {:<20} # extra directory level(s) above status (e.g. area)",
+        "  group_by        {:<20} # extra directory level(s) above status (e.g. area)",
         group_by
     );
     let defaults_dir = ctx
@@ -63,8 +63,17 @@ pub fn run(ctx: &Context) -> Result<()> {
         .dir
         .map_or_else(|| "(none)".to_string(), |v| v.to_string());
     println!(
-        "  defaults.dir  {:<20} # default for `create --dir` when omitted",
+        "  defaults.dir    {:<20} # default for `create --dir` when omitted",
         defaults_dir
+    );
+    let default_labels = if ctx.config.defaults.labels.is_empty() {
+        "(none)".to_string()
+    } else {
+        ctx.config.defaults.labels.join(", ")
+    };
+    println!(
+        "  defaults.labels {:<20} # labels `create` adds unless --no-default-labels",
+        default_labels
     );
 
     Ok(())
