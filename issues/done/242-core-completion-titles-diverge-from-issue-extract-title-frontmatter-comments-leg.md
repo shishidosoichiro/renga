@@ -1,4 +1,5 @@
 ---
+type: Issue
 schema_version: 1
 status: done
 priority: low

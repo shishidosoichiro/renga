@@ -1,4 +1,5 @@
 ---
+type: Issue
 status: pending
 priority: medium
 area: docs

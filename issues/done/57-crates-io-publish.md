@@ -1,4 +1,5 @@
 ---
+type: Issue
 status: done
 priority: medium
 area: misc

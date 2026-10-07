@@ -1,4 +1,5 @@
 ---
+type: Issue
 status: open
 priority: low
 area: misc
