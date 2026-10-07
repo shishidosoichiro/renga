@@ -1,7 +1,7 @@
 ---
 type: Issue
 schema_version: 1
-status: open
+status: done
 priority: high
 area: agent
 labels: []
@@ -67,7 +67,7 @@ retro が3か月起票されていない。retro スキルが、起票のたび�
 - 型なし（変更提案か変更の記録で、失敗の観測が無い）: #39・135・145・146・177・211・212・225
 - 棚卸しでは、open の #173・175・181・197・198 を3節に書き直した。#177 は close する（.codex 設定変更の記録で、変更は e38e00c で入っている）
 - #227（agent-config-reviewer の diff 対象に `.claude/skills`・`rules`・`hooks` を含める）は、この変更の agent-config-reviewer Step 2・3 で満たした
-- 各 issue への型ラベルの付与と #177 の close は、作業環境の権限で `renga update` が拒否されたため未実施。**付与が済むまで #261 は close しない。** 付与すると `unverified-premise` が open で2件（#175・#198）になり、最初の改善 issue `improve: unverified-premise` を起票する
+- 型ラベルの付与と #177 の close は、2026-10-07 に宍戸さんの承認を得て実施した（ad10d29）。`unverified-premise` が open で2件（#175・#198）になったので、改善 issue #273 を起票した
 
 ## 見送ったもの
 

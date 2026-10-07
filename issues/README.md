@@ -19,7 +19,6 @@ Closed issues are moved to `done/`.
 | [197](open/197-retro-status-authoritative-sou.md) | open | medium | retro: status authoritative source の既存判断を確認せず推奨した |
 | [198](open/198-retro-update-edit-done-issue.md) | open | medium | retro: update/edit の done issue 操作方針で反証を出さずに同意した |
 | [201](open/201-codex-agents-agents-md.md) | open | medium | .codex/ .agents/ にサブエージェントが未定義 — AGENTS.md が参照しているが実体がない |
-| [261](open/261-retro-を記録専用にし-改善を型単位で回す.md) | open | high | retro を記録専用にし、改善を型単位で回す |
 | [267](open/267-バグラベルの-found-at-を発見版に再定義し-since-を新設する.md) | open | low | バグラベルの found_at を発見版に再定義し since を新設する |
 | [273](open/273-improve-unverified-premise.md) | open | high | improve: unverified-premise |
 
