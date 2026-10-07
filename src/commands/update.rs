@@ -8,9 +8,9 @@ use serde::Deserialize;
 use crate::{
     cli::UpdateArgs,
     issue::{
-        convert_flat_to_dir, find_editable_issue, is_dir_based, issue_root, labels_inline_yaml,
-        relocate_issue, remove_frontmatter_field, replace_or_prepend_heading,
-        set_frontmatter_field, split_frontmatter, validate_area_for_group_by, validate_label,
+        convert_flat_to_dir, find_editable_issue, is_dir_based, issue_root, relocate_issue,
+        remove_frontmatter_field, replace_or_prepend_heading, set_frontmatter_field,
+        set_frontmatter_labels, split_frontmatter, validate_area_for_group_by, validate_label,
         validate_label_chars, Issue,
     },
     readme, Context, FbimError,
@@ -75,34 +75,33 @@ pub fn run(args: UpdateArgs, ctx: &Context) -> Result<()> {
     Issue::parse(&path, &content)?;
 
     if let Some(priority) = &input.priority {
-        content = set_frontmatter_field(&content, "priority", priority);
+        content = set_frontmatter_field(&content, "priority", priority)?;
     }
     if let Some(area) = &input.area {
-        content = set_frontmatter_field(&content, "area", area);
+        content = set_frontmatter_field(&content, "area", area)?;
     }
     if let Some(status) = &input.status {
-        content = set_frontmatter_field(&content, "status", status);
+        content = set_frontmatter_field(&content, "status", status)?;
     }
     if let Some(milestone) = &input.milestone {
         content = if milestone.is_empty() {
-            remove_frontmatter_field(&content, "milestone")
+            remove_frontmatter_field(&content, "milestone")?
         } else {
-            set_frontmatter_field(&content, "milestone", milestone)
+            set_frontmatter_field(&content, "milestone", milestone)?
         };
     }
     if let Some(assignee) = &input.assignee {
         content = if assignee.is_empty() {
-            remove_frontmatter_field(&content, "assignee")
+            remove_frontmatter_field(&content, "assignee")?
         } else {
-            set_frontmatter_field(&content, "assignee", assignee)
+            set_frontmatter_field(&content, "assignee", assignee)?
         };
     }
     if let Some(labels) = &input.labels {
         for l in labels {
             validate_label(l)?;
         }
-        let labels_yaml = labels_inline_yaml(labels);
-        content = set_frontmatter_field(&content, "labels", &labels_yaml);
+        content = set_frontmatter_labels(&content, labels)?;
     }
     if !input.add_labels.is_empty() || !input.remove_labels.is_empty() {
         for l in &input.add_labels {
@@ -119,8 +118,7 @@ pub fn run(args: UpdateArgs, ctx: &Context) -> Result<()> {
             }
         }
         labels.retain(|l| !input.remove_labels.contains(l));
-        let labels_yaml = labels_inline_yaml(&labels);
-        content = set_frontmatter_field(&content, "labels", &labels_yaml);
+        content = set_frontmatter_labels(&content, &labels)?;
     }
     if let Some(new_title) = &input.title {
         let (fm_str, body) = split_frontmatter(&content)

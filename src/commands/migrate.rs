@@ -159,8 +159,14 @@ pub fn run(ctx: &Context) -> Result<()> {
         if frontmatter_has_type(&content) != Some(false) {
             continue;
         }
-        std::fs::write(&path, insert_type_field(&content))
-            .with_context(|| format!("writing {}", path.display()))?;
+        let updated = match insert_type_field(&content) {
+            Ok(updated) => updated,
+            Err(e) => {
+                eprintln!("warning: skipping {} — {e:#}", path.display());
+                continue;
+            }
+        };
+        std::fs::write(&path, updated).with_context(|| format!("writing {}", path.display()))?;
         typed += 1;
     }
 

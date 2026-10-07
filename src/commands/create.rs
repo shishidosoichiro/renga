@@ -8,8 +8,8 @@ use serde::Deserialize;
 use crate::{
     cli::CreateArgs,
     issue::{
-        find_issue, labels_inline_yaml, make_slug, next_id, validate_area_for_group_by,
-        validate_label, ISSUE_TYPE,
+        find_issue, make_slug, next_id, set_frontmatter_field, set_frontmatter_labels,
+        validate_area_for_group_by, validate_label, ISSUE_TYPE,
     },
     readme, Context,
 };
@@ -88,21 +88,22 @@ pub fn run(args: CreateArgs, ctx: &Context) -> Result<()> {
         _ => "\n".to_string(),
     };
 
-    let milestone_line = match &input.milestone {
-        Some(m) => format!("milestone: {m}\n"),
-        None => String::new(),
-    };
-    let assignee_line = match &input.assignee {
-        Some(a) => format!("assignee: {a}\n"),
-        None => String::new(),
-    };
-
-    let labels_yaml = labels_inline_yaml(&labels);
-
-    let content = format!(
-        "---\ntype: {ISSUE_TYPE}\nschema_version: 1\nstatus: open\npriority: {}\narea: {}\nlabels: {labels_yaml}\n{milestone_line}{assignee_line}---\n\n# {}\n{}",
-        input.priority, input.area, input.title, body_section
+    // Only `priority` (already validated) is formatted into the skeleton; every
+    // free-form value goes through the YAML editor so it is quoted as needed.
+    let mut content = format!(
+        "---\ntype: {ISSUE_TYPE}\nschema_version: 1\nstatus: open\npriority: {}\narea:\nlabels: []\n---\n\n# {}\n{}",
+        input.priority, input.title, body_section
     );
+    if !input.area.is_empty() {
+        content = set_frontmatter_field(&content, "area", &input.area)?;
+    }
+    content = set_frontmatter_labels(&content, &labels)?;
+    if let Some(m) = &input.milestone {
+        content = set_frontmatter_field(&content, "milestone", m)?;
+    }
+    if let Some(a) = &input.assignee {
+        content = set_frontmatter_field(&content, "assignee", a)?;
+    }
 
     std::io::Write::write_all(
         &mut std::fs::OpenOptions::new()

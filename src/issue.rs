@@ -644,8 +644,9 @@ pub fn validate_label(label: &str) -> Result<()> {
 /// Check only the characters that would break the inline YAML label list.
 ///
 /// Used when removing a label, so a label that predates the trailing-`*`
-/// rule can still be removed. Line breaks are rejected because frontmatter
-/// values are edited line by line and must stay on one line.
+/// rule can still be removed. Line breaks are rejected because yaml-edit 0.3
+/// renders such a string inside `[ ]` as invalid YAML, which
+/// `edit_frontmatter` would then refuse to write.
 pub(crate) fn validate_label_chars(label: &str) -> Result<()> {
     if label.contains(['\n', '\r']) {
         anyhow::bail!("label {label:?} contains a line break");
@@ -660,36 +661,6 @@ pub(crate) fn validate_label_chars(label: &str) -> Result<()> {
         }
     }
     Ok(())
-}
-
-/// Render labels as a one-line YAML flow sequence, e.g. `[bug, 'a: b']`.
-///
-/// Each label is quoted only when YAML would otherwise read it differently
-/// (`a: b`, `#x`, an empty string, `true`, `123`), so ordinary labels are
-/// written exactly as before.
-///
-/// serde_yaml quotes for block context, which misses a few cases that only
-/// break inside `[ ]` (e.g. `:x`). Each rendered item is therefore parsed back
-/// as a one-item flow sequence; if that does not yield the label, it is
-/// written as a JSON string instead, which is always a valid one-line YAML
-/// double-quoted scalar, even for a label with a line break read from a
-/// hand-edited file.
-pub(crate) fn labels_inline_yaml(labels: &[String]) -> String {
-    let items: Vec<String> = labels.iter().map(|l| label_inline_yaml(l)).collect();
-    format!("[{}]", items.join(", "))
-}
-
-fn label_inline_yaml(label: &str) -> String {
-    let plain = serde_yaml::to_string(label)
-        .map(|s| s.trim_end_matches('\n').to_string())
-        .unwrap_or_default();
-    let round_trips = serde_yaml::from_str::<Vec<String>>(&format!("[{plain}]"))
-        .is_ok_and(|v| v.len() == 1 && v[0] == label);
-    if round_trips && !plain.contains('\n') {
-        plain
-    } else {
-        serde_json::to_string(label).unwrap_or_else(|_| format!("{label:?}"))
-    }
 }
 
 /// Label conditions for `renga list`: labels an issue must have and labels it
@@ -802,100 +773,125 @@ pub fn replace_or_prepend_heading(body: &str, title: &str) -> String {
     }
 }
 
-/// Update a single frontmatter field in raw file content without re-serialising.
+/// Apply `edit` to the frontmatter mapping and return the updated file content.
 ///
-/// Leaves all other lines unchanged. If the field is not found in frontmatter,
-/// inserts it before the closing frontmatter fence.
+/// The frontmatter is edited through a lossless YAML syntax tree, so only the
+/// values that `edit` touches change: comments, key order, and the formatting
+/// of every other key are kept, and a value written in any YAML style (for
+/// example a block sequence) is replaced as a whole. The body is never
+/// touched. Content without frontmatter is returned unchanged.
+///
+/// Fails when the frontmatter is not valid YAML or holds no keys: such an
+/// issue has status `unknown`, which renga treats as read-only.
+fn edit_frontmatter(content: &str, edit: impl FnOnce(&yaml_edit::Mapping)) -> Result<String> {
+    if content.starts_with("---\r\n") {
+        anyhow::bail!("frontmatter with CRLF line endings cannot be edited");
+    }
+    let Some(rest) = content.strip_prefix("---\n") else {
+        return Ok(content.to_string());
+    };
+    if rest.starts_with("---") {
+        anyhow::bail!("frontmatter has no keys to edit");
+    }
+    let Some(end) = rest.find("\n---\n").or_else(|| rest.find("\n---")) else {
+        anyhow::bail!("frontmatter has no closing `---` line");
+    };
+    let (fm, after) = (&rest[..end], &rest[end + 1..]);
+
+    // The reader parses frontmatter with serde_yaml, which also rejects
+    // duplicate keys; refuse to edit anything it would not read back.
+    serde_yaml::from_str::<serde_yaml::Value>(fm)
+        .map_err(|e| anyhow::anyhow!("frontmatter is not valid YAML: {e}"))?;
+    let file = yaml_edit::YamlFile::from_str(&format!("{fm}\n"))
+        .map_err(|e| anyhow::anyhow!("frontmatter is not valid YAML: {e}"))?;
+    let mapping = file
+        .documents()
+        .next()
+        .and_then(|doc| doc.as_mapping())
+        .context("frontmatter has no keys to edit")?;
+    edit(&mapping);
+
+    let mut fm = file.to_string();
+    if !fm.ends_with('\n') {
+        fm.push('\n');
+    }
+    // Never write what the reader cannot parse back. yaml-edit 0.3 renders
+    // some values invalidly (e.g. a string with a line break inside `[ ]`).
+    serde_yaml::from_str::<serde_yaml::Value>(&fm)
+        .map_err(|e| anyhow::anyhow!("editing the frontmatter would produce invalid YAML: {e}"))?;
+    Ok(format!("---\n{fm}{after}"))
+}
+
+/// Set a single frontmatter field, keeping everything else as written.
+///
+/// The value is written as a YAML string, quoted only when needed. If the
+/// field is missing it is added after the existing keys. See
+/// `edit_frontmatter` for what is preserved and when this fails.
 ///
 /// # Examples
 ///
 /// ```
 /// use renga::issue::set_frontmatter_field;
-/// let content = "---\nstatus: open\npriority: high\n---\n\n# Title\n";
-/// let updated = set_frontmatter_field(content, "status", "done");
-/// assert!(updated.contains("status: done"));
-/// assert!(updated.contains("priority: high"));
+/// let content = "---\nstatus: open  # note\npriority: high\n---\n\n# Title\n";
+/// let updated = set_frontmatter_field(content, "status", "done").unwrap();
+/// assert_eq!(updated, "---\nstatus: done  # note\npriority: high\n---\n\n# Title\n");
 /// ```
-pub fn set_frontmatter_field(content: &str, field: &str, value: &str) -> String {
-    let prefix = format!("{field}:");
-    let mut in_fm = false;
-    let mut fm_closed = false;
-    let mut found = false;
-    let mut out: Vec<String> = Vec::new();
-
-    for line in content.lines() {
-        if !fm_closed && line.trim() == "---" {
-            if in_fm {
-                if !found {
-                    out.push(format!("{field}: {value}"));
-                    found = true;
-                }
-                in_fm = false;
-                fm_closed = true;
-            } else if out.is_empty() {
-                // opening fence must be the very first line
-                in_fm = true;
-            }
-            out.push(line.to_string());
-            continue;
-        }
-        if in_fm && !found && line.starts_with(&prefix) {
-            out.push(format!("{field}: {value}"));
-            found = true;
-        } else {
-            out.push(line.to_string());
-        }
-    }
-
-    let mut result = out.join("\n");
-    if content.ends_with('\n') {
-        result.push('\n');
-    }
-    result
+pub fn set_frontmatter_field(content: &str, field: &str, value: &str) -> Result<String> {
+    edit_frontmatter(content, |m| m.set(field, value))
 }
 
-/// Remove a single frontmatter field from raw file content without re-serialising.
+/// Remove a single frontmatter field, keeping everything else as written.
 ///
-/// Leaves all other lines unchanged. If the field is not present, the content is
-/// returned unchanged.
+/// Content without the field is returned unchanged. See `edit_frontmatter` for
+/// what is preserved and when this fails.
 ///
 /// # Examples
 ///
 /// ```
 /// use renga::issue::remove_frontmatter_field;
 /// let content = "---\nstatus: open\nmilestone: v1\n---\n\n# Title\n";
-/// let updated = remove_frontmatter_field(content, "milestone");
-/// assert!(!updated.contains("milestone:"));
-/// assert!(updated.contains("status: open"));
+/// let updated = remove_frontmatter_field(content, "milestone").unwrap();
+/// assert_eq!(updated, "---\nstatus: open\n---\n\n# Title\n");
 /// ```
-pub fn remove_frontmatter_field(content: &str, field: &str) -> String {
-    let prefix = format!("{field}:");
-    let mut in_fm = false;
-    let mut fm_closed = false;
-    let mut out: Vec<String> = Vec::new();
+pub fn remove_frontmatter_field(content: &str, field: &str) -> Result<String> {
+    edit_frontmatter(content, |m| {
+        m.remove(field);
+    })
+}
 
-    for line in content.lines() {
-        if !fm_closed && line.trim() == "---" {
-            if in_fm {
-                in_fm = false;
-                fm_closed = true;
-            } else if out.is_empty() {
-                in_fm = true;
-            }
-            out.push(line.to_string());
-            continue;
+/// Set `status` for a status transition (`done`, `pending`, `in-progress`,
+/// `reopen`).
+///
+/// These commands must keep working on an issue whose frontmatter cannot be
+/// edited as YAML (issue #232): the file is still moved to its new status
+/// directory. In that case the content is returned unchanged with a warning,
+/// since rewriting invalid YAML line by line would only leave it invalid.
+pub(crate) fn set_status_for_transition(content: &str, path: &Path, status: &str) -> String {
+    match set_frontmatter_field(content, "status", status) {
+        Ok(updated) => updated,
+        Err(e) => {
+            eprintln!(
+                "warning: {}: {e:#}; moving the file without updating its frontmatter",
+                path.display()
+            );
+            content.to_string()
         }
-        if in_fm && line.starts_with(&prefix) {
-            continue; // drop this line
-        }
-        out.push(line.to_string());
     }
+}
 
-    let mut result = out.join("\n");
-    if content.ends_with('\n') {
-        result.push('\n');
-    }
-    result
+/// Set the `labels` field to a one-line flow sequence such as
+/// `[bug, 'a: b']`, quoting each label only when YAML needs it.
+///
+/// The labels are passed as a flow sequence on purpose: yaml-edit 0.3 writes
+/// an invalid `labels: - a` when given a plain list.
+pub(crate) fn set_frontmatter_labels(content: &str, labels: &[String]) -> Result<String> {
+    edit_frontmatter(content, |m| {
+        let seq = yaml_edit::Sequence::new_flow();
+        for l in labels {
+            seq.push(l.as_str());
+        }
+        m.set("labels", seq);
+    })
 }
 
 /// The OKF `type` value renga writes into issue frontmatter.
@@ -903,8 +899,8 @@ pub(crate) const ISSUE_TYPE: &str = "Issue";
 
 /// Whether the frontmatter declares a `type` key.
 ///
-/// Returns `None` when the file has no frontmatter or it cannot be parsed, so
-/// callers can leave such files to `validate`. The key is looked up through the
+/// Returns `None` when the file has no frontmatter, it cannot be parsed, or it
+/// holds no keys, so callers can leave such files to `validate`. The key is looked up through the
 /// YAML parser rather than by line prefix, so a `type:` line inside a
 /// multi-line value is not mistaken for the key. A key whose value is empty or
 /// `null` still counts as present; adding another `type` line would duplicate
@@ -913,22 +909,17 @@ pub(crate) fn frontmatter_has_type(content: &str) -> Option<bool> {
     let (fm_str, _) = split_frontmatter(content)?;
     match serde_yaml::from_str::<serde_yaml::Value>(fm_str).ok()? {
         serde_yaml::Value::Mapping(map) => Some(map.contains_key("type")),
-        serde_yaml::Value::Null => Some(false),
         _ => None,
     }
 }
 
-/// Insert `type: Issue` as the first frontmatter line, leaving every other
-/// line unchanged.
+/// Add `type: Issue` as the first frontmatter key, keeping everything else as
+/// written.
 ///
-/// Callers must check [`frontmatter_has_type`] first: this function does not
-/// look for an existing `type` key, and returns `content` unchanged when it
-/// does not start with a frontmatter fence.
-pub(crate) fn insert_type_field(content: &str) -> String {
-    match content.strip_prefix("---\n") {
-        Some(rest) => format!("---\ntype: {ISSUE_TYPE}\n{rest}"),
-        None => content.to_string(),
-    }
+/// Callers must check [`frontmatter_has_type`] first: if `type` already exists,
+/// its value is overwritten in place.
+pub(crate) fn insert_type_field(content: &str) -> Result<String> {
+    edit_frontmatter(content, |m| m.insert_at_index(0, "type", ISSUE_TYPE))
 }
 
 pub(crate) fn split_frontmatter(content: &str) -> Option<(&str, &str)> {
@@ -1270,7 +1261,7 @@ mod tests {
     #[test]
     fn set_frontmatter_field_updates_status() {
         let content = "---\nstatus: open\npriority: high\narea: core\n---\n\n# Title\n";
-        let updated = set_frontmatter_field(content, "status", "done");
+        let updated = set_frontmatter_field(content, "status", "done").unwrap();
         assert!(updated.contains("status: done"));
         assert!(updated.contains("priority: high"));
         assert!(updated.contains("area: core"));
@@ -1280,7 +1271,7 @@ mod tests {
     #[test]
     fn set_frontmatter_field_adds_missing_field() {
         let content = "---\nstatus: open\npriority: high\n---\n\n# Title\n";
-        let updated = set_frontmatter_field(content, "milestone", "v1");
+        let updated = set_frontmatter_field(content, "milestone", "v1").unwrap();
         assert!(updated.contains("status: open"));
         assert!(updated.contains("priority: high"));
         assert!(updated.contains("milestone: v1\n---"));
@@ -1291,7 +1282,7 @@ mod tests {
     fn set_frontmatter_field_ignores_hr_in_body() {
         // '---' in the body must not re-enable frontmatter parsing
         let content = "---\nstatus: open\n---\n\n# Title\n\n---\nstatus: see notes\n";
-        let updated = set_frontmatter_field(content, "status", "done");
+        let updated = set_frontmatter_field(content, "status", "done").unwrap();
         assert!(
             updated.contains("status: done"),
             "frontmatter status should be updated"
@@ -1306,14 +1297,14 @@ mod tests {
     fn set_frontmatter_field_no_frontmatter_content_unchanged() {
         // content without frontmatter must be returned as-is
         let content = "# Title\n\n---\nstatus: open\n---\n";
-        let updated = set_frontmatter_field(content, "status", "done");
+        let updated = set_frontmatter_field(content, "status", "done").unwrap();
         assert_eq!(updated, content);
     }
 
     #[test]
     fn remove_frontmatter_field_removes_existing_field() {
         let content = "---\nstatus: open\nmilestone: v1\narea: core\n---\n\n# Title\n";
-        let updated = remove_frontmatter_field(content, "milestone");
+        let updated = remove_frontmatter_field(content, "milestone").unwrap();
         assert!(!updated.contains("milestone:"));
         assert!(updated.contains("status: open"));
         assert!(updated.contains("area: core"));
@@ -1322,14 +1313,14 @@ mod tests {
     #[test]
     fn remove_frontmatter_field_noop_when_field_absent() {
         let content = "---\nstatus: open\narea: core\n---\n\n# Title\n";
-        let updated = remove_frontmatter_field(content, "milestone");
+        let updated = remove_frontmatter_field(content, "milestone").unwrap();
         assert_eq!(updated, content);
     }
 
     #[test]
     fn remove_frontmatter_field_ignores_hr_in_body() {
         let content = "---\nstatus: open\nmilestone: v1\n---\n\n# Title\n\n---\nmilestone: fake\n";
-        let updated = remove_frontmatter_field(content, "milestone");
+        let updated = remove_frontmatter_field(content, "milestone").unwrap();
         assert!(!updated.contains("milestone: v1"));
         assert!(updated.contains("milestone: fake"));
     }
@@ -1877,14 +1868,14 @@ mod tests {
     fn insert_type_field_prepends_and_keeps_other_lines() {
         let content = "---\nstatus: open\nextra: kept # comment\n---\n\n# T\n";
         assert_eq!(
-            insert_type_field(content),
+            insert_type_field(content).unwrap(),
             "---\ntype: Issue\nstatus: open\nextra: kept # comment\n---\n\n# T\n"
         );
     }
 
     #[test]
     fn insert_type_field_leaves_content_without_frontmatter_unchanged() {
-        assert_eq!(insert_type_field("# T\n"), "# T\n");
+        assert_eq!(insert_type_field("# T\n").unwrap(), "# T\n");
     }
 
     #[test]
@@ -1949,21 +1940,34 @@ mod tests {
         assert!(validate_label_chars("a,b").is_err());
     }
 
-    #[test]
-    fn labels_inline_yaml_quotes_only_when_needed() {
-        let labels: Vec<String> = ["bug", "found_at:0.17.0", "a: b", "#x", "", "true"]
-            .iter()
-            .map(|s| s.to_string())
-            .collect();
-        assert_eq!(
-            labels_inline_yaml(&labels),
-            "[bug, found_at:0.17.0, 'a: b', '#x', '', 'true']"
-        );
-        assert_eq!(labels_inline_yaml(&[]), "[]");
+    fn labels_of(content: &str) -> String {
+        content
+            .lines()
+            .find(|l| l.starts_with("labels:"))
+            .unwrap()
+            .to_string()
     }
 
     #[test]
-    fn labels_inline_yaml_round_trips_through_the_parser() {
+    fn set_frontmatter_labels_quotes_only_when_needed() {
+        let labels: Vec<String> = ["bug", "found_at:0.17.0", "a: b", ":x", "#x", "", "true"]
+            .iter()
+            .map(|s| s.to_string())
+            .collect();
+        let content = "---\nstatus: open\nlabels: []\n---\n\n# T\n";
+        let updated = set_frontmatter_labels(content, &labels).unwrap();
+        assert_eq!(
+            labels_of(&updated),
+            "labels: [bug, found_at:0.17.0, 'a: b', ':x', '#x', '', 'true']"
+        );
+        assert_eq!(
+            labels_of(&set_frontmatter_labels(content, &[]).unwrap()),
+            "labels: []"
+        );
+    }
+
+    #[test]
+    fn set_frontmatter_labels_round_trips_through_the_parser() {
         let labels: Vec<String> = [
             "a: b",
             "#x",
@@ -1973,13 +1977,85 @@ mod tests {
             "- x",
             ":x",
             "say \"hi\"",
-            "a\nb",
         ]
         .iter()
         .map(|s| s.to_string())
         .collect();
-        let parsed: Vec<String> = serde_yaml::from_str(&labels_inline_yaml(&labels)).unwrap();
-        assert_eq!(parsed, labels);
+        let content = "---\nstatus: open\nlabels: [old]\n---\n\n# T\n";
+        let updated = set_frontmatter_labels(content, &labels).unwrap();
+        let issue = Issue::parse(Path::new("issues/open/1-t.md"), &updated).unwrap();
+        assert_eq!(issue.labels, labels);
+    }
+
+    #[test]
+    fn set_frontmatter_labels_refuses_a_label_with_a_line_break() {
+        // Only a hand-edited file can hold such a label; validate_label rejects
+        // new ones. The edit must fail rather than write invalid YAML.
+        let content = "---\nstatus: open\nlabels: [old]\n---\n\n# T\n";
+        assert!(set_frontmatter_labels(content, &["a\nb".to_string()]).is_err());
+    }
+
+    #[test]
+    fn set_frontmatter_labels_replaces_a_block_sequence() {
+        for content in [
+            "---\nstatus: open\nlabels:\n  - a\n  - b\nnote: kept\n---\n\n# T\n",
+            "---\nstatus: open\nlabels:\n- a\n- b\nnote: kept\n---\n\n# T\n",
+        ] {
+            let labels = vec!["a".to_string(), "b".to_string(), "c".to_string()];
+            let updated = set_frontmatter_labels(content, &labels).unwrap();
+            assert_eq!(
+                updated,
+                "---\nstatus: open\nlabels: [a, b, c]\nnote: kept\n---\n\n# T\n"
+            );
+        }
+    }
+
+    #[test]
+    fn frontmatter_edits_keep_comments_and_unknown_keys() {
+        let content =
+            "---\n# lead\nstatus: open  # inline\ncustom: x\nlabels: [a]\n# tail\n---\n\n# T\n";
+        let updated = set_frontmatter_field(content, "status", "done").unwrap();
+        let updated = set_frontmatter_labels(&updated, &["b".to_string()]).unwrap();
+        assert_eq!(
+            updated,
+            "---\n# lead\nstatus: done  # inline\ncustom: x\nlabels: [b]\n# tail\n---\n\n# T\n"
+        );
+    }
+
+    #[test]
+    fn frontmatter_edits_quote_strings_that_look_like_other_types() {
+        let content = "---\nstatus: open\n---\n\n# T\n";
+        let updated = set_frontmatter_field(content, "milestone", "1.0").unwrap();
+        assert!(updated.contains("milestone: '1.0'"));
+    }
+
+    #[test]
+    fn frontmatter_edits_refuse_invalid_or_empty_frontmatter() {
+        for content in [
+            "---\nnot valid yaml: [\n---\n\n# T\n",
+            "---\nstatus: open\nstatus: done\n---\n\n# T\n",
+            "---\n# only a comment\n---\n\n# T\n",
+            "---\n---\n\n# T\n",
+            "---\nstatus: open\n\n# no closing fence\n",
+            "---\r\nstatus: open\r\n---\r\n\r\n# T\r\n",
+        ] {
+            assert!(set_frontmatter_field(content, "status", "done").is_err());
+        }
+        assert_eq!(
+            set_frontmatter_field("# no frontmatter\n", "status", "done").unwrap(),
+            "# no frontmatter\n"
+        );
+    }
+
+    #[test]
+    fn frontmatter_edits_handle_a_closing_fence_without_newline() {
+        let updated = set_frontmatter_field("---\nstatus: open\n---", "status", "done").unwrap();
+        assert_eq!(updated, "---\nstatus: done\n---");
+    }
+
+    #[test]
+    fn frontmatter_has_type_is_none_for_frontmatter_without_keys() {
+        assert_eq!(frontmatter_has_type("---\n# c\n---\n\n# T\n"), None);
     }
 
     #[test]

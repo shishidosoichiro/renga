@@ -6,7 +6,7 @@ use anyhow::{Context as _, Result};
 
 use crate::{
     cli::ReopenArgs,
-    issue::{find_issue, issue_root, relocate_issue, set_frontmatter_field, Issue, Status},
+    issue::{find_issue, issue_root, relocate_issue, set_status_for_transition, Issue, Status},
     readme, Context, FbimError,
 };
 
@@ -43,7 +43,7 @@ fn reopen_one(id: &str, ctx: &Context) -> Result<PathBuf> {
     // `issues/open/` directory regardless of group_by.
     let parsed = Issue::parse(&path, &content).ok();
     let area = parsed.as_ref().map_or("", |issue| issue.area.as_str());
-    let updated = set_frontmatter_field(&content, "status", "open");
+    let updated = set_status_for_transition(&content, &path, "open");
 
     let open_dir = ctx.canonical_dir(area, "open");
     let src_root = issue_root(&path);

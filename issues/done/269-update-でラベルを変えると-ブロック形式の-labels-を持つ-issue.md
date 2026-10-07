@@ -1,7 +1,7 @@
 ---
 type: Issue
 schema_version: 1
-status: open
+status: done
 priority: medium
 area: core
 labels: [bug, found_at:0.17.0]

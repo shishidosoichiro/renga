@@ -44,7 +44,7 @@ The core of renga. The entry points are the `Issue` type, which a file parses in
 
 **Architecture invariant:** frontmatter `status` is meant to be the source of truth, and the status directory mirrors it. Lookup by ID is the one place that looks at the directory first: whether an issue counts as done is decided by whether it sits under `done/`. A file under `done/` whose frontmatter says it is active is the only mismatch that lookup resolves in favor of the frontmatter.
 
-**Architecture invariant:** frontmatter is edited line by line and is never re-serialized, so keys that renga does not know survive every edit. This assumes each edited key has a single-line value.
+**Architecture invariant:** frontmatter is edited as YAML through a lossless syntax tree (the `yaml-edit` crate), never as lines of text. Only the values an edit touches change; comments, key order, keys that renga does not know, and the formatting of other keys survive. A value is replaced whole whatever its YAML style, and an edit whose result would not parse back is refused. Frontmatter that is not valid YAML is not edited.
 
 **Architecture invariant:** the ID lives only in the file name, and the title lives only in the body's first H1 heading. Neither is stored in frontmatter.
 
@@ -70,12 +70,12 @@ End-to-end tests that run the compiled binary. See Testability below.
 
 ### Boundaries
 
-Renga deliberately has no network access, no locking, no git integration, and no full YAML round-trip.
+Renga deliberately has no network access, no locking, no git integration, and no re-serialization of frontmatter.
 
 - **No network.** All state is in the working tree. Sharing issues is the job of git or whatever syncs the files.
 - **No locking.** Two renga processes writing to the same issues directory at the same time can race. For example, two `create` calls can pick the same next ID. Renga assumes one writer at a time.
 - **No git integration.** Renga moves and edits files but never stages or commits them. The user decides when and how to commit.
-- **No full YAML round-trip.** Renga reads frontmatter with a YAML parser but writes it by replacing single lines. Edits therefore cannot restructure frontmatter, and in return they do not reformat the lines they leave alone.
+- **No re-serialization of frontmatter.** Renga never rebuilds frontmatter from parsed data; it edits the syntax tree in place. A key that renga rewrites may change style (a block list of labels becomes `[a, b]`), but nothing else in the frontmatter is reformatted.
 
 ## Cross-cutting concerns
 

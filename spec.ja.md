@@ -71,7 +71,7 @@ assignee: alice             # 省略可能（担当者）
 
 `schema_version` は frontmatter のフォーマットバージョンを示す。新規作成ファイルには `schema_version: 1` が含まれる。このフィールドがない旧ファイルは内部的に `None`（不在）として保持され、ツールはバージョン 1 と同等に扱う。
 
-`type` は、[Open Knowledge Format（OKF）](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md) の文書を読むツールに対して、このファイルが issue であることを示す。OKF で必須のキーは `type` だけである。新規作成ファイルには `type: Issue` が含まれる。renga は読み込み時にこのフィールドを必須としない。`renga migrate` は、frontmatter に `type` キーがない issue すべてに、frontmatter の先頭行として `type: Issue` を追加する。すでに `type` を持つファイル（値は問わない）と、frontmatter を parse できないファイルは変更しない。
+`type` は、[Open Knowledge Format（OKF）](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md) の文書を読むツールに対して、このファイルが issue であることを示す。OKF で必須のキーは `type` だけである。新規作成ファイルには `type: Issue` が含まれる。renga は読み込み時にこのフィールドを必須としない。`renga migrate` は、frontmatter に `type` キーがない issue すべてに、frontmatter の最初のキーとして `type: Issue` を追加する。すでに `type` を持つファイル（値は問わない）、frontmatter を parse できないファイル、frontmatter にキーが1つもないファイルは変更しない。
 
 `area`・`priority`・`milestone`・`assignee` は frontmatter がある場合でも省略可能。`area` を省略すると issue はグループなし扱いになり、`issues/README.md` では見出しなしで表示される。`priority` を省略すると `medium` がデフォルトになる。`milestone` を省略するとどのマイルストーンにも属さない。`assignee` を省略すると担当者なしとなる。
 
@@ -143,7 +143,9 @@ renga help [command]
 
 `renga list --label` は、そのラベルを持つ issue に絞り込む。繰り返し指定すると、すべてのラベルを持つ issue に絞り込む（AND）。`--not-label` は、そのラベルを持つ issue を除く。こちらも繰り返し指定でき、ラベルを1つも持たない issue は残る。どちらのフラグでも、値が `*` で終わると、`*` より前の文字列で始まるラベルすべてに一致する（例: `--label 'found_at:*'`）。シェルが `*` を展開しないよう、引用符で囲む。それ以外の値は、ラベルと完全に一致したものだけに一致する。このため、ラベルは `*` で終わってはならない。`create`・`update` はそのようなラベルを拒否する。ただし、すでにあるラベルは `update --remove-label` で外せる。
 
-ラベルは1行の YAML リストとして書き出す（`labels: [bug, 'a: b']`）。renga が引用符で囲むのは、そのままでは YAML 1.2（renga が読む規格）が別の意味に読むラベルだけである。たとえば `a: b`・`:x`・`#x`・`true`・空文字列が該当する。通常のラベルは引用符なしで書く。ラベルには `,`・`[`・`]`・`{`・`}`・改行を含められない。
+ラベルは1行の YAML リストとして書き出す（`labels: [bug, 'a: b']`）。renga は、YAML がその文字列以外のものとして読むおそれのあるラベルを引用符で囲む。たとえば `a: b`・`:x`・`#x`・`true`・`yes`・空文字列が該当する。`bug` や `found_at:0.17.0` のような通常のラベルは引用符なしで書く。ラベルには `,`・`[`・`]`・`{`・`}`・改行を含められない。
+
+renga は frontmatter を、行の並びではなく YAML として編集する。フィールドはどの YAML の書き方でもよい。たとえば `labels` をブロック形式のリスト（`- a` を1行ずつ）で書いてもよい。renga がそのフィールドを変えるときは、値全体を置き換える。コメント・キーの順序・renga が知らないキー・変えないフィールドの書式は保つ。frontmatter が YAML として正しくないとき、キーが1つもないとき、改行が CRLF のときは、`update` はファイルを変えずに失敗する。`done`・`pending`・`in-progress`・`reopen` は、その場合もファイルを新しい status ディレクトリへ移す。ただし frontmatter は変えず、警告を出す。
 
 `renga list --count` は、条件に合う issue の件数だけを1行で出す。件数が0でも終了コードは 0 である。そのため、スクリプトでは終了コードではなく件数を比べる（`[ "$(renga list --label inbox --count)" -eq 0 ]`）。`--json` とは同時に指定できない。
 

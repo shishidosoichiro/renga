@@ -340,7 +340,7 @@ fn labels_with_yaml_syntax_are_quoted_and_stay_readable() {
         .assert()
         .success();
     let content = fs::read_to_string(dir.path().join("issues/open/1-odd.md")).unwrap();
-    assert!(content.contains("labels: [\":x\", plain]"));
+    assert!(content.contains("labels: [':x', plain]"));
     renga(&dir).args(["validate"]).assert().success();
 }
 
@@ -3294,6 +3294,91 @@ fn info_shows_group_by() {
 // frontmatter before.
 
 #[test]
+fn update_replaces_block_style_labels() {
+    // Regression test for issue #269.
+    for labels in ["labels:\n  - a\n  - b\n", "labels:\n- a\n- b\n"] {
+        let dir = setup();
+        fs::write(
+            dir.path().join("issues/open/1-block.md"),
+            format!("---\nstatus: open\n{labels}note: kept\n---\n\n# Block\n"),
+        )
+        .unwrap();
+        renga(&dir)
+            .args(["update", "1", "--add-label", "c"])
+            .assert()
+            .success();
+        let content = fs::read_to_string(dir.path().join("issues/open/1-block.md")).unwrap();
+        assert_eq!(
+            content,
+            "---\nstatus: open\nlabels: [a, b, c]\nnote: kept\n---\n\n# Block\n"
+        );
+        renga(&dir).args(["validate"]).assert().success();
+    }
+}
+
+#[test]
+fn frontmatter_comments_and_unknown_keys_survive_done_and_update() {
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/open/1-notes.md"),
+        "---\n# keep this\nstatus: open  # why\ncustom: value\nlabels: [a]\n---\n\n# Notes\n",
+    )
+    .unwrap();
+    renga(&dir)
+        .args(["update", "1", "--add-label", "b"])
+        .assert()
+        .success();
+    renga(&dir).args(["done", "1"]).assert().success();
+    let content = fs::read_to_string(dir.path().join("issues/done/1-notes.md")).unwrap();
+    assert_eq!(
+        content,
+        "---\n# keep this\nstatus: done  # why\ncustom: value\nlabels: [a, b]\n---\n\n# Notes\n"
+    );
+}
+
+#[test]
+fn update_refuses_unparseable_frontmatter_and_leaves_the_file() {
+    let dir = setup();
+    let original = "---\nstatus: open\nnot: valid: yaml: [\n---\n\n# Bad\n";
+    fs::write(dir.path().join("issues/open/1-bad.md"), original).unwrap();
+    renga(&dir)
+        .args(["update", "1", "--add-label", "x"])
+        .assert()
+        .failure();
+    assert_eq!(
+        fs::read_to_string(dir.path().join("issues/open/1-bad.md")).unwrap(),
+        original
+    );
+}
+
+#[test]
+fn done_warns_and_keeps_a_crlf_file_unchanged() {
+    let dir = setup();
+    let original = "---\r\nstatus: open\r\n---\r\n\r\n# Crlf\r\n";
+    fs::write(dir.path().join("issues/open/1-crlf.md"), original).unwrap();
+    renga(&dir)
+        .args(["done", "1"])
+        .assert()
+        .success()
+        .stderr(predicate::str::contains("CRLF"));
+}
+
+#[test]
+fn done_warns_when_frontmatter_cannot_be_updated() {
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/open/1-bad.md"),
+        "---\nnot: valid: yaml: [\n---\n\n# Bad\n",
+    )
+    .unwrap();
+    renga(&dir)
+        .args(["done", "1"])
+        .assert()
+        .success()
+        .stderr(predicate::str::contains("without updating its frontmatter"));
+}
+
+#[test]
 fn done_tolerates_unparseable_frontmatter() {
     let dir = setup();
     fs::write(
@@ -3302,7 +3387,10 @@ fn done_tolerates_unparseable_frontmatter() {
     )
     .unwrap();
     renga(&dir).args(["done", "1"]).assert().success();
-    assert!(dir.path().join("issues/done/1-bad.md").exists());
+    assert_eq!(
+        fs::read_to_string(dir.path().join("issues/done/1-bad.md")).unwrap(),
+        "---\nnot: valid: yaml: [\n---\n\n# Bad\n"
+    );
 }
 
 #[test]
@@ -3314,7 +3402,10 @@ fn pending_tolerates_unparseable_frontmatter() {
     )
     .unwrap();
     renga(&dir).args(["pending", "1"]).assert().success();
-    assert!(dir.path().join("issues/pending/1-bad.md").exists());
+    assert_eq!(
+        fs::read_to_string(dir.path().join("issues/pending/1-bad.md")).unwrap(),
+        "---\nnot: valid: yaml: [\n---\n\n# Bad\n"
+    );
 }
 
 #[test]
@@ -3326,7 +3417,10 @@ fn in_progress_tolerates_unparseable_frontmatter() {
     )
     .unwrap();
     renga(&dir).args(["in-progress", "1"]).assert().success();
-    assert!(dir.path().join("issues/in-progress/1-bad.md").exists());
+    assert_eq!(
+        fs::read_to_string(dir.path().join("issues/in-progress/1-bad.md")).unwrap(),
+        "---\nnot: valid: yaml: [\n---\n\n# Bad\n"
+    );
 }
 
 #[test]
@@ -3338,7 +3432,10 @@ fn reopen_tolerates_unparseable_frontmatter() {
     )
     .unwrap();
     renga(&dir).args(["reopen", "1"]).assert().success();
-    assert!(dir.path().join("issues/open/1-bad.md").exists());
+    assert_eq!(
+        fs::read_to_string(dir.path().join("issues/open/1-bad.md")).unwrap(),
+        "---\nnot: valid: yaml: [\n---\n\n# Bad\n"
+    );
 }
 
 #[test]

@@ -52,7 +52,9 @@ Closed issues are moved to `done/`.
 | [195](open/195-prevent-duplicate-ids.md) | open | medium | issue 作成時に重複 ID を防止できない |
 | [203](open/203-git-worktree-issues.md) | open | medium | git worktree 使用時に issues ディレクトリが分離される |
 | [256](open/256-core-no-bulk-path-repairs-the-area-layout-that-renga-itself-created.md) | open | medium | core: no bulk path repairs the area layout that renga itself created |
-| [269](open/269-update-でラベルを変えると-ブロック形式の-labels-を持つ-issue.md) | open | medium | update でラベルを変えると、ブロック形式の labels を持つ issue が invalid frontmatter で失敗する |
+| [274](open/274-serde-yaml-deprecated-から読み込みを移行する.md) | open | medium | serde_yaml（deprecated）から読み込みを移行する |
+| [275](open/275-validate-が-status-キーを行頭の文字列で探しており-yaml-として.md) | open | low | validate が status キーを行頭の文字列で探しており、YAML として判定していない |
+| [276](open/276-area-milestone-assignee-に改行を含む値を受け付けるか決める.md) | open | low | area・milestone・assignee に改行を含む値を受け付けるか決める |
 
 ---
 

@@ -6,7 +6,7 @@ use anyhow::Result;
 
 use crate::{
     cli::InProgressArgs,
-    issue::{find_active_issue, relocate_issue, set_frontmatter_field, Issue},
+    issue::{find_active_issue, relocate_issue, set_status_for_transition, Issue},
     readme, Context, FbimError,
 };
 
@@ -46,7 +46,7 @@ fn move_one(id: &str, ctx: &Context) -> Result<PathBuf> {
     // no area, which places the issue at the flat `issues/in-progress/`
     // directory regardless of group_by.
     let area = Issue::parse(&path, &content).map_or_else(|_| String::new(), |issue| issue.area);
-    let updated = set_frontmatter_field(&content, "status", "in-progress");
+    let updated = set_status_for_transition(&content, &path, "in-progress");
 
     let dest_dir = ctx.canonical_dir(&area, "in-progress");
     relocate_issue(&path, &updated, &dest_dir)
