@@ -220,7 +220,7 @@ defaults:             # create に適用する既定値
 ```sh
 cargo test            # テスト実行
 cargo test --doc      # doctest 実行
-cargo clippy -- -D warnings
+cargo clippy --all-targets -- -D warnings
 cargo fmt --check
 cargo doc --no-deps --open
 ```

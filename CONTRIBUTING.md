@@ -14,13 +14,13 @@ Before changing code, read [ARCHITECTURE.md](ARCHITECTURE.md) for where things l
 **Build and test**
 
 ```sh
-cargo build                      # debug build
-cargo build --release            # release build
-cargo test                       # unit + integration tests
-cargo test --doc                 # doctests
-cargo clippy -- -D warnings      # lint (must be clean)
-cargo fmt --check                # format check
-cargo doc --no-deps              # verify doc generation
+cargo build                                # debug build
+cargo build --release                      # release build
+cargo test                                 # unit + integration tests
+cargo test --doc                           # doctests
+cargo clippy --all-targets -- -D warnings  # lint (must be clean)
+cargo fmt --check                          # format check
+cargo doc --no-deps                        # verify doc generation
 ```
 
 ## Coverage
@@ -31,6 +31,21 @@ cargo llvm-cov --html           # HTML report (target/llvm-cov/)
 ```
 
 Check coverage both after implementation and after applying review feedback.
+
+## Code quality
+
+Ask the same questions when you write code and when you review it.
+
+- **Every change**: [What to look for in a code review](https://google.github.io/eng-practices/review/reviewer/looking-for.html) from Google Engineering Practices.
+- **Changes to the public library API** (items exported from `src/lib.rs`): the [Rust API Guidelines checklist](https://rust-lang.github.io/api-guidelines/checklist.html). Renga is mainly a CLI, so don't apply it to the rest of the code.
+
+The tools enforce the mechanical rules. Clippy rejects `unwrap()` and `expect()` outside tests (`[lints]` in `Cargo.toml`, `clippy.toml`). `#![deny(missing_docs)]` in `src/lib.rs` requires doc comments on public items.
+
+Renga-specific decisions:
+
+- User-facing errors go to stderr with an `error:` prefix, and the process exits with code 1.
+- Domain errors use `thiserror`; application errors use `anyhow`.
+- Tests that touch the filesystem use a real directory from `tempfile::TempDir`, not mocks. Integration tests live in `tests/` and run the `renga` binary.
 
 ## Commit messages
 
@@ -141,4 +156,4 @@ Or use the Claude Code skill: `/renga`.
 
 - Keep PRs focused — one logical change per PR.
 - All CI checks must pass before merging.
-- Code review looks for: correctness, test coverage, clippy/fmt compliance, doc comment completeness on public items.
+- Code review uses the questions in [Code quality](#code-quality).

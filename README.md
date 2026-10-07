@@ -220,7 +220,7 @@ defaults:             # default values applied to `create`
 ```sh
 cargo test            # run tests
 cargo test --doc      # run doctests
-cargo clippy -- -D warnings
+cargo clippy --all-targets -- -D warnings
 cargo fmt --check
 cargo doc --no-deps --open
 ```
