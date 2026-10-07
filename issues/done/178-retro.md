@@ -4,7 +4,7 @@ schema_version: 1
 status: done
 priority: medium
 area: agent
-labels: [retro]
+labels: [retro, unread-source]
 ---
 
 # retro: リリース対象範囲を確認せず次バージョンを提案した

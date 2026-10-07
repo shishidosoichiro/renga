@@ -3,7 +3,7 @@ type: Issue
 status: done
 priority: medium
 area: misc
-labels: [retro]
+labels: [retro, skipped-step]
 ---
 
 # retro: self-improve 経由ルールの違反と新 area 追加

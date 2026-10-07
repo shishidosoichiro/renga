@@ -1,10 +1,10 @@
 ---
 type: Issue
 schema_version: 1
-status: open
+status: done
 priority: medium
 area: agent
-labels: [retro]
+labels: []
 ---
 
 # retro: .codex 設定変更のコミット前確認

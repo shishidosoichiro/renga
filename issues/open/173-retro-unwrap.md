@@ -4,7 +4,7 @@ schema_version: 1
 status: open
 priority: medium
 area: agent
-labels: [retro]
+labels: [retro, skipped-step]
 ---
 
 # retro: 全体レビューで unwrap 観点の確認結果を報告し漏らした

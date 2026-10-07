@@ -4,7 +4,7 @@ schema_version: 1
 status: done
 priority: medium
 area: agent
-labels: [retro]
+labels: [retro, skipped-step]
 ---
 
 # CLAUDE.md と CONTRIBUTING.md の構造を整理して self-improve の発動率を改善する

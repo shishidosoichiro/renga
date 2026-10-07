@@ -4,7 +4,7 @@ schema_version: 1
 status: done
 priority: medium
 area: agent
-labels: [retro]
+labels: [retro, missed-sync]
 ---
 
 # retro: /release スキルに手動 cargo publish の古い記載が残っている

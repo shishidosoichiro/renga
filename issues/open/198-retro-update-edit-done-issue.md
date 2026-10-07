@@ -4,7 +4,7 @@ schema_version: 1
 status: open
 priority: medium
 area: agent
-labels: [retro]
+labels: [retro, unverified-premise]
 ---
 
 # retro: update/edit の done issue 操作方針で反証を出さずに同意した

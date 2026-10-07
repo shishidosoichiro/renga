@@ -4,7 +4,7 @@ schema_version: 1
 status: done
 priority: high
 area: agent
-labels: [retro]
+labels: [retro, wrong-commit]
 ---
 
 # retro: fix と feat を分けずにコミットする習慣の改善

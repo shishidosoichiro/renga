@@ -4,7 +4,7 @@ schema_version: 1
 status: done
 priority: medium
 area: agent
-labels: [retro]
+labels: [retro, missed-sync, wrong-commit]
 ---
 
 # retro: 同種の過去コミット誤分類を見落とした

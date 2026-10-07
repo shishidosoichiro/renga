@@ -4,7 +4,7 @@ schema_version: 1
 status: done
 priority: medium
 area: agent
-labels: [retro]
+labels: [retro, wrong-commit]
 ---
 
 # retro: テスト追加コミットを fix と誤分類した

@@ -4,7 +4,7 @@ schema_version: 1
 status: done
 priority: medium
 area: agent
-labels: [retro]
+labels: [retro, unverified-premise]
 ---
 
 # retro: 非公開の参考プロジェクト名を公開物の issue とコミットに書いた

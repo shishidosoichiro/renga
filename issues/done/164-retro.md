@@ -4,7 +4,7 @@ schema_version: 1
 status: done
 priority: medium
 area: agent
-labels: [retro]
+labels: [retro, acted-on-question]
 ---
 
 # retro: 相談への回答前に実装へ進んだ

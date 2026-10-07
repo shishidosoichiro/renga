@@ -4,7 +4,7 @@ schema_version: 1
 status: open
 priority: medium
 area: agent
-labels: [retro]
+labels: [retro, unverified-premise]
 ---
 
 # retro: validate の frontmatter なし判定を実装バグとして誤分類した

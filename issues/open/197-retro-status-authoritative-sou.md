@@ -4,7 +4,7 @@ schema_version: 1
 status: open
 priority: medium
 area: agent
-labels: [retro]
+labels: [retro, unread-source]
 ---
 
 # retro: status authoritative source の既存判断を確認せず推奨した

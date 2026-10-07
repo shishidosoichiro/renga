@@ -4,7 +4,7 @@ schema_version: 1
 status: open
 priority: medium
 area: agent
-labels: [retro]
+labels: [retro, acted-on-question]
 ---
 
 # retro: できるかどうかの質問に確認実行で返した

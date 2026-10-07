@@ -4,7 +4,7 @@ schema_version: 1
 status: done
 priority: high
 area: agent
-labels: [retro]
+labels: [retro, skipped-step, wrong-commit]
 ---
 
 # retro: コミット前レビューとバグ発生源の判定を実装フローに追加

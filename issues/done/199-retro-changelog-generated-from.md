@@ -4,7 +4,7 @@ schema_version: 1
 status: done
 priority: medium
 area: agent
-labels: [retro]
+labels: [retro, wrong-commit]
 ---
 
 # retro: changelog generated from unclear commit subjects

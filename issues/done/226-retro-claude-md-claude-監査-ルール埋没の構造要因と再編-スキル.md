@@ -4,7 +4,7 @@ schema_version: 1
 status: done
 priority: medium
 area: agent
-labels: [retro]
+labels: [retro, skipped-step]
 ---
 
 # retro: CLAUDE.md・.claude/ 監査 — ルール埋没の構造要因と再編（スキル化・rules 化・hooks 導入）
