@@ -51,7 +51,34 @@ retro が3か月起票されていない。retro スキルが、起票のたび�
 
 この変更は `.claude/` を変えるので、規約上は retro → self-improve を通す。ただし、変える対象が retro の流れそのものである。そのため最初の1回は、宍戸さんの承認を得てから self-improve に渡す（2026-10-07 に方針は承認済み）。
 
-再検討の条件:
-- 導入後3か月で retro の起票が増えなければ見直す
-- 同じ型の再発が減らない場合も見直す
+## 型ラベルの対応表（2026-10-07）
+
+語彙は retro ラベル付きの32件から帰納した。どの型も実例が2件以上ある。
+
+| 型 | retro |
+|---|---|
+| `skipped-step` | #37・38・143・148・173・226 |
+| `missed-sync` | #147・159・160・163・166・169・224 |
+| `wrong-commit` | #134・143・165・166・199・200 |
+| `acted-on-question` | #164・181 |
+| `unread-source` | #178・197 |
+| `unverified-premise` | #37・175・198・268 |
+
+- 型なし（変更提案か変更の記録で、失敗の観測が無い）: #39・135・145・146・177・211・212・225
+- 棚卸しでは、open の #173・175・181・197・198 を3節に書き直した。#177 は close する（.codex 設定変更の記録で、変更は e38e00c で入っている）
+- #227（agent-config-reviewer の diff 対象に `.claude/skills`・`rules`・`hooks` を含める）は、この変更の agent-config-reviewer Step 2・3 で満たした
+- 各 issue への型ラベルの付与と #177 の close は、作業環境の権限で `renga update` が拒否されたため未実施。**付与が済むまで #261 は close しない。** 付与すると `unverified-premise` が open で2件（#175・#198）になり、最初の改善 issue `improve: unverified-premise` を起票する
+
+## 見送ったもの
+
+- **リリース手順での改善 issue の確認**: リリース step 1 の `renga list` で open の retro は毎回表示されていたのに、v0.12〜v0.17 の間放置された（#173 は 2026-06-08 起票）。読まれていた手順に文を1つ足しても効かない（self-improve の問い1）ため見送った
+- **CLAUDE.md への ARCHITECTURE.md を読む導線**: CLAUDE.md が `@CONTRIBUTING.md` で取り込む CONTRIBUTING.md の3行目に、すでに「Before changing code, read ARCHITECTURE.md」がある。CLAUDE.md には `/commit` の同期ルールへの導線だけを足した
+
+## 再検討の条件
+
+- コミット50件あたりの retro 件数が6月の水準を下回ったら見直す。6月はコミット89件に対し retro が約25件だった。8〜9月はコミットが0件で、件数だけでは活動の空白と区別できない
+- 改善 issue が open のまま2リリースを越えたら、起動の仕組みを強める（リリースを止める形、または SessionStart hook で件数を出す形）
+- close 済みの同じ型の再発が、改善の起動前に2回起きたら、close 済みの retro も件数に入れる。#181 は #164 を受けた規則の後の再発だが、open では1件にしかならない
+- open で1件だけの型が4つ以上並んだら、改善工程で型を統合する（`unread-source` と `unverified-premise` の境界は曖昧）
+- 「機械で判定できるなら hook」の問いで、hook やテストが増えすぎたら見直す
 

@@ -9,8 +9,16 @@ labels: [retro]
 
 # retro: update/edit の done issue 操作方針で反証を出さずに同意した
 
-## 改善メモ
+## 観測
 
-- closed issue そのものを `update` / `edit` 可能にする話と、frontmatter status が active なのに `done/` に置かれた不整合 issue を操作可能にする話を分けて扱う。
-- #193 では後者だけを対象にする。frontmatter status を authoritative source とするため、`done/` 配下でも `open` / `pending` / `in-progress` なら操作を継続し、warning で `renga validate <ID> --auto-correct` を案内する。
-- 通常の `status: done` issue を close 後に追記・更新できるようにするかは、別 issue で UX と監査性を検討する。
+`update` / `edit` で done の issue を操作する方針について、反証を出さずに同意した。
+
+## そのとき何が見えていたか
+
+- 2つの論点が1つとして扱われていた。closed issue そのものを編集可能にする話と、frontmatter の status が active なのに `done/` に置かれた不整合 issue を操作可能にする話である
+- 当時の判断材料の詳細は記録に残っていない
+- 論点はその後、#193（不整合 issue の操作）と #213（done issue の編集）に分かれた
+
+## 推測
+
+2つの論点が混ざったまま、前提を確かめずに同意した可能性がある。
