@@ -38,7 +38,9 @@ pub fn run(args: ListArgs, ctx: &Context) -> Result<()> {
     .filter(|i| label_filter.matches(&i.labels))
     .collect();
 
-    if args.json {
+    if args.count {
+        println!("{}", issues.len());
+    } else if args.json {
         #[derive(Serialize)]
         struct IssueJson<'a> {
             id: &'a str,

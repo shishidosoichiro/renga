@@ -124,7 +124,7 @@ cargo install renga
 | `renga pending <ID>...` | Put an issue on hold |
 | `renga in-progress <ID>...` | Mark an issue as in-progress |
 | `renga reopen <ID>...` | Reopen a closed issue |
-| `renga list [--status open\|pending\|in-progress\|done\|unknown] [--area <area>] [--label <label>]... [--not-label <label>]... [--milestone <milestone>] [--assignee <assignee>] [--json]` | List issues (`--label` repeats as AND; a trailing `*` matches by prefix) |
+| `renga list [--status open\|pending\|in-progress\|done\|unknown] [--area <area>] [--label <label>]... [--not-label <label>]... [--milestone <milestone>] [--assignee <assignee>] [--json \| --count]` | List issues (`--label` repeats as AND; a trailing `*` matches by prefix; `--count` prints only the number) |
 | `renga show <ID> [--json]` | Show issue details |
 | `renga edit <ID>` | Open issue in `$EDITOR` (human) |
 | `renga update <ID> [<title>] [--priority ...] [--area ...] [--status ...] [--milestone ...] [--assignee ...] [--label ...]... [--add-label ...]... [--remove-label ...]... [--body <text\|->]` | Update issue fields (AI/scripts) |

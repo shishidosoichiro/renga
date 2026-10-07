@@ -191,6 +191,12 @@ pub struct ListArgs {
     /// Output as JSON.
     #[arg(long)]
     pub json: bool,
+    /// Print only the number of matching issues.
+    ///
+    /// Always exits with 0, even when nothing matches, so a script can
+    /// compare the number itself: `[ "$(renga list --count)" -eq 0 ]`.
+    #[arg(long, conflicts_with = "json")]
+    pub count: bool,
 }
 
 /// Arguments for `renga show`.

@@ -124,7 +124,7 @@ cargo install renga
 | `renga pending <ID>...` | issue を保留にする |
 | `renga in-progress <ID>...` | issue を作業中にする |
 | `renga reopen <ID>...` | issue を再開する |
-| `renga list [--status open\|pending\|in-progress\|done\|unknown] [--area <area>] [--label <label>]... [--not-label <label>]... [--milestone <milestone>] [--assignee <assignee>] [--json]` | issue 一覧を表示する（`--label` の繰り返しは AND、末尾の `*` は前方一致） |
+| `renga list [--status open\|pending\|in-progress\|done\|unknown] [--area <area>] [--label <label>]... [--not-label <label>]... [--milestone <milestone>] [--assignee <assignee>] [--json \| --count]` | issue 一覧を表示する（`--label` の繰り返しは AND、末尾の `*` は前方一致、`--count` は件数だけを出す） |
 | `renga show <ID> [--json]` | issue の詳細を表示する |
 | `renga edit <ID>` | `$EDITOR` で issue を開く（人間向け） |
 | `renga update <ID> [<タイトル>] [--priority ...] [--area ...] [--status ...] [--milestone ...] [--assignee ...] [--label ...]... [--add-label ...]... [--remove-label ...]... [--body <テキスト\|->]` | issue のフィールドを更新する（AI・スクリプト向け） |

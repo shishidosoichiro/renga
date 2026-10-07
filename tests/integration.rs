@@ -118,6 +118,32 @@ fn list_label_repeated_requires_all_labels() {
 }
 
 #[test]
+fn list_count_prints_only_the_number_and_exits_zero_when_empty() {
+    let dir = setup();
+    labelled_issues(&dir);
+    renga(&dir)
+        .args(["list", "--label", "bug", "--count"])
+        .assert()
+        .success()
+        .stdout("3\n");
+    renga(&dir)
+        .args(["list", "--label", "missing", "--count"])
+        .assert()
+        .success()
+        .stdout("0\n");
+}
+
+#[test]
+fn list_count_conflicts_with_json() {
+    let dir = setup();
+    renga(&dir)
+        .args(["list", "--count", "--json"])
+        .assert()
+        .code(2)
+        .stderr(predicate::str::contains("cannot be used with"));
+}
+
+#[test]
 fn list_single_label_still_matches_exactly() {
     let dir = setup();
     labelled_issues(&dir);

@@ -131,7 +131,7 @@ Report the destination file path to the user.
 Use `--json` when processing the result programmatically. Use plain output only when displaying directly to the user with no further processing.
 
 ```
-renga list [--status open|pending|in-progress|done|unknown] [--area <area>] [--label <label>]... [--not-label <label>]... [--milestone <milestone>] [--json]
+renga list [--status open|pending|in-progress|done|unknown] [--area <area>] [--label <label>]... [--not-label <label>]... [--milestone <milestone>] [--assignee <assignee>] [--json | --count]
 ```
 
 - `--status`: Comma-separated. Default shows open, pending, and in-progress.
@@ -140,6 +140,7 @@ renga list [--status open|pending|in-progress|done|unknown] [--area <area>] [--l
 - Prefer these flags over `--json | jq` for label conditions.
 - `--milestone`: Filter by milestone.
 - `--json`: Output as JSON for programmatic processing.
+- `--count`: Print only the number of matching issues. Exits 0 even when the number is 0, so compare the number: `[ "$(renga list --label inbox --count)" -eq 0 ]`. Prefer this over `--json | jq length`.
 
 ---
 
