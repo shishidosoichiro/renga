@@ -1,3 +1,9 @@
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    reason = "test code may unwrap; clippy.toml exempts only #[test] functions, not the shared helpers"
+)]
+
 use std::fs;
 
 use assert_cmd::Command;
