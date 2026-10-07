@@ -126,7 +126,7 @@ renga done <ID>...
 renga pending <ID>...
 renga in-progress <ID>...
 renga reopen <ID>...
-renga list [--status open|pending|in-progress|done|unknown] [--area <area>] [--label <label>] [--milestone <milestone>] [--assignee <assignee>] [--json]
+renga list [--status open|pending|in-progress|done|unknown] [--area <area>] [--label <label>]... [--not-label <label>]... [--milestone <milestone>] [--assignee <assignee>] [--json]
 renga show <ID> [--json]
 renga edit <ID>
 renga update <ID> [<title>] [--priority high|medium|low] [--area <area>] [--status open|pending|in-progress] [--milestone <milestone>] [--assignee <assignee>] [--label <label>]... [--add-label <label>]... [--remove-label <label>]... [--body <text|->]
@@ -140,6 +140,8 @@ renga help [command]
 ```
 
 `N` is the plain integer issue ID (e.g. `42`). Legacy zero-padded IDs (e.g. `00042`) are also accepted.
+
+`renga list --label` keeps issues that have the label; repeat it to require several labels (all must match). `--not-label` leaves out issues that have the label and can also be repeated; issues without any labels are kept. In both flags, a value ending in `*` matches every label that starts with the text before the `*` (e.g. `--label 'found_at:*'`); quote it so the shell does not expand the `*`. Any other value must match a label exactly. Because of this, a label must not end with `*`: `create` and `update` reject such labels, but `update --remove-label` still removes one that already exists.
 
 `renga create --json` reads one JSON object from stdin. Supported fields are
 `title` (required), `id`, `slug`, `priority`, `area`, `body`, `milestone`,

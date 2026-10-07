@@ -444,6 +444,9 @@ pub(crate) fn collect_issue_files(issues_dir: &Path) -> Vec<PathBuf> {
 /// `status_filter`:
 /// - `None` — return all issues regardless of status
 /// - `Some(statuses)` — return only issues whose status is in the slice
+///
+/// `label_filter` matches one label exactly. For several labels, prefixes, or
+/// excluded labels, pass `None` and filter the result with [`LabelFilter`].
 pub fn all_issues(
     issues_dir: &Path,
     status_filter: Option<&[Status]>,
@@ -612,17 +615,37 @@ pub fn make_slug(title: &str) -> String {
 ///
 /// # Errors
 ///
-/// Returns an error when `label` contains `,`, `[`, `]`, `{`, or `}`.
+/// Returns an error when `label` contains `,`, `[`, `]`, `{`, or `}`, or ends
+/// with `*`.
+///
+/// A trailing `*` is reserved for prefix matching in `renga list --label`, so
+/// a label ending in `*` could never be matched exactly.
 ///
 /// # Examples
 ///
 /// ```
 /// use renga::issue::validate_label;
 /// assert!(validate_label("bug").is_ok());
+/// assert!(validate_label("a*b").is_ok());
 /// assert!(validate_label("bug, urgent").is_err());
 /// assert!(validate_label("[invalid]").is_err());
+/// assert!(validate_label("rollback:*").is_err());
 /// ```
 pub fn validate_label(label: &str) -> Result<()> {
+    validate_label_chars(label)?;
+    if label.ends_with('*') {
+        anyhow::bail!(
+            "label '{label}' ends with '*', which is reserved for prefix matching in `renga list --label`"
+        );
+    }
+    Ok(())
+}
+
+/// Check only the characters that would break the inline YAML label list.
+///
+/// Used when removing a label, so a label that predates the trailing-`*`
+/// rule can still be removed.
+pub(crate) fn validate_label_chars(label: &str) -> Result<()> {
     for ch in [',', '[', ']', '{', '}'] {
         if label.contains(ch) {
             anyhow::bail!(
@@ -633,6 +656,51 @@ pub fn validate_label(label: &str) -> Result<()> {
         }
     }
     Ok(())
+}
+
+/// Label conditions for `renga list`: labels an issue must have and labels it
+/// must not have.
+///
+/// A pattern ending in `*` matches any label that starts with the text before
+/// the `*`; any other pattern must match a label exactly.
+///
+/// # Examples
+///
+/// ```
+/// use renga::issue::LabelFilter;
+/// let filter = LabelFilter::new(vec!["found_at:*".into()], vec!["wontfix".into()]);
+/// assert!(filter.matches(&["found_at:0.17.0".to_string()]));
+/// assert!(!filter.matches(&["found_at:0.17.0".to_string(), "wontfix".to_string()]));
+/// assert!(!filter.matches(&[]));
+/// ```
+#[derive(Debug, Default)]
+pub struct LabelFilter {
+    include: Vec<String>,
+    exclude: Vec<String>,
+}
+
+impl LabelFilter {
+    /// Build a filter from patterns that must all match (`include`) and
+    /// patterns none of which may match (`exclude`).
+    pub fn new(include: Vec<String>, exclude: Vec<String>) -> Self {
+        Self { include, exclude }
+    }
+
+    /// Whether an issue with these labels passes the filter.
+    ///
+    /// An issue without labels passes any filter that has no `include`
+    /// patterns.
+    pub fn matches(&self, labels: &[String]) -> bool {
+        let has = |pattern: &String| labels.iter().any(|l| label_matches(pattern, l));
+        self.include.iter().all(has) && !self.exclude.iter().any(has)
+    }
+}
+
+fn label_matches(pattern: &str, label: &str) -> bool {
+    match pattern.strip_suffix('*') {
+        Some(prefix) => label.starts_with(prefix),
+        None => label == pattern,
+    }
 }
 
 /// Reject an `area` value that would collide with a reserved status
@@ -1783,5 +1851,67 @@ mod tests {
     #[test]
     fn insert_type_field_leaves_content_without_frontmatter_unchanged() {
         assert_eq!(insert_type_field("# T\n"), "# T\n");
+    }
+
+    #[test]
+    fn all_issues_label_filter_matches_one_label_exactly() {
+        let dir = TempDir::new().unwrap();
+        let open = dir.path().join("open");
+        std::fs::create_dir_all(&open).unwrap();
+        std::fs::write(
+            open.join("1-a.md"),
+            "---\nstatus: open\nlabels: [bug]\n---\n\n# A\n",
+        )
+        .unwrap();
+        std::fs::write(
+            open.join("2-b.md"),
+            "---\nstatus: open\nlabels: [bug-report]\n---\n\n# B\n",
+        )
+        .unwrap();
+        let issues = all_issues(dir.path(), None, None, Some("bug"), None, None).unwrap();
+        assert_eq!(issues.len(), 1);
+        assert_eq!(issues[0].id, "1");
+    }
+
+    #[test]
+    fn label_filter_treats_inner_star_as_a_literal() {
+        let filter = LabelFilter::new(vec!["a*b".into()], vec![]);
+        assert!(filter.matches(&["a*b".to_string()]));
+        assert!(!filter.matches(&["axb".to_string()]));
+    }
+
+    #[test]
+    fn label_filter_without_patterns_matches_everything() {
+        let filter = LabelFilter::default();
+        assert!(filter.matches(&[]));
+        assert!(filter.matches(&["bug".to_string()]));
+    }
+
+    #[test]
+    fn label_filter_include_is_exact_unless_starred() {
+        let exact = LabelFilter::new(vec!["found_at".into()], vec![]);
+        assert!(!exact.matches(&["found_at:0.1.0".to_string()]));
+        let prefix = LabelFilter::new(vec!["found_at*".into()], vec![]);
+        assert!(prefix.matches(&["found_at:0.1.0".to_string()]));
+    }
+
+    #[test]
+    fn label_filter_include_requires_every_pattern() {
+        let filter = LabelFilter::new(vec!["a".into(), "b".into()], vec![]);
+        assert!(filter.matches(&["a".to_string(), "b".to_string()]));
+        assert!(!filter.matches(&["a".to_string()]));
+    }
+
+    #[test]
+    fn label_filter_exclude_passes_unlabelled_issues() {
+        let filter = LabelFilter::new(vec![], vec!["inbox".into()]);
+        assert!(filter.matches(&[]));
+        assert!(!filter.matches(&["inbox".to_string()]));
+    }
+
+    #[test]
+    fn validate_label_chars_allows_trailing_star() {
+        assert!(validate_label_chars("old*").is_ok());
+        assert!(validate_label_chars("a,b").is_err());
     }
 }

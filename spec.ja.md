@@ -126,7 +126,7 @@ renga done <ID>...
 renga pending <ID>...
 renga in-progress <ID>...
 renga reopen <ID>...
-renga list [--status open|pending|in-progress|done|unknown] [--area <area>] [--label <label>] [--milestone <milestone>] [--assignee <assignee>] [--json]
+renga list [--status open|pending|in-progress|done|unknown] [--area <area>] [--label <label>]... [--not-label <label>]... [--milestone <milestone>] [--assignee <assignee>] [--json]
 renga show <ID> [--json]
 renga edit <ID>
 renga update <ID> [<title>] [--priority high|medium|low] [--area <area>] [--status open|pending|in-progress] [--milestone <milestone>] [--assignee <assignee>] [--label <label>]... [--add-label <label>]... [--remove-label <label>]... [--body <text|->]
@@ -140,6 +140,8 @@ renga help [command]
 ```
 
 `N` はゼロ埋めなしの整数 ID（例: `42`）。レガシーのゼロ埋め ID（例: `00042`）も受け付ける。
+
+`renga list --label` は、そのラベルを持つ issue に絞り込む。繰り返し指定すると、すべてのラベルを持つ issue に絞り込む（AND）。`--not-label` は、そのラベルを持つ issue を除く。こちらも繰り返し指定でき、ラベルを1つも持たない issue は残る。どちらのフラグでも、値が `*` で終わると、`*` より前の文字列で始まるラベルすべてに一致する（例: `--label 'found_at:*'`）。シェルが `*` を展開しないよう、引用符で囲む。それ以外の値は、ラベルと完全に一致したものだけに一致する。このため、ラベルは `*` で終わってはならない。`create`・`update` はそのようなラベルを拒否する。ただし、すでにあるラベルは `update --remove-label` で外せる。
 
 `renga create --json` は標準入力から 1 つの JSON object を読む。対応フィールドは
 `title`（必須）、`id`、`slug`、`priority`、`area`、`body`、`milestone`、`assignee`、`labels`。

@@ -171,9 +171,17 @@ pub struct ListArgs {
     /// Filter by area.
     #[arg(long)]
     pub area: Option<String>,
-    /// Filter by label.
+    /// Only list issues that have this label (repeatable, all must match).
+    ///
+    /// A trailing `*` matches by prefix, e.g.
+    /// `--label 'found_at:*'`; quote it so the shell does not expand it.
     #[arg(long)]
-    pub label: Option<String>,
+    pub label: Vec<String>,
+    /// Leave out issues that have this label (repeatable).
+    ///
+    /// A trailing `*` matches by prefix. Issues without any labels are kept.
+    #[arg(long)]
+    pub not_label: Vec<String>,
     /// Filter by milestone.
     #[arg(long)]
     pub milestone: Option<String>,

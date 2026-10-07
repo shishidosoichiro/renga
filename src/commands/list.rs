@@ -5,7 +5,7 @@ use serde::Serialize;
 
 use crate::{
     cli::ListArgs,
-    issue::{all_issues, Priority, Status},
+    issue::{all_issues, LabelFilter, Priority, Status},
     Context,
 };
 
@@ -25,14 +25,18 @@ pub fn run(args: ListArgs, ctx: &Context) -> Result<()> {
         None => vec![Status::Open, Status::Pending, Status::InProgress],
     };
 
-    let issues = all_issues(
+    let label_filter = LabelFilter::new(args.label, args.not_label);
+    let issues: Vec<_> = all_issues(
         &ctx.issues_dir,
         Some(&status_filter),
         args.area.as_deref(),
-        args.label.as_deref(),
+        None,
         args.milestone.as_deref(),
         args.assignee.as_deref(),
-    )?;
+    )?
+    .into_iter()
+    .filter(|i| label_filter.matches(&i.labels))
+    .collect();
 
     if args.json {
         #[derive(Serialize)]

@@ -42,7 +42,6 @@ Closed issues are moved to `done/`.
 | [153](open/153-clap-complete-unstable-dynamic.md) | open | low | clap_complete unstable-dynamic が stable になったら __complete と手書きシェルスクリプトを置き換えを検討する |
 | [167](open/167-split-complete-update-test.md) | open | low | complete_update_shows_open_issues_and_flags を2つのテストに分割する |
 | [228](open/228-feat-add-append-to-renga-update-for-appending-text-to-issue-body.md) | open | medium | feat: add --append to renga update for appending text to issue body |
-| [264](open/264-list-label-で前方一致-否定-複数指定をできるようにする.md) | open | medium | list --label で前方一致・否定・複数指定をできるようにする |
 | [266](open/266-list-に件数だけを返すオプションを足す.md) | open | low | list に件数だけを返すオプションを足す |
 
 ---

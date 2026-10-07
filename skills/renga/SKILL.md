@@ -70,7 +70,7 @@ renga create --json
 - `--slug`: Kebab-case English slug derived from the title (max 30 chars). Auto-generated from title if omitted.
 - `--area`: Infer from context. Use `misc` if unclear.
 - `--priority`: Default is `medium`. Use `high` for correctness issues, `low` for suggestions.
-- `--label`: Labels to attach (repeatable: `--label bug --label urgent`).
+- `--label`: Labels to attach (repeatable: `--label bug --label urgent`). A label must not end with `*`.
 - `--body`: **Always include.** Write a brief description of what needs to be done and why. The title alone is not sufficient.
 - `--dir`: Pass `--dir=true` to store the issue as a directory (`N-slug/README.md`) so attachments or notes can live alongside it. Defaults to the flat `N-slug.md` file.
 - `--json`: Read one JSON object from stdin. Supported fields are `title`, `id`, `slug`, `priority`, `area`, `body`, `milestone`, and `labels`. Do not combine with field arguments.
@@ -131,11 +131,13 @@ Report the destination file path to the user.
 Use `--json` when processing the result programmatically. Use plain output only when displaying directly to the user with no further processing.
 
 ```
-renga list [--status open|pending|in-progress|done|unknown] [--area <area>] [--label <label>] [--milestone <milestone>] [--json]
+renga list [--status open|pending|in-progress|done|unknown] [--area <area>] [--label <label>]... [--not-label <label>]... [--milestone <milestone>] [--json]
 ```
 
 - `--status`: Comma-separated. Default shows open, pending, and in-progress.
-- `--label`: Filter by label.
+- `--label`: Keep issues with this label. Repeat to require several labels (all must match). A trailing `*` matches by prefix: `--label 'found_at:*'` (quote it).
+- `--not-label`: Leave out issues with this label. Repeatable; a trailing `*` matches by prefix. Issues without labels are kept.
+- Prefer these flags over `--json | jq` for label conditions.
 - `--milestone`: Filter by milestone.
 - `--json`: Output as JSON for programmatic processing.
 
@@ -174,7 +176,7 @@ Updates issue fields without opening an editor. Designed for AI agents and scrip
 - `<title>`: Optional positional argument. Updates the `# Heading` line in the body.
 - `--body`: Replaces the body. If the new body has no `# Heading`, the existing title is automatically preserved.
 - `--body -` reads the new body from stdin, allowing the agent to pipe modified content
-- `--label` is repeatable and **replaces** all existing labels
+- `--label` is repeatable and **replaces** all existing labels. A label must not end with `*`; an existing one can still be removed with `--remove-label`
 - `--add-label` adds a label without removing others (repeatable, deduplicates automatically)
 - `--remove-label` removes a specific label (repeatable)
 - `--dir` converts the issue between layouts. `--dir=true` expands a flat `N-slug.md` file into a `N-slug/README.md` directory; `--dir=false` collapses it back (fails if the directory holds files other than `README.md`)

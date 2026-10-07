@@ -10,7 +10,7 @@ use crate::{
     issue::{
         convert_flat_to_dir, find_editable_issue, is_dir_based, issue_root, relocate_issue,
         remove_frontmatter_field, replace_or_prepend_heading, set_frontmatter_field,
-        split_frontmatter, validate_area_for_group_by, validate_label, Issue,
+        split_frontmatter, validate_area_for_group_by, validate_label, validate_label_chars, Issue,
     },
     readme, Context, FbimError,
 };
@@ -115,7 +115,7 @@ pub fn run(args: UpdateArgs, ctx: &Context) -> Result<()> {
             validate_label(l)?;
         }
         for l in &input.remove_labels {
-            validate_label(l)?;
+            validate_label_chars(l)?;
         }
         let issue = Issue::parse(&path, &content)?;
         let mut labels = issue.labels.clone();

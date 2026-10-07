@@ -89,6 +89,154 @@ fn create_without_issues_dir_fails() {
 
 // ── list ─────────────────────────────────────────────────────────────────────
 
+fn labelled_issues(dir: &TempDir) {
+    for (title, labels) in [
+        ("Both", &["bug", "found_at:0.17.0"][..]),
+        ("Bug only", &["bug"][..]),
+        ("Inbox bug", &["bug", "inbox"][..]),
+        ("No labels", &[][..]),
+    ] {
+        let mut cmd = renga(dir);
+        cmd.arg("create").arg(title);
+        for l in labels {
+            cmd.args(["--label", l]);
+        }
+        cmd.assert().success();
+    }
+}
+
+#[test]
+fn list_label_repeated_requires_all_labels() {
+    let dir = setup();
+    labelled_issues(&dir);
+    renga(&dir)
+        .args(["list", "--label", "bug", "--label", "found_at:0.17.0"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Both"))
+        .stdout(predicate::str::contains("Bug only").not());
+}
+
+#[test]
+fn list_single_label_still_matches_exactly() {
+    let dir = setup();
+    labelled_issues(&dir);
+    renga(&dir)
+        .args(["list", "--label", "found_at"])
+        .assert()
+        .success()
+        .stdout(predicate::str::is_empty());
+}
+
+#[test]
+fn list_label_with_trailing_star_matches_prefix() {
+    let dir = setup();
+    labelled_issues(&dir);
+    renga(&dir)
+        .args(["list", "--label", "found_at:*"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Both"))
+        .stdout(predicate::str::contains("Bug only").not());
+}
+
+#[test]
+fn list_not_label_excludes_and_keeps_unlabelled_issues() {
+    let dir = setup();
+    labelled_issues(&dir);
+    renga(&dir)
+        .args(["list", "--not-label", "inbox"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Inbox bug").not())
+        .stdout(predicate::str::contains("No labels"))
+        .stdout(predicate::str::contains("Bug only"));
+}
+
+#[test]
+fn list_combines_label_and_not_label() {
+    let dir = setup();
+    labelled_issues(&dir);
+    renga(&dir)
+        .args([
+            "list",
+            "--label",
+            "bug",
+            "--not-label",
+            "inbox",
+            "--not-label",
+            "found_at:*",
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Bug only"))
+        .stdout(predicate::str::contains("Both").not())
+        .stdout(predicate::str::contains("Inbox bug").not());
+}
+
+#[test]
+fn create_rejects_label_ending_with_star() {
+    let dir = setup();
+    renga(&dir)
+        .args(["create", "Starred", "--label", "rollback:*"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("reserved for prefix matching"));
+}
+
+#[test]
+fn update_and_json_create_reject_labels_ending_with_star() {
+    let dir = setup();
+    renga(&dir).args(["create", "Plain"]).assert().success();
+    renga(&dir)
+        .args(["update", "1", "--add-label", "x*"])
+        .assert()
+        .failure();
+    renga(&dir)
+        .args(["update", "1", "--label", "x*"])
+        .assert()
+        .failure();
+    renga(&dir)
+        .args(["create", "--json"])
+        .write_stdin(r#"{"title": "J", "labels": ["x*"]}"#)
+        .assert()
+        .failure();
+}
+
+#[test]
+fn list_star_alone_selects_labelled_and_not_label_star_selects_unlabelled() {
+    let dir = setup();
+    labelled_issues(&dir);
+    renga(&dir)
+        .args(["list", "--label", "*"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("No labels").not())
+        .stdout(predicate::str::contains("Bug only"));
+    renga(&dir)
+        .args(["list", "--not-label", "*"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("No labels"))
+        .stdout(predicate::str::contains("Bug only").not());
+}
+
+#[test]
+fn update_can_remove_a_legacy_label_ending_with_star() {
+    let dir = setup();
+    fs::write(
+        dir.path().join("issues/open/1-legacy.md"),
+        "---\nstatus: open\nlabels: [old*, keep]\n---\n\n# Legacy\n",
+    )
+    .unwrap();
+    renga(&dir)
+        .args(["update", "1", "--remove-label", "old*"])
+        .assert()
+        .success();
+    let content = fs::read_to_string(dir.path().join("issues/open/1-legacy.md")).unwrap();
+    assert!(content.contains("labels: [keep]"));
+}
+
 #[test]
 fn list_shows_open_issues() {
     let dir = setup();
