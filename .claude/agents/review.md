@@ -12,13 +12,15 @@ tools: Read, Glob, Grep, Bash, Write
 
 ### 1. コード品質
 
-- `cargo clippy -- -D warnings` が通るか
-- `cargo fmt --check` が通るか
-- `cargo test` が全件通るか
-- `cargo llvm-cov --summary-only` でカバレッジを確認する
-- `cargo doc --no-deps` がエラーなく通るか（`#![deny(missing_docs)]` 違反がないか）
-- `unwrap()` / `expect()` がテスト外で使われていないか
-- 過剰な抽象化・不要な複雑さがないか（タスクに必要な最小限の実装か）
+CONTRIBUTING.md の Code quality 節に従う。レビュー対象のコード（差分のレビューなら差分、全体レビューならコード全体）を、リンク先の Google のガイドの観点ごとに見る。観点と問いは一次資料を読んで確かめる。公開ライブラリ API が変わるときだけ Rust API Guidelines も当てる。
+
+機械で判定する項目は、コマンドを実行して確かめる。
+
+- `cargo clippy --all-targets -- -D warnings`
+- `cargo fmt --check`
+- `cargo test`
+- `cargo llvm-cov --summary-only`
+- `cargo doc --no-deps`
 
 ### 2. CLI ↔ 仕様の整合性
 

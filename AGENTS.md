@@ -50,22 +50,9 @@ Codex でサブエージェントまたは custom agent が利用可能な場合
 File-Based Issue Management。詳細仕様は `spec.ja.md`、コードの地図と不変条件は `ARCHITECTURE.md` を参照。
 `skills/` はエージェントスキルの配布用ディレクトリ（`~/.claude/skills/` または `~/.agents/skills/` にシンボリックリンクして使う）。インストール方法・コマンド一覧は `README.md` の "Claude Code skill" セクションを参照。
 
-## エラーハンドリング
+## コード規約
 
-- `unwrap()` / `expect()` はテストコード以外で使わない
-- ユーザー向けエラーメッセージは `error:` プレフィックスで stderr に出力し、exit code 1 で終了する
-- ドメインエラーは `thiserror`、アプリエラーは `anyhow` で扱う
-
-## ドキュメント
-
-- `src/lib.rs` に `#![deny(missing_docs)]` を置く。公開アイテムへの doc コメント漏れをコンパイルエラーにする
-- 公開アイテムには `///` で doc コメントを付け、`# Examples` セクションを書いて doctest にする
-- 非公開アイテムは WHY が自明でない場合のみ `//` で書く
-
-## テスト方針
-
-- ファイルシステムを伴うテストは `tempfile::TempDir` を使う。モックは使わない
-- 統合テストは `tests/` に置く
+コード品質の指針と Renga 固有のコード規約は CONTRIBUTING.md の Code quality 節に従う。
 
 ## 後方互換
 
@@ -92,7 +79,7 @@ File-Based Issue Management。詳細仕様は `spec.ja.md`、コードの地図�
 
 1. 実装 + テスト追加
 2. カバレッジ確認（`cargo llvm-cov --summary-only`）
-3. **コミット前に** review / reviewer 相当のサブエージェントでコードレビューを受ける。利用可能なレビュー用サブエージェントがない場合のみ、その理由を明記してセルフレビューする。観点: 正確性・テストカバレッジ・clippy/fmt・公開アイテムの doc コメント・生成される `CHANGELOG.md` の読みやすさ。レビュー観点にはカバレッジ確認（`cargo llvm-cov --summary-only`）を含める
+3. **コミット前に** review / reviewer 相当のサブエージェントでコードレビューを受ける。利用可能なレビュー用サブエージェントがない場合のみ、その理由を明記してセルフレビューする。観点: CONTRIBUTING.md の Code quality 節・生成される `CHANGELOG.md` の読みやすさ。レビュー観点にはカバレッジ確認（`cargo llvm-cov --summary-only`）を含める
 4. レビュー指摘を分類する（判定基準: 「このバグは今回変更したコードに由来するか？」）。issue 化するときのラベルは「バグ issue のラベル規約」に従う
    - **今回の実装で入ったバグ**（新規追加ファイルや今回変更した箇所に起因）→ コミット前に修正し feature コミットに含める
    - **以前のバージョンから存在していたバグ** → コミット後に別の `fix:` コミットで修正する

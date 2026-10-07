@@ -20,7 +20,6 @@ Closed issues are moved to `done/`.
 | [198](open/198-retro-update-edit-done-issue.md) | open | medium | retro: update/edit の done issue 操作方針で反証を出さずに同意した |
 | [201](open/201-codex-agents-agents-md.md) | open | medium | .codex/ .agents/ にサブエージェントが未定義 — AGENTS.md が参照しているが実体がない |
 | [273](open/273-improve-unverified-premise.md) | open | high | improve: unverified-premise |
-| [277](open/277-コード品質の指針を-contributing-md-に置き-rust-code-md-を固有の.md) | open | medium | コード品質の指針を CONTRIBUTING.md に置き、rust-code.md を固有の決定だけにする |
 
 ---
 
@@ -29,6 +28,7 @@ Closed issues are moved to `done/`.
 | # | status | priority | title |
 |---|---|---|---|
 | [260](open/260-ci-release-workflow-s-macos-13-build-job-never-starts-and-times-out-after-24h.md) | open | medium | ci: release workflow's macos-13 build job never starts and times out after 24h |
+| [278](open/278-ci-の-clippy-を-all-targets-で実行する.md) | open | medium | CI の clippy を --all-targets で実行する |
 
 ---
 

@@ -33,7 +33,7 @@ File-Based Issue Management。詳細仕様は `spec.ja.md` を参照。
 ## 実装フロー・コード規約（詳細は自動読み込み）
 
 - コミット手順・レビュー指摘の分類・feat / fix / fixup の判断・ドキュメント更新ルール（ARCHITECTURE.md の同期を含む）は `/commit` スキル（`.claude/skills/commit/SKILL.md`）に従う
-- Rust コード規約（エラーハンドリング・doc コメント・テスト方針）は `src/`・`tests/` の編集時に自動読み込みされる（`.claude/rules/rust-code.md`）
+- コード品質の指針と Renga 固有のコード規約は CONTRIBUTING.md の Code quality 節に従う
 - リリース手順は `/release` スキルと CONTRIBUTING.md の Releasing 節に従う
 
 ## 後方互換
