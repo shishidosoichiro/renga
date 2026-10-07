@@ -11,9 +11,9 @@ labels: [retro]
 
 ## 背景
 
-kiwi/agents/CLAUDE.md（retro #381）にある「リリース前 fixup フロー」が renga リポジトリの CLAUDE.md・.claude・CONTRIBUTING.md に反映されていない。
+別の運用で使っている「リリース前 fixup フロー」が renga リポジトリの CLAUDE.md・.claude・CONTRIBUTING.md に反映されていない。
 
-## kiwi/agents 側の方針
+## 取り込む方針
 
 - feat / fix / fixup の使い分け表（開発中＝前タグ以降に追加したコードへの手直しは fixup!、リリース済みコードのバグ修正は fix:）
 - リリース前 fixup フロー: git commit --fixup <SHA> で積み、タグ前に git rebase -i --autosquash で統合
@@ -26,4 +26,4 @@ CLAUDE.md 実装フローは「今回の実装で入ったバグ→feature コ�
 
 ## やること
 
-self-improve 経由で、kiwi/agents の fixup 方針を renga の実績・用語に合わせて CLAUDE.md（実装フロー / コミット粒度）と CONTRIBUTING.md（Commit messages / Releasing）に転記する。英語版ドキュメント（CONTRIBUTING.md）と日本語（CLAUDE.md）の整合を取る。
+self-improve 経由で、この fixup 方針を renga の実績・用語に合わせて CLAUDE.md（実装フロー / コミット粒度）と CONTRIBUTING.md（Commit messages / Releasing）に転記する。英語版ドキュメント（CONTRIBUTING.md）と日本語（CLAUDE.md）の整合を取る。

@@ -20,7 +20,7 @@ grep -rn "ADR" --include="*.md" .   # ヒットなし（issues/ 以外）
 find . -iname "*adr*"               # ADR ドキュメントは存在しない
 ```
 
-kiwi モノレポの architect エージェント（`docs/arch/` に ADR を書く）の慣習を
+ADR を書く運用をしている別のプロジェクトの慣習を
 持ち込んでしまった可能性がある。renga/fbim にはそのような ADR 運用は無い。
 
 設計判断の経緯自体は issue #214 の本文（「検討の経緯と決定」節）に詳しく記録されている。
