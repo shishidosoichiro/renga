@@ -356,9 +356,10 @@ pub fn find_active_issue(issues_dir: &Path, id: &str) -> Result<Option<ActiveIss
 /// (frontmatter `status: done`, correctly stored under `done/`). This lets
 /// field edits (labels, assignee, milestone, body, title) remain possible on
 /// closed issues without requiring `reopen` first, following GitHub/GitLab/Jira
-/// convention. Status *transition* commands (`done`, `pending`, `in-progress`,
-/// `reopen`) must keep calling [`find_active_issue`] directly so they stay
-/// restricted to active issues.
+/// convention. The status *transition* commands `done`, `pending`, and
+/// `in-progress` must keep calling [`find_active_issue`] directly so they stay
+/// restricted to active issues; `reopen` targets done issues and uses
+/// [`find_issue`] instead.
 ///
 /// The misplaced-file warning behavior of [`find_active_issue`] is preserved
 /// unchanged; no warning is emitted for a normal done issue since its directory
