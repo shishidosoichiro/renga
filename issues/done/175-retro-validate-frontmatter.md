@@ -1,7 +1,7 @@
 ---
 type: Issue
 schema_version: 1
-status: open
+status: done
 priority: medium
 area: agent
 labels: [retro, unverified-premise]
