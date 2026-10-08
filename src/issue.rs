@@ -262,11 +262,19 @@ impl Issue {
 /// The `id` argument is parsed as an integer so both `"42"` and `"00042"` match
 /// the same file. When `include_done` is `false`, files under the `done/`
 /// subtree are skipped.
+///
+/// Entries are visited in file-name order, so when several files share an ID
+/// the same one is returned on every filesystem: within one parent directory
+/// `done/` comes before `open/`, which lets `reopen` see the done copy and
+/// report the collision.
 pub fn find_issue(issues_dir: &Path, id: &str, include_done: bool) -> Result<Option<PathBuf>> {
     let num: u64 = id
         .parse()
         .with_context(|| format!("invalid issue ID: {id}"))?;
-    let mut it = WalkDir::new(issues_dir).min_depth(1).into_iter();
+    let mut it = WalkDir::new(issues_dir)
+        .min_depth(1)
+        .sort_by_file_name()
+        .into_iter();
     while let Some(entry) = it.next() {
         let entry = entry?;
         let name = entry.file_name().to_string_lossy().into_owned();
@@ -421,7 +429,12 @@ fn is_area_dir(entry: &DirEntry) -> bool {
 /// regardless of nesting depth above the status directory.
 pub(crate) fn collect_issue_files(issues_dir: &Path) -> Vec<PathBuf> {
     let mut files = Vec::new();
-    let mut it = WalkDir::new(issues_dir).min_depth(1).into_iter();
+    // Sorted so that issues sharing an ID keep the same relative order on
+    // every filesystem (callers sort by ID with a stable sort).
+    let mut it = WalkDir::new(issues_dir)
+        .min_depth(1)
+        .sort_by_file_name()
+        .into_iter();
     while let Some(entry) = it.next() {
         let Ok(entry) = entry else { continue };
         if is_dir_based_issue(&entry) {
@@ -2063,5 +2076,19 @@ mod tests {
         assert!(validate_label("a\nb").is_err());
         assert!(validate_label("a\rb").is_err());
         assert!(validate_label_chars("a\nb").is_err());
+    }
+
+    #[test]
+    fn find_issue_prefers_the_first_match_in_file_name_order() {
+        // Regardless of the order the filesystem lists entries in, a duplicate
+        // ID under done/ is found before the one under open/.
+        let dir = TempDir::new().unwrap();
+        for status in ["open", "done"] {
+            let d = dir.path().join("core").join(status);
+            std::fs::create_dir_all(&d).unwrap();
+            std::fs::write(d.join("1-foo.md"), "---\nstatus: open\n---\n\n# Foo\n").unwrap();
+        }
+        let found = find_issue(dir.path(), "1", true).unwrap().unwrap();
+        assert!(found.ends_with("core/done/1-foo.md"), "{}", found.display());
     }
 }
