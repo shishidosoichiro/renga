@@ -21,6 +21,9 @@ body = """
         - [`{{ commit.id | truncate(length=7, end="") }}`] {% if commit.scope %}*({{ commit.scope }})* {% endif %}\
             {% if commit.breaking %}[**breaking**] {% endif %}\
             {{ commit.message | upper_first }}\
+            {% if commit.breaking and commit.breaking_description != commit.message %}
+{{ "  " }}- {{ commit.breaking_description | replace(from="\n", to=" ") | upper_first }}\
+            {% endif %}\
     {% endfor %}
 {% endfor %}
 """
