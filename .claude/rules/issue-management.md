@@ -15,7 +15,7 @@ paths:
 | `test` | テストの追加・修正 |
 | `docs` | ドキュメント・README・CONTRIBUTING |
 | `ci` | CI/CD パイプライン |
-| `agent` | CLAUDE.md・AGENTS.md・`.claude/` の変更・retro・改善 issue |
+| `agent` | AGENTS.md・CLAUDE.md・`.claude/` の変更・retro・改善 issue |
 | `misc` | 上記に当てはまらないもの |
 
 ## バグ issue のラベル規約

@@ -1,6 +1,6 @@
 ---
 name: agent-config-reviewer
-description: self-improve が加えた CLAUDE.md・AGENTS.md・.claude/・skills/ の変更を、新鮮なコンテキストでレビューする。明示的呼び出しのみ。
+description: self-improve が加えた AGENTS.md・.claude/・skills/ の変更を、新鮮なコンテキストでレビューする。明示的呼び出しのみ。
 tools: Read, Glob, Grep, Bash
 ---
 
@@ -24,18 +24,18 @@ tools: Read, Glob, Grep, Bash
 ### Step 2: git diff で変更内容を確認する
 
 ```bash
-git diff HEAD~1 HEAD -- CLAUDE.md AGENTS.md .claude/ skills/
+git diff HEAD~1 HEAD -- AGENTS.md CLAUDE.md .claude/ skills/
 ```
 
 変更がまだコミットされていない場合:
 
 ```bash
-git diff -- CLAUDE.md AGENTS.md .claude/ skills/
+git diff -- AGENTS.md CLAUDE.md .claude/ skills/
 ```
 
 ### Step 3: 変更後のファイルをすべて読む
 
-- `CLAUDE.md`・`AGENTS.md`
+- `AGENTS.md`
 - `.claude/` 配下の agents・skills・rules・hooks
 - `skills/` 配下の全 `SKILL.md`
 
@@ -59,7 +59,7 @@ retro・承認済みの issue・git log のどれにも登場しないパター�
 
 変更後の記述が以下と矛盾しないか確認する:
 
-- `CLAUDE.md`・`AGENTS.md` の他の記述
+- `AGENTS.md` の他の記述
 - `.claude/` 配下の agents・skills・rules・hooks
 - `skills/` 配下の SKILL.md
 - `CONTRIBUTING.md`
@@ -88,7 +88,7 @@ retro・承認済みの issue・git log・重複先のファイルに根拠が�
 
 #### 観点 8: 純増0
 
-CLAUDE.md・AGENTS.md の文字数が増えていないか確かめる（未コミットなら `git show HEAD:CLAUDE.md | wc -m` と `wc -m CLAUDE.md`、コミット済みなら `HEAD~1` と `HEAD` を比べる。AGENTS.md も同じ）。
+AGENTS.md の文字数が増えていないか確かめる（未コミットなら `git show HEAD:AGENTS.md | wc -m` と `wc -m AGENTS.md`、コミット済みなら `HEAD~1` と `HEAD` を比べる）。
 
 ## 出力形式
 

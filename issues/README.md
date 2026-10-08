@@ -19,6 +19,7 @@ Closed issues are moved to `done/`.
 | [201](open/201-codex-agents-agents-md.md) | open | medium | .codex/ .agents/ にサブエージェントが未定義 — AGENTS.md が参照しているが実体がない |
 | [279](open/279-retro-self-improve-がセッション開始時の古い-claude-md-を見て-直.md) | open | medium | retro: self-improve がセッション開始時の古い CLAUDE.md を見て、直っている指示を古いと判断した |
 | [280](open/280-retro-issue-の起票-close-だけのコミットを10個積み-push-前のコ.md) | open | medium | retro: issue の起票・close だけのコミットを10個積み、push 前のコミットが29個に膨らんだ |
+| [283](open/283-codex-用の-custom-agent-定義を-codex-agents-に置き-claude-agents-の定.md) | open | medium | Codex 用の custom agent 定義を .codex/agents/ に置き、.claude/agents/ の定義を参照させる |
 
 ---
 

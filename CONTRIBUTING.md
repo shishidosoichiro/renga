@@ -66,7 +66,7 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/). The type is
 | `ci` | CI/CD pipeline changes |
 | `chore` | Maintenance (deps, release prep, etc.) |
 
-**Agent-internal changes** (`scope: agent`) — changes to `CLAUDE.md`, `.claude/agents/`, or Claude Code skills that have no effect on the CLI or library. Use `chore(agent):` so git-cliff excludes them from the changelog automatically. Do not use `feat(agent):` or `refactor(agent):` for these changes.
+**Agent-internal changes** (`scope: agent`) — changes to `AGENTS.md`, `CLAUDE.md`, `.claude/agents/`, or Claude Code skills that have no effect on the CLI or library. Use `chore(agent):` so git-cliff excludes them from the changelog automatically. Do not use `feat(agent):` or `refactor(agent):` for these changes.
 
 **Breaking changes** — add `!` after the type (`feat!:`) or add a `BREAKING CHANGE:` footer. Include migration steps in the commit body.
 

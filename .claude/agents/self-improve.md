@@ -1,12 +1,12 @@
 ---
 name: self-improve
-description: CLAUDE.md・AGENTS.md・.claude/・skills/ の改善。改善 issue（同じ型の retro の束）か承認済みの area: agent issue を受け取り、出口を選んで編集する。推測的変更は行わない。明示的呼び出しのみ。
+description: AGENTS.md・.claude/・skills/ の改善。改善 issue（同じ型の retro の束）か承認済みの area: agent issue を受け取り、出口を選んで編集する。推測的変更は行わない。明示的呼び出しのみ。
 tools: Read, Glob, Grep, Write, Edit, Bash, WebFetch, Agent
 ---
 
 # 自己改善モード
 
-**目的**: 実際に起きたことを根拠として CLAUDE.md・AGENTS.md・`.claude/`・`skills/` を改善する。経験のない推測的な変更は行わない。
+**目的**: 実際に起きたことを根拠として AGENTS.md・`.claude/`・`skills/` を改善する。経験のない推測的な変更は行わない。
 
 ## 前提: 主エージェントが issue を起票してから呼ぶ
 
@@ -27,7 +27,7 @@ tools: Read, Glob, Grep, Write, Edit, Bash, WebFetch, Agent
 
 ### Step 2: 指示ファイルをすべて読む
 
-- `CLAUDE.md`・`AGENTS.md`
+- `AGENTS.md`（`CLAUDE.md` は AGENTS.md を import するだけ）
 - `CONTRIBUTING.md`
 - `.claude/` 配下の agents・skills・rules・hooks
 - `skills/` 配下の全 SKILL.md
@@ -61,12 +61,12 @@ https://code.claude.com/docs/en/sub-agents.md
 
 1. 既存のルールは読まれていたか。読まれていたのに守られなかったなら、文を足しても効かない。置き場所を変えるか、機械で止める
 2. 機械で判定できるか。できるなら hook・テスト・CLI の機能を先に検討する
-3. 誰が、いつ、その知識を要るか。特定の工程だけなら、その工程のスキルか `paths` 付きの rules に置く。全セッションで要るものだけ CLAUDE.md・AGENTS.md に置く
+3. 誰が、いつ、その知識を要るか。特定の工程だけなら、その工程のスキルか `paths` 付きの rules に置く。全セッションで要るものだけ AGENTS.md に置く
 
-出口: 何もしない／既存の記述を直す・消す／スキル／rules／hook／テスト／CLI の機能（`renga create` で別 issue にする）／CLAUDE.md・AGENTS.md
+出口: 何もしない／既存の記述を直す・消す／スキル／rules／hook／テスト／CLI の機能（`renga create` で別 issue にする）／AGENTS.md
 
 - **根拠は観測から引く**: retro の「観測」節と git log を根拠にする。「推測」節だけを根拠にしない
-- **CLAUDE.md・AGENTS.md は純増0**: 変更前後の `wc -m` を報告に書く。増えるなら同じ変更の中で削る
+- **AGENTS.md は純増0**: 変更前後の `wc -m` を報告に書く。増えるなら同じ変更の中で削る
 - **削除も行う**: 実態と乖離した記述は修正または削除する
 - **記述は最小限にとどめる**: 一文で表現できる規則に手順書・表・複数段落を与えない
 
@@ -83,7 +83,6 @@ https://code.claude.com/docs/en/sub-agents.md
 - yyy（理由・再検討の条件）
 
 ### wc -m
-- CLAUDE.md: <前> → <後>
 - AGENTS.md: <前> → <後>
 ```
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 # PreToolUse hook (matcher: Bash)
 # git commit 呼び出し内の --no-verify / -n を検出してブロックする（retro #226）。
-# CLAUDE.md 判断方針「--no-verify を使わない」の決定論的な強制。
+# AGENTS.md 判断方針「--no-verify を使わない」の決定論的な強制。
 # permissions の deny ルールはフラグ順序が変わると素通りするため hook で実装している。
 #
 # 検査手順: 実フラグは引用符・heredoc の外にしか現れないため、
@@ -44,7 +44,7 @@ while IFS= read -r segment; do
   if printf '%s\n' "$segment" | grep -qE '(^|[[:space:];&|])git([[:space:]]+-[^[:space:]]*([[:space:]]+[^-[:space:]][^[:space:]]*)?)*[[:space:]]+commit([[:space:]]|$)'; then
     # --no-verify、単独の -n、短縮フラグ結合形（-anm 等）の n を検出する
     if printf '%s\n' "$segment" | grep -qE '(^|[[:space:]])(--no-verify(=[^[:space:]]*)?|-[a-zA-Z]*n[a-zA-Z]*)([[:space:]]|$)'; then
-      echo "git commit の --no-verify / -n は禁止されています。pre-commit フックの失敗は回避せず、根本原因を修正してからコミットしてください（CLAUDE.md 判断方針）。" >&2
+      echo "git commit の --no-verify / -n は禁止されています。pre-commit フックの失敗は回避せず、根本原因を修正してからコミットしてください（AGENTS.md 判断方針）。" >&2
       exit 2
     fi
   fi

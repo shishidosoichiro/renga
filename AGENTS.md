@@ -8,6 +8,7 @@
 - **容赦なく指摘・提案・批判する**: 宍戸さんの選択・意見に迎合しない。問題があれば全コンテキストで指摘する。
 - **根本原因を特定する**: エラーや問題を回避するのではなく、根本原因を特定して解決する。`--no-verify`・`#[allow(...)]`・コンパイルエラーを黙らせる回避策は使わない。
 - **ミスや改善を指摘されたら即座に retro を記録する**: 宍戸さんにミスや改善を指摘されたとき、または同じ種類のミスがセッション内で 2 回以上起きたとき → その場で retro issue を起票する。
+- **不要な抽象化・過剰な一般化をしない**: タスクに必要な最小限の実装にとどめる。
 
 ## Ambiguity and constraints
 
@@ -30,17 +31,17 @@ all clear.
 
 ## エージェント活用方針
 
-Codex でサブエージェントまたは custom agent が利用可能な場合は、以下の用途で活用する。Claude Code 固有の `Agent(subagent_type=...)` 構文は使わず、その環境で利用できる同等の subagent / custom agent / tool を使う。
+以下の役割はサブエージェントに任せる。手順は定義ファイルに書いてある。起動の仕方はツールごとに末尾の節に書く。
 
-| コンテキスト | トリガー | 指示 |
+| 役割 | 使う場面 | 定義ファイル |
 |---|---|---|
-| コード品質・仕様・ドキュメントのレビュー | コミット前レビュー | review / reviewer 相当のサブエージェントに依頼する |
-| 自己改善 | 同じ型の open な retro が 2 件たまったとき | 改善 issue を起票し、宍戸さんの承認後に self-improve / worker 相当に依頼する |
-| OSS ポジショニング・ローンチ計画 | マーケティング・公開戦略の相談 | marketing-strategist 相当があれば使う |
-| OSS 公開用ドキュメント執筆・改善 | README・公開文書の大きな改善 | docs-writer 相当があれば使う |
-| OSS ローンチ実行 | 投稿文・公開順序・告知導線の作成 | launch-orchestrator 相当があれば使う |
+| review / reviewer 相当 | コミット前のコード・仕様・ドキュメントのレビュー | `.claude/agents/review.md` |
+| self-improve | 承認済みの改善 issue・`area: agent` の issue（issue 番号を渡す） | `.claude/agents/self-improve.md` |
+| marketing-strategist 相当 | マーケティング・公開戦略の相談 | `.claude/agents/marketing-strategist.md` |
+| docs-writer 相当 | README・公開文書の大きな改善 | `.claude/agents/docs-writer.md` |
+| launch-orchestrator 相当 | 投稿文・公開順序・告知導線の作成 | `.claude/agents/launch-orchestrator.md` |
 
-**エージェント設定ファイルの変更は self-improve 経由**: `AGENTS.md`、`CLAUDE.md`、`.claude/`、`.codex/agents/`、`.agents/` を変更する場合は、必ず `area: agent` の issue を起票し、宍戸さんの承認後に self-improve / worker 相当のサブエージェントを呼ぶ。「局所的な変更だから直接やる」という判断は行わない。CLI 仕様変更に伴う `skills/` 配下のドキュメント同期は通常のドキュメント更新として扱い、この規則の対象にしない。
+**エージェント設定ファイルの変更は self-improve 経由**: `AGENTS.md`、`CLAUDE.md`、`.claude/`、`.codex/agents/`、`.agents/` を変更する場合は、必ず `area: agent` の issue を起票し、宍戸さんの承認後に self-improve に渡す。「局所的な変更だから直接やる」という判断は行わない。CLI 仕様変更に伴う `skills/` 配下のドキュメント同期は通常のドキュメント更新として扱い、この規則の対象にしない。
 
 **明示的な計画を出す条件**:
 - 3 ファイル以上を変更するタスク
@@ -161,3 +162,15 @@ renga create "retro: <内容>" --area agent --label retro --label <型>
 
 - `area: agent`、`labels: [retro]` と型ラベルを1つ以上付ける。本文は「観測／そのとき何が見えていたか／推測」の3節。型の語彙は `.claude/skills/retro/SKILL.md`
 - 記録だけで終える。同じ型の open な retro が 2 件になったら、改善 issue を起票して宍戸さんに報告する
+
+## Claude Code
+
+- `CLAUDE.md` は `@AGENTS.md` を import するだけのファイル。指示は AGENTS.md に書く
+- サブエージェントは `Agent(subagent_type="<name>")` で起動する
+- self-improve は Claude Code で実行する。self-improve が書き換える `.claude/`・AGENTS.md・CLAUDE.md を守る guard hook は、Claude Code でしか効かないため
+- retro は `/retro`、コミットは `/commit`（fixup の判断を含む）、リリースは `/release` スキルに従う
+- 明示的な計画を出す条件に当たるときは Plan モードに入る
+
+## Codex
+
+- `.codex/agents/` の custom agent 定義はまだ無い（#283）。self-improve を除く上の役割は、定義ファイルを読んでその手順に従う。エージェント設定の変更が要るときは issue を起票し、Claude Code の self-improve に渡す

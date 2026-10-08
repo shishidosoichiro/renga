@@ -1,8 +1,9 @@
 #!/bin/bash
 # PreToolUse hook (matcher: Edit|Write)
-# このリポジトリの .claude/ 配下と CLAUDE.md の変更を self-improve エージェント以外に許可しない（retro #226）。
+# このリポジトリの .claude/ 配下・AGENTS.md・CLAUDE.md の変更を self-improve エージェント以外に許可しない（retro #226）。
 # 正規ルート: area: agent の issue（改善 issue を含む）を起票 → self-improve エージェントが編集する（#261）。
-# 注意: ガード対象はプロジェクトの .claude/ と CLAUDE.md のみ。パス中の ".claude/" だけでマッチさせると
+# 指示は AGENTS.md に一本化し、CLAUDE.md は AGENTS.md を import するだけのファイルにした（#282）。
+# 注意: ガード対象はプロジェクトの .claude/・AGENTS.md・CLAUDE.md のみ。パス中の ".claude/" だけでマッチさせると
 # ~/.claude/（グローバル領域。memory 等）まで誤ブロックする（実運用で発生した誤検知の修正）。
 set -euo pipefail
 
@@ -27,7 +28,7 @@ case "$file_path" in
 esac
 
 case "$file_path" in
-  "$project_dir/.claude/"*|"$project_dir/CLAUDE.md")
+  "$project_dir/.claude/"*|"$project_dir/AGENTS.md"|"$project_dir/CLAUDE.md")
     if [ "$agent_type" = "self-improve" ]; then
       exit 0
     fi
@@ -35,7 +36,7 @@ case "$file_path" in
       hookSpecificOutput: {
         hookEventName: "PreToolUse",
         permissionDecision: "deny",
-        permissionDecisionReason: ".claude/ と CLAUDE.md の変更は area: agent の issue を起票し、宍戸さんの承認後に self-improve エージェントに渡して行う。直接編集は禁止。"
+        permissionDecisionReason: ".claude/・AGENTS.md・CLAUDE.md の変更は area: agent の issue を起票し、宍戸さんの承認後に self-improve エージェントに渡して行う。直接編集は禁止。"
       }
     }'
     exit 0
