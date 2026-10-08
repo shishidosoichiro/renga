@@ -1,7 +1,7 @@
 ---
 type: Issue
 schema_version: 1
-status: open
+status: done
 priority: medium
 area: agent
 labels: [retro, wrong-commit]
@@ -37,3 +37,11 @@ labels: [retro, wrong-commit]
 
 「ついでの修正は別コミット」という規則を、「ついでの起票」にまで広げて当てはめた可能性がある。起票は変更の記録であって、コードの修正ではない。きっかけになったコミットに同梱しても、履歴を追う妨げにはならなかった。
 
+
+## クローズ理由（2026-10-09）
+
+前提が誤っていたため、記録を取り下げる。
+
+宍戸さんの質問は叱責ではなかった。本人の説明は「危険を感じたから聞いただけ。正当な修正ならOK。だけど fixup とかだと問題」である。起票・close だけのコミットは正当な記録で、fixup ではない。したがって wrong-commit の事例に当たらない。
+
+この retro を open のまま残すと、同じ型の retro が2件そろったときに、誤った改善 issue の材料になる。そのため閉じる。
