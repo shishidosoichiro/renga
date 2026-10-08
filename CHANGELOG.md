@@ -1,6 +1,21 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [0.18.0] - 2026-10-09
+
+### 🚀 Features
+
+- [`1132516`] Add OKF type key to issue frontmatter
+- [`4cce4a1`] Filter list by several labels, label prefixes, and excluded labels
+- [`5dfd1b7`] Add --count to list for scripts and gates
+- [`58560c3`] Add default labels for create in .renga.yml
+
+### 🐛 Bug Fixes
+
+- [`f1ed92c`] Quote labels that would break the frontmatter YAML
+- [`af2a39a`] [**breaking**] Edit frontmatter as YAML so block-style values can be updated
+  - The library functions in `renga::issue`, `set_frontmatter_field` and `remove_frontmatter_field`, now return the type `anyhow::Result<String>` instead of `String`. Callers should propagate the error with `?` (or handle it) where they previously used the string.
+- [`755b003`] Pick the same file on every platform when issues share an ID
 ## [0.17.0] - 2026-07-27
 
 ### 🚀 Features
